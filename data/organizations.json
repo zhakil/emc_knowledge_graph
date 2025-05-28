@@ -1,0 +1,369 @@
+{
+  "standards_organizations": {
+    "CISPR": {
+      "id": "CISPR",
+      "name": "国际特别无线电干扰委员会",
+      "full_name": "International Special Committee on Radio Interference",
+      "acronym": "CISPR",
+      "type": "International Standards Organization",
+      "parent_organization": "IEC",
+      "established": 1934,
+      "headquarters": "Geneva, Switzerland",
+      "scope": "Radio interference standards and measurement methods",
+      "geographic_coverage": "Global",
+      "membership": "National committees from IEC member countries",
+      "structure": {
+        "subcommittees": {
+          "SC-A": "Radio interference measurements and statistical methods",
+          "SC-B": "Interference relating to industrial, scientific and medical apparatus",
+          "SC-D": "Electromagnetic disturbances related to electric/hybrid-electric vehicles and electric vehicle supply equipment",
+          "SC-I": "Electromagnetic compatibility of information technology equipment, multimedia equipment, and receivers"
+        }
+      },
+      "key_standards": [
+        "CISPR 12",
+        "CISPR 25", 
+        "CISPR 36",
+        "CISPR 16 series"
+      ],
+      "automotive_relevance": {
+        "role": "Primary developer of vehicle EMC emission standards",
+        "responsibility": "Vehicle and component emission testing methods",
+        "collaboration": "Works closely with ISO TC22/SC32 on automotive EMC"
+      },
+      "recent_activities": [
+        "Development of CISPR 36 for electric vehicles",
+        "Revision of CISPR 12 Edition 7",
+        "Extension of frequency ranges to support 5G/6G"
+      ],
+      "website": "https://www.iec.ch/dyn/www/f?p=103:7:0::::FSP_ORG_ID:1273",
+      "contact_info": {
+        "secretary": "IEC Central Office",
+        "email": "info@iec.ch"
+      }
+    },
+    "ISO": {
+      "id": "ISO",
+      "name": "国际标准化组织",
+      "full_name": "International Organization for Standardization",
+      "acronym": "ISO",
+      "type": "International Standards Organization",
+      "established": 1947,
+      "headquarters": "Geneva, Switzerland",
+      "scope": "International standards across all industries",
+      "geographic_coverage": "Global",
+      "membership": "165 national standards bodies",
+      "automotive_structure": {
+        "technical_committee": "ISO/TC 22 - Road vehicles",
+        "subcommittee": "ISO/TC 22/SC 32 - Electrical and electronic components and general system aspects",
+        "working_groups": {
+          "WG 3": "Electromagnetic compatibility",
+          "WG 8": "Safety and cybersecurity",
+          "WG 11": "Smart mobility and automation"
+        }
+      },
+      "key_automotive_emc_standards": [
+        "ISO 11451 series",
+        "ISO 11452 series", 
+        "ISO 7637 series",
+        "ISO 10605",
+        "ISO 14982"
+      ],
+      "automotive_emc_scope": {
+        "immunity_testing": "Vehicle and component immunity standards",
+        "transient_testing": "Electrical transient and ESD standards",
+        "measurement_methods": "Test procedures and equipment requirements"
+      },
+      "collaboration": {
+        "with_cispr": "Joint development of automotive EMC standards",
+        "with_iec": "Harmonization of basic EMC principles",
+        "with_sae": "Coordination on North American requirements"
+      },
+      "recent_developments": [
+        "ISO 11452 updates for higher frequencies",
+        "New standards for autonomous vehicle EMC",
+        "Enhanced cybersecurity integration"
+      ],
+      "website": "https://www.iso.org",
+      "tc22_website": "https://www.iso.org/committee/46706.html"
+    },
+    "SAE": {
+      "id": "SAE",
+      "name": "汽车工程师学会",
+      "full_name": "SAE International (formerly Society of Automotive Engineers)",
+      "acronym": "SAE",
+      "type": "Professional Engineering Organization",
+      "established": 1905,
+      "headquarters": "Warrendale, Pennsylvania, USA",
+      "scope": "Mobility engineering standards and education",
+      "geographic_coverage": "Global (originally North American focus)",
+      "membership": "128,000 engineers and technical experts worldwide",
+      "organizational_structure": {
+        "committees": {
+          "EMC Committee": "Electromagnetic compatibility standards",
+          "Vehicle Electronics Committee": "Electronic system standards",
+          "Electric Vehicle Committee": "EV/HEV standards"
+        }
+      },
+      "historical_emc_standards": {
+        "withdrawn_standards": {
+          "J551 series": "Vehicle EMC performance levels (withdrawn)",
+          "J1113 series": "Component EMC measurement procedures (withdrawn)"
+        },
+        "withdrawal_reason": "Superseded by international standards (ISO/CISPR)",
+        "transition_period": "2010-2015"
+      },
+      "current_emc_role": {
+        "status": "Reference organization for North American variations",
+        "activities": [
+          "Maintaining liaison with ISO TC22/SC32",
+          "Documenting regional differences",
+          "Supporting OEM-specific requirements"
+        ]
+      },
+      "active_related_standards": [
+        "SAE J3061 - Cybersecurity Guidebook",
+        "SAE J3016 - Automated Driving Levels",
+        "SAE J1772 - EV Charging Connector"
+      ],
+      "collaboration": {
+        "with_iso": "Liaison member of ISO TC22/SC32",
+        "with_cispr": "Observer status in relevant subcommittees",
+        "with_ieee": "Joint activities on vehicle communication"
+      },
+      "website": "https://www.sae.org",
+      "standards_portal": "https://www.sae.org/standards/"
+    },
+    "UNECE": {
+      "id": "UNECE",
+      "name": "联合国欧洲经济委员会",
+      "full_name": "United Nations Economic Commission for Europe",
+      "acronym": "UNECE",
+      "type": "International Regulatory Body",
+      "established": 1947,
+      "headquarters": "Geneva, Switzerland", 
+      "scope": "Economic cooperation and regulatory harmonization",
+      "geographic_coverage": "56 member countries (Europe, North America, Central Asia)",
+      "automotive_division": {
+        "name": "World Forum for Harmonization of Vehicle Regulations (WP.29)",
+        "established": 1952,
+        "responsibility": "Global vehicle regulations and standards"
+      },
+      "wp29_structure": {
+        "working_parties": {
+          "GRVA": "Automated/Autonomous and Connected Vehicles",
+          "GRE": "Lighting and Light-Signalling",
+          "GRPE": "Pollution and Energy",
+          "GRRF": "Brakes and Running Gear",
+          "GRSG": "General Safety Provisions",
+          "GRSP": "Passive Safety"
+        },
+        "emc_responsibility": "Primarily under GRSG (General Safety)"
+      },
+      "key_emc_regulation": {
+        "regulation": "ECE R10 - Electromagnetic Compatibility",
+        "current_version": "Revision 6 (2019)",
+        "development": "Revision 7 in progress",
+        "scope": "Type approval for vehicle EMC compliance"
+      },
+      "regulatory_framework": {
+        "three_agreements": {
+          "1958_agreement": "Global technical regulations (includes ECE R10)",
+          "1998_agreement": "Global technical regulations for worldwide use",
+          "1997_agreement": "Periodic technical inspections"
+        }
+      },
+      "emc_approach": {
+        "philosophy": "Performance-based regulations with technical standards",
+        "referenced_standards": "CISPR and ISO standards",
+        "approval_process": "Type approval by designated technical services"
+      },
+      "global_impact": {
+        "adopting_countries": "50+ countries worldwide",
+        "mutual_recognition": "Facilitates international trade",
+        "harmonization": "Reduces technical barriers"
+      },
+      "recent_emc_activities": [
+        "ECE R10 Rev.7 development (frequency extension to 6 GHz)",
+        "Enhanced requirements for automated vehicles",
+        "Integration with cybersecurity regulations"
+      ],
+      "website": "https://unece.org/transport/vehicle-regulations",
+      "wp29_portal": "https://unece.org/transport/standards/transport/vehicle-regulations-wp29"
+    },
+    "IEC": {
+      "id": "IEC",
+      "name": "国际电工委员会", 
+      "full_name": "International Electrotechnical Commission",
+      "acronym": "IEC",
+      "type": "International Standards Organization",
+      "established": 1906,
+      "headquarters": "Geneva, Switzerland",
+      "scope": "International standards for electrical and electronic technologies",
+      "geographic_coverage": "Global",
+      "membership": "86 countries with 170 participating countries/economies",
+      "emc_structure": {
+        "technical_committee": "IEC/TC 77 - Electromagnetic compatibility",
+        "subcommittees": {
+          "SC 77A": "Low frequency phenomena",
+          "SC 77B": "High frequency phenomena", 
+          "SC 77C": "High power transient phenomena"
+        }
+      },
+      "key_emc_standards": {
+        "fundamental": "IEC 61000 series - Electromagnetic compatibility",
+        "automotive_relevance": [
+          "IEC 61000-4-2 - ESD immunity",
+          "IEC 61000-4-3 - Radiated immunity",
+          "IEC 61000-4-4 - EFT/Burst immunity",
+          "IEC 61000-4-5 - Surge immunity",
+          "IEC 61000-4-6 - Conducted immunity"
+        ]
+      },
+      "relationship_with_cispr": {
+        "organizational": "CISPR is a special committee under IEC",
+        "coordination": "IEC provides administrative support",
+        "standards_hierarchy": "CISPR standards published as IEC/CISPR series"
+      },
+      "automotive_connection": {
+        "direct_role": "Basic EMC standards referenced by automotive standards",
+        "indirect_role": "Parent organization of CISPR",
+        "coordination": "Ensures consistency between basic and automotive EMC"
+      },
+      "recent_initiatives": [
+        "Smart city and IoT EMC standards",
+        "5G/6G compatibility requirements",
+        "Renewable energy system EMC"
+      ],
+      "website": "https://www.iec.ch",
+      "tc77_info": "https://www.iec.ch/dyn/www/f?p=103:7:0::::FSP_ORG_ID:1258"
+    },
+    "IEEE": {
+      "id": "IEEE",
+      "name": "电气电子工程师学会",
+      "full_name": "Institute of Electrical and Electronics Engineers",
+      "acronym": "IEEE",
+      "type": "Professional Technical Organization",
+      "established": 1963,
+      "headquarters": "Piscataway, New Jersey, USA",
+      "scope": "Electrical engineering, electronics, and related technologies",
+      "geographic_coverage": "Global",
+      "membership": "400,000+ members in 160+ countries",
+      "emc_involvement": {
+        "society": "IEEE EMC Society",
+        "established": 1957,
+        "focus": "EMC research, education, and standardization"
+      },
+      "automotive_emc_activities": {
+        "standards": [
+          "IEEE Std 1848 - Automotive EMC techniques",
+          "IEEE Std 299 - Shielding effectiveness measurements"
+        ],
+        "conferences": "IEEE International Symposium on EMC",
+        "research": "University and industry EMC research programs"
+      },
+      "collaboration_automotive": {
+        "with_sae": "Joint standards development",
+        "with_iso": "Research and measurement methodology",
+        "with_cispr": "Technical liaison activities"
+      },
+      "unique_contributions": {
+        "research_focus": "Advanced EMC measurement techniques",
+        "education": "EMC engineering education and training",
+        "innovation": "Next-generation EMC technologies"
+      },
+      "website": "https://www.ieee.org",
+      "emc_society": "https://www.emcs.org"
+    },
+    "ETSI": {
+      "id": "ETSI",
+      "name": "欧洲电信标准化研究所",
+      "full_name": "European Telecommunications Standards Institute",
+      "acronym": "ETSI",
+      "type": "European Standards Organization",
+      "established": 1988,
+      "headquarters": "Sophia Antipolis, France",
+      "scope": "Telecommunications and related technologies",
+      "geographic_coverage": "Europe and global influence",
+      "membership": "900+ organizations from 65+ countries",
+      "automotive_relevance": {
+        "technical_committee": "ETSI TC ITS - Intelligent Transport Systems",
+        "focus_areas": [
+          "V2X communication EMC",
+          "5G automotive applications",
+          "Connected vehicle standards"
+        ]
+      },
+      "emc_related_standards": [
+        "ETSI EN 303 413 - 5.9 GHz ITS band EMC",
+        "ETSI TS 103 191 - V2X communication requirements",
+        "ETSI EN 301 489 - EMC for radio equipment"
+      ],
+      "coordination": {
+        "with_cispr": "Radio equipment EMC harmonization",
+        "with_iso_tc22": "ITS and automotive EMC coordination",
+        "with_3gpp": "Cellular V2X EMC requirements"
+      },
+      "future_automotive_emc": [
+        "6G automotive communication",
+        "Enhanced V2X EMC requirements",
+        "AI-based EMC testing methods"
+      ],
+      "website": "https://www.etsi.org"
+    }
+  },
+  "regional_bodies": {
+    "EU": {
+      "name": "European Union",
+      "emc_directive": "EMC Directive 2014/30/EU",
+      "automotive_relevance": "Whole Vehicle Type Approval (WVTA)",
+      "implementation": "ECE regulations through EU directives"
+    },
+    "FCC": {
+      "name": "Federal Communications Commission (USA)",
+      "jurisdiction": "United States",
+      "automotive_emc_role": "Radio frequency emission regulations",
+      "key_regulations": "FCC Part 15 - Radio frequency devices"
+    },
+    "IC": {
+      "name": "Innovation, Science and Economic Development Canada",
+      "former_name": "Industry Canada (IC)",
+      "jurisdiction": "Canada", 
+      "automotive_emc_role": "Radio equipment certification",
+      "coordination": "Harmonization with FCC requirements"
+    },
+    "ACMA": {
+      "name": "Australian Communications and Media Authority",
+      "jurisdiction": "Australia",
+      "automotive_emc_role": "Radio communications equipment",
+      "approach": "Adoption of international standards"
+    }
+  },
+  "industry_associations": {
+    "OICA": {
+      "name": "Organisation Internationale des Constructeurs d'Automobiles",
+      "role": "Global automotive manufacturers association",
+      "emc_involvement": "Policy development and standards harmonization"
+    },
+    "CLEPA": {
+      "name": "European Association of Automotive Suppliers", 
+      "role": "Automotive supplier representation",
+      "emc_focus": "Component-level EMC requirements"
+    },
+    "ACEA": {
+      "name": "European Automobile Manufacturers' Association",
+      "role": "European OEM representation",
+      "emc_activities": "Technical position papers and regulatory input"
+    }
+  },
+  "metadata": {
+    "version": "1.0",
+    "last_updated": "2024-12-01",
+    "total_organizations": 8,
+    "primary_standards_bodies": 5,
+    "regional_regulators": 4,
+    "industry_associations": 3,
+    "data_completeness": "Comprehensive coverage of major EMC standards organizations",
+    "update_frequency": "Quarterly review recommended"
+  }
+}

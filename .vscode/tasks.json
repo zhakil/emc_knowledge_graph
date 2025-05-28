@@ -1,0 +1,373 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "安装项目依赖",
+      "type": "shell",
+      "command": "pip",
+      "args": ["install", "-r", "requirements.txt"],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": true,
+        "clear": false
+      },
+      "problemMatcher": [],
+      "detail": "安装项目所需的所有Python依赖包"
+    },
+    {
+      "label": "升级项目依赖", 
+      "type": "shell",
+      "command": "pip",
+      "args": ["install", "-r", "requirements.txt", "--upgrade"],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always", 
+        "focus": false,
+        "panel": "shared"
+      },
+      "problemMatcher": [],
+      "detail": "升级所有依赖包到最新版本"
+    },
+    {
+      "label": "代码格式化",
+      "type": "shell",
+      "command": "black",
+      "args": ["src/", "tests/", "--line-length", "88", "--target-version", "py38"],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "problemMatcher": [],
+      "detail": "使用Black格式化Python代码"
+    },
+    {
+      "label": "导入排序",
+      "type": "shell", 
+      "command": "isort",
+      "args": ["src/", "tests/", "--profile", "black", "--line-length", "88"],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "problemMatcher": [],
+      "detail": "使用isort整理导入语句"
+    },
+    {
+      "label": "代码质量检查",
+      "type": "shell",
+      "command": "flake8",
+      "args": [
+        "src/", 
+        "tests/", 
+        "--max-line-length=88", 
+        "--extend-ignore=E203,W503,E501",
+        "--statistics"
+      ],
+      "group": "test",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "problemMatcher": {
+        "owner": "python",
+        "fileLocation": ["relative", "${workspaceFolder}"],
+        "pattern": {
+          "regexp": "^(.*):(\\d+):(\\d+):\\s+(\\w+\\d+)\\s+(.*)$",
+          "file": 1,
+          "line": 2,
+          "column": 3,
+          "code": 4,
+          "message": 5
+        }
+      },
+      "detail": "使用Flake8进行代码质量检查"
+    },
+    {
+      "label": "类型检查",
+      "type": "shell",
+      "command": "mypy",
+      "args": [
+        "src/", 
+        "--ignore-missing-imports", 
+        "--follow-imports=silent",
+        "--show-column-numbers",
+        "--show-error-codes"
+      ],
+      "group": "test",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "problemMatcher": {
+        "owner": "python",
+        "fileLocation": ["relative", "${workspaceFolder}"],
+        "pattern": {
+          "regexp": "^(.*):(\\d+):(\\d+):\\s+(error|warning|note):\\s+(.*)$",
+          "file": 1,
+          "line": 2,
+          "column": 3,
+          "severity": 4,
+          "message": 5
+        }
+      },
+      "detail": "使用MyPy进行静态类型检查"
+    },
+    {
+      "label": "运行所有测试",
+      "type": "shell",
+      "command": "pytest",
+      "args": [
+        "tests/", 
+        "-v", 
+        "--cov=src", 
+        "--cov-report=html", 
+        "--cov-report=term",
+        "--tb=short"
+      ],
+      "group": "test",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "problemMatcher": {
+        "owner": "python",
+        "fileLocation": ["relative", "${workspaceFolder}"],
+        "pattern": {
+          "regexp": "^(.*):(\\d+).*FAILED.*$",
+          "file": 1,
+          "line": 2
+        }
+      },
+      "detail": "运行完整的测试套件并生成覆盖率报告"
+    },
+    {
+      "label": "快速测试",
+      "type": "shell",
+      "command": "pytest",
+      "args": ["tests/", "-v", "--tb=line", "-x"],
+      "group": "test",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "problemMatcher": [],
+      "detail": "快速运行测试，遇到第一个失败就停止"
+    },
+    {
+      "label": "构建完整项目",
+      "type": "shell",
+      "command": "python",
+      "args": ["build.py", "--all"],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "problemMatcher": [],
+      "detail": "执行完整的项目构建流程"
+    },
+    {
+      "label": "生成知识图谱",
+      "type": "shell",
+      "command": "python",
+      "args": ["src/knowledge_graph.py"],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "problemMatcher": [],
+      "detail": "生成EMC标准知识图谱"
+    },
+    {
+      "label": "启动Jupyter Lab",
+      "type": "shell",
+      "command": "jupyter",
+      "args": ["lab", "--no-browser", "--port=8888", "--ip=127.0.0.1"],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "isBackground": true,
+      "problemMatcher": [],
+      "detail": "启动Jupyter Lab开发环境"
+    },
+    {
+      "label": "启动Jupyter Notebook",
+      "type": "shell",
+      "command": "jupyter",
+      "args": ["notebook", "--no-browser", "--port=8889", "--ip=127.0.0.1"],
+      "group": "build", 
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "isBackground": true,
+      "problemMatcher": [],
+      "detail": "启动Jupyter Notebook环境"
+    },
+    {
+      "label": "清理构建文件",
+      "type": "shell",
+      "command": "python",
+      "args": ["build.py", "--clean"],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "problemMatcher": [],
+      "detail": "清理所有构建产生的临时文件"
+    },
+    {
+      "label": "创建虚拟环境",
+      "type": "shell",
+      "command": "python",
+      "args": ["-m", "venv", "venv"],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "problemMatcher": [],
+      "detail": "创建Python虚拟环境"
+    },
+    {
+      "label": "激活虚拟环境",
+      "type": "shell",
+      "command": "venv/Scripts/activate",
+      "windows": {
+        "command": "venv\\Scripts\\activate.bat"
+      },
+      "linux": {
+        "command": "source venv/bin/activate"
+      },
+      "osx": {
+        "command": "source venv/bin/activate"
+      },
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "problemMatcher": [],
+      "detail": "激活Python虚拟环境"
+    },
+    {
+      "label": "生成需求文件",
+      "type": "shell",
+      "command": "pip",
+      "args": ["freeze", ">", "requirements-freeze.txt"],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "problemMatcher": [],
+      "detail": "生成当前环境的完整依赖列表"
+    },
+    {
+      "label": "打包项目",
+      "type": "shell",
+      "command": "python",
+      "args": ["setup.py", "sdist", "bdist_wheel"],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "problemMatcher": [],
+      "detail": "创建项目的源码包和wheel包"
+    },
+    {
+      "label": "安装项目到开发环境",
+      "type": "shell",
+      "command": "pip",
+      "args": ["install", "-e", "."],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "problemMatcher": [],
+      "detail": "以开发模式安装项目包"
+    },
+    {
+      "label": "运行演示程序",
+      "type": "shell",
+      "command": "python",
+      "args": ["demo.py"],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "problemMatcher": [],
+      "detail": "运行EMC知识图谱演示程序"
+    },
+    {
+      "label": "完整代码质量检查",
+      "dependsOrder": "sequence",
+      "dependsOn": [
+        "代码格式化",
+        "导入排序", 
+        "代码质量检查",
+        "类型检查"
+      ],
+      "group": "test",
+      "detail": "执行完整的代码质量检查流程"
+    },
+    {
+      "label": "完整测试流程",
+      "dependsOrder": "sequence",
+      "dependsOn": [
+        "完整代码质量检查",
+        "运行所有测试"
+      ],
+      "group": "test",
+      "detail": "执行完整的测试流程，包括代码质量检查和单元测试"
+    }
+  ]
+}

@@ -1,0 +1,68 @@
+{
+  "build_info": {
+    "timestamp": "2025-05-28T14:06:33.784977",
+    "duration_seconds": 13.254813,
+    "platform": "win32",
+    "python_version": "3.12.3 | packaged by conda-forge | (main, Apr 15 2024, 18:20:11) [MSC v.1938 64 bit (AMD64)]"
+  },
+  "results": {
+    "\u73af\u5883\u9a8c\u8bc1": {
+      "success": true,
+      "duration": 0.40346717834472656,
+      "result": true
+    },
+    "\u865a\u62df\u73af\u5883": {
+      "success": true,
+      "duration": 0.0,
+      "result": true
+    },
+    "\u4f9d\u8d56\u5b89\u88c5": {
+      "success": false,
+      "duration": 0.27454042434692383,
+      "result": false
+    },
+    "\u4ee3\u7801\u8d28\u91cf": {
+      "success": true,
+      "duration": 3.096585988998413,
+      "result": {
+        "formatting": true,
+        "linting": false,
+        "type_checking": false,
+        "import_sorting": true
+      }
+    },
+    "\u6d4b\u8bd5\u6267\u884c": {
+      "success": true,
+      "duration": 8.740510702133179,
+      "result": {
+        "passed": false,
+        "coverage": 62.0,
+        "test_count": 0,
+        "failures": 0
+      }
+    },
+    "\u77e5\u8bc6\u56fe\u8c31\u6784\u5efa": {
+      "success": false,
+      "duration": 0.7357416152954102,
+      "result": false
+    },
+    "\u6587\u6863\u751f\u6210": {
+      "success": true,
+      "duration": 0.0010008811950683594,
+      "result": true
+    }
+  },
+  "artifacts": {
+    "graphs": [
+      "E:\\EMC_Knowledge_Graph\\output\\graphs\\emc_interactive_graph.html",
+      "E:\\EMC_Knowledge_Graph\\output\\graphs\\emc_knowledge_graph.png"
+    ],
+    "exports": [],
+    "docs": [
+      "E:\\EMC_Knowledge_Graph\\docs\\API.md",
+      "E:\\EMC_Knowledge_Graph\\docs\\examples",
+      "E:\\EMC_Knowledge_Graph\\docs\\README.md",
+      "E:\\EMC_Knowledge_Graph\\docs\\UserGuide.md"
+    ]
+  }
+}

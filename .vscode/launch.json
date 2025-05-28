@@ -1,0 +1,241 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    
+    {
+      "name": "Attach",
+      "port": 9229,
+      "request": "attach",
+      "skipFiles": ["<node_internals>/**"],
+      "type": "node"
+    },
+    {
+      "name": "Python Debugger: Current File",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${file}",
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "Python Debugger: Module",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "${module}",
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "Python Debugger: Django",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "django",
+      "console": "integratedTerminal",
+      "env": {
+        "DJANGO_SETTINGS_MODULE": "${workspaceFolder}/myproject.settings"
+      }
+    },
+    {
+      "name": "Python Debugger: Flask",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "flask",
+      "console": "integratedTerminal",
+      "env": {
+        "FLASK_APP": "${workspaceFolder}/app.py",
+        "FLASK_ENV": "development"
+      }
+    },
+    {
+      "name": "运行知识图谱主程序",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/src/knowledge_graph.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src",
+        "PYTHONUNBUFFERED": "1"
+      },
+      "args": [],
+      "justMyCode": false,
+      "stopOnEntry": false,
+      "showReturnValue": true
+    },
+    {
+      "name": "运行数据模型模块",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/src/data_models.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src",
+        "PYTHONUNBUFFERED": "1"
+      },
+      "args": [],
+      "justMyCode": false
+    },
+    {
+      "name": "运行可视化模块",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/src/visualizer.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src",
+        "PYTHONUNBUFFERED": "1"
+      },
+      "args": [],
+      "justMyCode": false
+    },
+    {
+      "name": "运行构建脚本",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/build.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}",
+        "PYTHONUNBUFFERED": "1"
+      },
+      "args": ["--all"],
+      "justMyCode": false
+    },
+    {
+      "name": "运行构建脚本 - 仅图谱生成",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/build.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}",
+        "PYTHONUNBUFFERED": "1"
+      },
+      "args": ["--graph"],
+      "justMyCode": false
+    },
+    {
+      "name": "运行测试套件",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "pytest",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src",
+        "PYTHONUNBUFFERED": "1"
+      },
+      "args": [
+        "tests/",
+        "-v",
+        "--tb=short",
+        "--cov=src",
+        "--cov-report=html",
+        "--cov-report=term"
+      ],
+      "justMyCode": false
+    },
+    {
+      "name": "运行单个测试文件",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "pytest",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src",
+        "PYTHONUNBUFFERED": "1"
+      },
+      "args": ["${file}", "-v", "--tb=long"],
+      "justMyCode": false
+    },
+    {
+      "name": "调试当前Python文件",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${file}",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src",
+        "PYTHONUNBUFFERED": "1"
+      },
+      "justMyCode": true,
+      "stopOnEntry": false
+    },
+    {
+      "name": "Jupyter内核调试",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "ipykernel_launcher",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src"
+      },
+      "args": ["-f", "{connection_file}"]
+    },
+    {
+      "name": "运行演示脚本",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/demo.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src",
+        "PYTHONUNBUFFERED": "1"
+      },
+      "args": [],
+      "justMyCode": false
+    },
+    {
+      "name": "性能分析模式",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/src/knowledge_graph.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src",
+        "PYTHONUNBUFFERED": "1",
+        "PROFILE_MODE": "1"
+      },
+      "args": ["--profile"],
+      "justMyCode": false
+    },
+    {
+      "name": "Web服务器调试",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/src/web_app.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src",
+        "PYTHONUNBUFFERED": "1",
+        "FLASK_ENV": "development",
+        "FLASK_DEBUG": "1"
+      },
+      "args": ["--debug"],
+      "justMyCode": false,
+      "gevent": true
+    },
+    {
+      "name": "数据导入调试",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/src/data_importer.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src",
+        "PYTHONUNBUFFERED": "1"
+      },
+      "args": ["--source", "data/", "--format", "json", "--validate"],
+      "justMyCode": false
+    }
+  ]
+}

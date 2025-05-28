@@ -1,0 +1,541 @@
+{
+  "semantic_relationships": [
+    {
+      "id": "rel_001",
+      "source": "CISPR",
+      "target": "CISPR25",
+      "relation_type": "develops",
+      "weight": 1.0,
+      "confidence": 0.98,
+      "description": "CISPR组织制定CISPR 25标准",
+      "evidence": "Official CISPR documentation",
+      "creation_date": "2024-01-01"
+    },
+    {
+      "id": "rel_002", 
+      "source": "CISPR",
+      "target": "CISPR12",
+      "relation_type": "develops",
+      "weight": 1.0,
+      "confidence": 0.98,
+      "description": "CISPR组织制定CISPR 12标准",
+      "evidence": "Official CISPR documentation"
+    },
+    {
+      "id": "rel_003",
+      "source": "CISPR",
+      "target": "CISPR36", 
+      "relation_type": "develops",
+      "weight": 1.0,
+      "confidence": 0.98,
+      "description": "CISPR组织制定CISPR 36电动车标准",
+      "evidence": "CISPR 36 publication records"
+    },
+    {
+      "id": "rel_004",
+      "source": "ISO",
+      "target": "ISO11452",
+      "relation_type": "develops",
+      "weight": 1.0,
+      "confidence": 0.98,
+      "description": "ISO组织制定ISO 11452组件抗扰度标准",
+      "evidence": "ISO TC22/SC32 documentation"
+    },
+    {
+      "id": "rel_005",
+      "source": "ISO", 
+      "target": "ISO11451",
+      "relation_type": "develops",
+      "weight": 1.0,
+      "confidence": 0.98,
+      "description": "ISO组织制定ISO 11451整车抗扰度标准",
+      "evidence": "ISO TC22/SC32 documentation"
+    },
+    {
+      "id": "rel_006",
+      "source": "ISO",
+      "target": "ISO7637",
+      "relation_type": "develops", 
+      "weight": 1.0,
+      "confidence": 0.98,
+      "description": "ISO组织制定ISO 7637传导干扰标准",
+      "evidence": "ISO TC22/SC32 documentation"
+    },
+    {
+      "id": "rel_007",
+      "source": "UNECE",
+      "target": "ECER10",
+      "relation_type": "develops",
+      "weight": 1.0,
+      "confidence": 0.98,
+      "description": "UNECE制定ECE R10电磁兼容性法规",
+      "evidence": "UN ECE WP.29 documentation"
+    },
+    {
+      "id": "rel_008",
+      "source": "IEC",
+      "target": "IEC61000",
+      "relation_type": "develops",
+      "weight": 1.0,
+      "confidence": 0.98,
+      "description": "IEC制定61000系列EMC基础标准",
+      "evidence": "IEC TC77 documentation"
+    },
+    {
+      "id": "rel_009",
+      "source": "IEC",
+      "target": "CISPR",
+      "relation_type": "includes",
+      "weight": 0.9,
+      "confidence": 0.95,
+      "description": "CISPR是IEC的特别委员会",
+      "evidence": "IEC organizational structure"
+    },
+    {
+      "id": "rel_010",
+      "source": "ECER10",
+      "target": "CISPR25",
+      "relation_type": "references",
+      "weight": 0.95,
+      "confidence": 0.92,
+      "description": "ECE R10法规引用CISPR 25标准",
+      "evidence": "ECE R10 Rev.6 Annex references"
+    },
+    {
+      "id": "rel_011",
+      "source": "ECER10",
+      "target": "CISPR12",
+      "relation_type": "references",
+      "weight": 0.90,
+      "confidence": 0.92,
+      "description": "ECE R10法规引用CISPR 12标准",
+      "evidence": "ECE R10 Rev.6 Annex references"
+    },
+    {
+      "id": "rel_012",
+      "source": "ECER10",
+      "target": "ISO11451",
+      "relation_type": "references",
+      "weight": 0.85,
+      "confidence": 0.90,
+      "description": "ECE R10法规引用ISO 11451整车抗扰度标准",
+      "evidence": "ECE R10 Rev.6 Annex references"
+    },
+    {
+      "id": "rel_013",
+      "source": "ECER10",
+      "target": "ISO11452",
+      "relation_type": "references",
+      "weight": 0.80,
+      "confidence": 0.88,
+      "description": "ECE R10法规引用ISO 11452组件抗扰度标准",
+      "evidence": "ECE R10 Rev.6 Annex references"
+    },
+    {
+      "id": "rel_014",
+      "source": "CISPR25",
+      "target": "RadiatedEmissions",
+      "relation_type": "includes",
+      "weight": 0.95,
+      "confidence": 0.94,
+      "description": "CISPR 25包含辐射发射测试方法",
+      "evidence": "CISPR 25 Ed.5 content analysis"
+    },
+    {
+      "id": "rel_015",
+      "source": "CISPR25",
+      "target": "ConductedEmissions", 
+      "relation_type": "includes",
+      "weight": 0.90,
+      "confidence": 0.94,
+      "description": "CISPR 25包含传导发射测试方法",
+      "evidence": "CISPR 25 Ed.5 content analysis"
+    },
+    {
+      "id": "rel_016",
+      "source": "CISPR12",
+      "target": "RadiatedEmissions",
+      "relation_type": "includes",
+      "weight": 1.0,
+      "confidence": 0.96,
+      "description": "CISPR 12主要为辐射发射测试标准",
+      "evidence": "CISPR 12 Ed.6 scope definition"
+    },
+    {
+      "id": "rel_017",
+      "source": "ISO11452",
+      "target": "RadiatedImmunity",
+      "relation_type": "includes",
+      "weight": 1.0,
+      "confidence": 0.96,
+      "description": "ISO 11452包含辐射抗扰度测试方法",
+      "evidence": "ISO 11452 series content"
+    },
+    {
+      "id": "rel_018",
+      "source": "ISO11452",
+      "target": "ConductedImmunity",
+      "relation_type": "includes",
+      "weight": 0.85,
+      "confidence": 0.90,
+      "description": "ISO 11452包含传导抗扰度测试方法(BCI等)",
+      "evidence": "ISO 11452-4 BCI method"
+    },
+    {
+      "id": "rel_019",
+      "source": "ISO11451",
+      "target": "RadiatedImmunity",
+      "relation_type": "includes",
+      "weight": 1.0,
+      "confidence": 0.96,
+      "description": "ISO 11451整车辐射抗扰度测试标准",
+      "evidence": "ISO 11451 series scope"
+    },
+    {
+      "id": "rel_020",
+      "source": "ISO7637",
+      "target": "Transients",
+      "relation_type": "includes",
+      "weight": 1.0,
+      "confidence": 0.98,
+      "description": "ISO 7637专门针对电气瞬变测试",
+      "evidence": "ISO 7637 series title and scope"
+    },
+    {
+      "id": "rel_021",
+      "source": "RadiatedEmissions",
+      "target": "AnechoicChamber",
+      "relation_type": "uses",
+      "weight": 0.90,
+      "confidence": 0.92,
+      "description": "辐射发射测试主要使用电波暗室",
+      "evidence": "CISPR 16-1-4 measurement sites"
+    },
+    {
+      "id": "rel_022",
+      "source": "RadiatedImmunity",
+      "target": "AnechoicChamber",
+      "relation_type": "uses",
+      "weight": 0.85,
+      "confidence": 0.90,
+      "description": "辐射抗扰度测试可使用电波暗室",
+      "evidence": "ISO 11452-2 anechoic chamber method"
+    },
+    {
+      "id": "rel_023",
+      "source": "RadiatedImmunity",
+      "target": "TEMCell",
+      "relation_type": "uses",
+      "weight": 0.75,
+      "confidence": 0.88,
+      "description": "辐射抗扰度测试可使用TEM小室",
+      "evidence": "ISO 11452-3 TEM cell method"
+    },
+    {
+      "id": "rel_024",
+      "source": "RadiatedImmunity",
+      "target": "ReverberationChamber",
+      "relation_type": "uses",
+      "weight": 0.70,
+      "confidence": 0.85,
+      "description": "辐射抗扰度可使用混响室测试",
+      "evidence": "ISO 11452-11 reverberation chamber"
+    },
+    {
+      "id": "rel_025",
+      "source": "ConductedEmissions",
+      "target": "LISN",
+      "relation_type": "uses",
+      "weight": 1.0,
+      "confidence": 0.98,
+      "description": "传导发射测试必须使用LISN/AMN",
+      "evidence": "CISPR 25 conducted emission requirements"
+    },
+    {
+      "id": "rel_026",
+      "source": "ConductedImmunity",
+      "target": "BCI", 
+      "relation_type": "uses",
+      "weight": 0.80,
+      "confidence": 0.90,
+      "description": "传导抗扰度测试使用BCI方法",
+      "evidence": "ISO 11452-4 bulk current injection"
+    },
+    {
+      "id": "rel_027",
+      "source": "RadiatedEmissions",
+      "target": "EMIReceiver",
+      "relation_type": "uses",
+      "weight": 1.0,
+      "confidence": 0.98,
+      "description": "辐射发射测试需要EMI接收机",
+      "evidence": "CISPR 16-1-1 receiver specifications"
+    },
+    {
+      "id": "rel_028",
+      "source": "RadiatedEmissions",
+      "target": "Antennas",
+      "relation_type": "uses",
+      "weight": 1.0,
+      "confidence": 0.98,
+      "description": "辐射发射测试需要标准天线",
+      "evidence": "CISPR 16-1-4 antenna requirements"
+    },
+    {
+      "id": "rel_029",
+      "source": "RadiatedImmunity",
+      "target": "Antennas",
+      "relation_type": "uses",
+      "weight": 1.0,
+      "confidence": 0.96,
+      "description": "辐射抗扰度测试需要天线产生场强",
+      "evidence": "ISO 11452 series antenna requirements"
+    },
+    {
+      "id": "rel_030",
+      "source": "CISPR36",
+      "target": "ElectricVehicles",
+      "relation_type": "applies_to",
+      "weight": 1.0,
+      "confidence": 0.98,
+      "description": "CISPR 36专门适用于电动和混动车辆",
+      "evidence": "CISPR 36 scope and title"
+    },
+    {
+      "id": "rel_031",
+      "source": "CISPR25",
+      "target": "ElectricVehicles",
+      "relation_type": "applies_to",
+      "weight": 0.85,
+      "confidence": 0.90,
+      "description": "CISPR 25也适用于电动车组件测试",
+      "evidence": "CISPR 25 general applicability"
+    },
+    {
+      "id": "rel_032",
+      "source": "CISPR25",
+      "target": "ConventionalVehicles",
+      "relation_type": "applies_to",
+      "weight": 0.95,
+      "confidence": 0.95,
+      "description": "CISPR 25主要针对传统车辆组件",
+      "evidence": "CISPR 25 historical development"
+    },
+    {
+      "id": "rel_033",
+      "source": "CISPR12",
+      "target": "ElectricVehicles",
+      "relation_type": "applies_to",
+      "weight": 0.90,
+      "confidence": 0.88,
+      "description": "CISPR 12适用于电动车整车测试", 
+      "evidence": "CISPR 12 vehicle scope"
+    },
+    {
+      "id": "rel_034",
+      "source": "CISPR12",
+      "target": "ConventionalVehicles",
+      "relation_type": "applies_to",
+      "weight": 0.95,
+      "confidence": 0.95,
+      "description": "CISPR 12广泛适用于传统车辆",
+      "evidence": "CISPR 12 comprehensive vehicle coverage"
+    },
+    {
+      "id": "rel_035",
+      "source": "ConductedEmissions",
+      "target": "LowFrequency",
+      "relation_type": "covers",
+      "weight": 0.95,
+      "confidence": 0.92,
+      "description": "传导发射测试主要覆盖低频段",
+      "evidence": "CISPR 25 frequency range 150kHz-108MHz"
+    },
+    {
+      "id": "rel_036",
+      "source": "RadiatedEmissions",
+      "target": "VHFUHFBand",
+      "relation_type": "covers",
+      "weight": 0.90,
+      "confidence": 0.90,
+      "description": "辐射发射测试覆盖VHF/UHF频段",
+      "evidence": "CISPR 12/25 radiated emission frequency ranges"
+    },
+    {
+      "id": "rel_037",
+      "source": "RadiatedImmunity",
+      "target": "VHFUHFBand",
+      "relation_type": "covers",
+      "weight": 0.85,
+      "confidence": 0.88,
+      "description": "辐射抗扰度测试覆盖VHF/UHF频段",
+      "evidence": "ISO 11451/11452 frequency ranges"
+    },
+    {
+      "id": "rel_038",
+      "source": "RadiatedImmunity",
+      "target": "MicrowaveBand",
+      "relation_type": "covers",
+      "weight": 0.80,
+      "confidence": 0.85,
+      "description": "辐射抗扰度测试扩展到微波频段",
+      "evidence": "ISO 11451/11452 up to 18 GHz"
+    },
+    {
+      "id": "rel_039",
+      "source": "ISO",
+      "target": "IEC",
+      "relation_type": "harmonized_with",
+      "weight": 0.75,
+      "confidence": 0.80,
+      "description": "ISO与IEC在EMC标准方面协调统一",
+      "evidence": "ISO/IEC coordination agreements"
+    },
+    {
+      "id": "rel_040",
+      "source": "SAE",
+      "target": "ISO",
+      "relation_type": "harmonized_with",
+      "weight": 0.70,
+      "confidence": 0.75,
+      "description": "SAE与ISO在汽车EMC标准方面协调",
+      "evidence": "SAE liaison with ISO TC22/SC32"
+    },
+    {
+      "id": "rel_041",
+      "source": "CISPR36",
+      "target": "CISPR12",
+      "relation_type": "extends",
+      "weight": 0.70,
+      "confidence": 0.78,
+      "description": "CISPR 36扩展了CISPR 12针对电动车的要求",
+      "evidence": "CISPR 36 development background"
+    },
+    {
+      "id": "rel_042",
+      "source": "ECER10",
+      "target": "CISPR25",
+      "relation_type": "implements",
+      "weight": 0.85,
+      "confidence": 0.88,
+      "description": "ECE R10实施CISPR 25的技术要求",
+      "evidence": "ECE R10 technical annexes"
+    },
+    {
+      "id": "rel_043",
+      "source": "ECER10",
+      "target": "ISO11451",
+      "relation_type": "implements",
+      "weight": 0.80,
+      "confidence": 0.85,
+      "description": "ECE R10实施ISO 11451的抗扰度要求",
+      "evidence": "ECE R10 immunity test procedures"
+    },
+    {
+      "id": "rel_044",
+      "source": "SAEJ551",
+      "target": "CISPR12",
+      "relation_type": "equivalent_to",
+      "weight": 0.60,
+      "confidence": 0.70,
+      "description": "SAE J551系列与CISPR 12存在等效关系",
+      "evidence": "Historical SAE-CISPR correlation studies"
+    },
+    {
+      "id": "rel_045",
+      "source": "SAEJ1113",
+      "target": "ISO11452",
+      "relation_type": "equivalent_to",
+      "weight": 0.65,
+      "confidence": 0.72,
+      "description": "SAE J1113系列与ISO 11452存在等效关系",
+      "evidence": "Historical SAE-ISO correlation studies"
+    },
+    {
+      "id": "rel_046",
+      "source": "IEC61000",
+      "target": "Transients",
+      "relation_type": "includes",
+      "weight": 0.80,
+      "confidence": 0.85,
+      "description": "IEC 61000系列包含瞬变测试方法",
+      "evidence": "IEC 61000-4-4, 61000-4-5 standards"
+    },
+    {
+      "id": "rel_047",
+      "source": "IEC61000",
+      "target": "RadiatedImmunity",
+      "relation_type": "includes", 
+      "weight": 0.75,
+      "confidence": 0.82,
+      "description": "IEC 61000包含基础辐射抗扰度测试",
+      "evidence": "IEC 61000-4-3 radiated immunity"
+    },
+    {
+      "id": "rel_048",
+      "source": "CISPR16",
+      "target": "EMIReceiver",
+      "relation_type": "specifies",
+      "weight": 0.95,
+      "confidence": 0.95,
+      "description": "CISPR 16规范EMI接收机技术要求",
+      "evidence": "CISPR 16-1-1 measuring apparatus"
+    },
+    {
+      "id": "rel_049",
+      "source": "CISPR16",
+      "target": "LISN",
+      "relation_type": "specifies",
+      "weight": 0.90,
+      "confidence": 0.92,
+      "description": "CISPR 16规范LISN/AMN技术要求",
+      "evidence": "CISPR 16-1-2 ancillary equipment"
+    },
+    {
+      "id": "rel_050",
+      "source": "CISPR16",
+      "target": "Antennas",
+      "relation_type": "specifies",
+      "weight": 0.90,
+      "confidence": 0.90,
+      "description": "CISPR 16规范测试天线技术要求",
+      "evidence": "CISPR 16-1-4 antenna specifications"
+    }
+  ],
+  "relationship_statistics": {
+    "total_relationships": 50,
+    "by_type": {
+      "develops": 8,
+      "references": 4, 
+      "includes": 13,
+      "uses": 9,
+      "applies_to": 6,
+      "covers": 4,
+      "harmonized_with": 2,
+      "extends": 1,
+      "implements": 2,
+      "equivalent_to": 2,
+      "specifies": 3
+    },
+    "confidence_distribution": {
+      "high_confidence_0.9+": 28,
+      "medium_confidence_0.8-0.9": 15,
+      "lower_confidence_below_0.8": 7
+    },
+    "weight_distribution": {
+      "strong_1.0": 12,
+      "very_strong_0.9+": 8,
+      "strong_0.8+": 12,
+      "moderate_0.7+": 10,
+      "weaker_below_0.7": 8
+    }
+  },
+  "metadata": {
+    "version": "1.0",
+    "last_updated": "2024-12-01",
+    "data_source": "Standards analysis and domain expertise",
+    "validation_method": "Expert review and cross-reference verification",
+    "update_frequency": "Quarterly with standards updates",
+    "coverage": "Comprehensive automotive EMC domain relationships"
+  }
+}

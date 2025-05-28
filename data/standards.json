@@ -1,0 +1,393 @@
+{
+  "emc_standards": {
+    "CISPR25": {
+      "id": "CISPR25",
+      "name": "CISPR 25 - 车载接收机保护标准",
+      "full_title": "Vehicles, boats and internal combustion engines - Radio disturbance characteristics - Limits and methods of measurement for the protection of on-board receivers",
+      "organization": "CISPR",
+      "current_version": "Edition 5.0 (2021)",
+      "status": "Active",
+      "scope": "Protection of on-board receivers",
+      "frequency_range": "150 kHz - 2.5 GHz",
+      "test_types": [
+        "Conducted emissions",
+        "Radiated emissions"
+      ],
+      "measurement_distances": ["1m", "3m"],
+      "detectors": ["Peak", "Quasi-peak", "Average"],
+      "application_areas": [
+        "Passenger cars",
+        "Commercial vehicles", 
+        "Motorcycles",
+        "Electronic sub-assemblies"
+      ],
+      "key_changes_v5": [
+        "Extended frequency range to 2.5 GHz",
+        "Updated measurement procedures",
+        "New antenna requirements",
+        "Enhanced immunity test methods"
+      ],
+      "related_standards": ["CISPR 12", "ISO 11451", "ISO 11452"],
+      "publication_year": 2021,
+      "revision_cycle": "5-7 years",
+      "geographical_adoption": "Global"
+    },
+    "CISPR12": {
+      "id": "CISPR12", 
+      "name": "CISPR 12 - 车外接收机保护标准",
+      "full_title": "Vehicles, boats and internal combustion engines - Radio disturbance characteristics - Limits and methods of measurement for the protection of off-board receivers",
+      "organization": "CISPR",
+      "current_version": "Edition 6.0 (2013)",
+      "next_version": "Edition 7.0 (in development)",
+      "status": "Under revision",
+      "scope": "Protection of off-board receivers",
+      "frequency_range": "150 kHz - 1 GHz",
+      "measurement_distances": ["3m", "10m"],
+      "test_environment": "Open area test site (OATS) or equivalent",
+      "application_areas": [
+        "All vehicles",
+        "Boats",
+        "Internal combustion engines"
+      ],
+      "planned_changes_v7": [
+        "Frequency extension to 6 GHz",
+        "Alternative test site correlation",
+        "Updated measurement procedures",
+        "Harmonization with ECE R10 Rev.7"
+      ],
+      "related_standards": ["CISPR 25", "ECE R10", "CISPR 16-1-1"],
+      "publication_year": 2013,
+      "geographical_adoption": "Global"
+    },
+    "CISPR36": {
+      "id": "CISPR36",
+      "name": "CISPR 36 - 电动/混动车标准", 
+      "full_title": "Radio disturbance characteristics for the protection of off-board receivers in the frequency range below 30 MHz - Electric and hybrid-electric vehicles",
+      "organization": "CISPR",
+      "current_version": "Edition 1.0 (2020)",
+      "status": "Active",
+      "scope": "Electric and hybrid vehicles below 30 MHz",
+      "frequency_range": "150 kHz - 30 MHz",
+      "vehicle_types": [
+        "Battery Electric Vehicles (BEV)",
+        "Hybrid Electric Vehicles (HEV)", 
+        "Plug-in Hybrid Electric Vehicles (PHEV)"
+      ],
+      "special_conditions": [
+        "Charging state testing",
+        "High voltage system considerations",
+        "Traction motor operation"
+      ],
+      "test_configurations": [
+        "Vehicle stationary - engine off",
+        "Vehicle stationary - charging",
+        "Vehicle stationary - ready to drive"
+      ],
+      "related_standards": ["CISPR 12", "CISPR 25"],
+      "publication_year": 2020,
+      "geographical_adoption": "Global"
+    },
+    "ISO11452": {
+      "id": "ISO11452",
+      "name": "ISO 11452 - 组件抗扰度测试标准",
+      "full_title": "Road vehicles - Component test methods for electrical disturbances from narrowband radiated electromagnetic energy",
+      "organization": "ISO",
+      "technical_committee": "ISO/TC 22/SC 32/WG 3",
+      "standard_type": "Multi-part standard",
+      "parts": {
+        "Part 1": {
+          "title": "General",
+          "scope": "General requirements and definitions",
+          "status": "Published"
+        },
+        "Part 2": {
+          "title": "Absorber-lined shielded enclosure",
+          "scope": "Anechoic chamber testing", 
+          "frequency_range": "80 MHz - 18 GHz",
+          "status": "Published"
+        },
+        "Part 3": {
+          "title": "TEM cell",
+          "scope": "Transverse electromagnetic cell testing",
+          "frequency_range": "10 kHz - 200 MHz", 
+          "status": "Published"
+        },
+        "Part 4": {
+          "title": "Bulk current injection (BCI)",
+          "scope": "Conducted immunity via current injection",
+          "frequency_range": "1 MHz - 400 MHz",
+          "status": "Published"
+        },
+        "Part 5": {
+          "title": "Stripline",
+          "scope": "Stripline method for small components",
+          "frequency_range": "1 MHz - 400 MHz",
+          "status": "Published"
+        },
+        "Part 7": {
+          "title": "Direct RF power injection", 
+          "scope": "Power injection method",
+          "frequency_range": "1 MHz - 400 MHz",
+          "status": "Published"
+        },
+        "Part 8": {
+          "title": "Immunity to magnetic fields",
+          "scope": "Magnetic field immunity",
+          "frequency_range": "DC - 100 kHz",
+          "status": "Published"
+        },
+        "Part 9": {
+          "title": "Portable transmitters",
+          "scope": "Immunity to portable transmitters", 
+          "frequency_range": "26 MHz - 2.5 GHz",
+          "status": "Published"
+        },
+        "Part 11": {
+          "title": "Reverberation chamber",
+          "scope": "Mode-stirred chamber testing",
+          "frequency_range": "200 MHz - 18 GHz",
+          "status": "Published"
+        }
+      },
+      "test_levels": "1 V/m to 200 V/m",
+      "modulation": ["AM 1 kHz", "PM", "CW"],
+      "related_standards": ["ISO 11451", "CISPR 25", "IEC 61000-4-3"],
+      "geographical_adoption": "Global"
+    },
+    "ISO11451": {
+      "id": "ISO11451",
+      "name": "ISO 11451 - 整车抗扰度测试标准",
+      "full_title": "Road vehicles - Vehicle test methods for electrical disturbances from narrowband radiated electromagnetic energy", 
+      "organization": "ISO",
+      "technical_committee": "ISO/TC 22/SC 32/WG 3",
+      "standard_type": "Multi-part standard",
+      "parts": {
+        "Part 1": {
+          "title": "General",
+          "scope": "General requirements for vehicle testing",
+          "status": "Published"
+        },
+        "Part 2": {
+          "title": "Off-vehicle antenna source",
+          "scope": "External antenna immunity testing",
+          "frequency_range": "200 MHz - 18 GHz",
+          "test_distance": "1m - 5m",
+          "status": "Published"
+        },
+        "Part 3": {
+          "title": "On-board antenna source", 
+          "scope": "Vehicle-mounted transmitter simulation",
+          "frequency_range": "26 MHz - 2.5 GHz",
+          "status": "Published"
+        },
+        "Part 4": {
+          "title": "Bulk current injection (BCI)",
+          "scope": "Vehicle harness immunity testing",
+          "frequency_range": "1 MHz - 400 MHz", 
+          "status": "Published"
+        }
+      },
+      "test_levels": "1 V/m to 200 V/m",
+      "vehicle_conditions": [
+        "Engine running",
+        "All electrical systems operational",
+        "Representative loading conditions"
+      ],
+      "related_standards": ["ISO 11452", "CISPR 25"],
+      "geographical_adoption": "Global"
+    },
+    "ISO7637": {
+      "id": "ISO7637",
+      "name": "ISO 7637 - 传导和耦合电气干扰",
+      "full_title": "Road vehicles - Electrical disturbances from conduction and coupling",
+      "organization": "ISO", 
+      "technical_committee": "ISO/TC 22/SC 32/WG 3",
+      "standard_type": "Multi-part standard",
+      "parts": {
+        "Part 1": {
+          "title": "Definitions and general considerations",
+          "scope": "General definitions and test setup",
+          "status": "Published"
+        },
+        "Part 2": {
+          "title": "Electrical transient conduction along supply lines only",
+          "scope": "Power line transient testing",
+          "voltage_systems": ["12V", "24V"],
+          "test_pulses": ["1", "2a", "2b", "3a", "3b", "4", "5a", "5b"],
+          "status": "Published"
+        },
+        "Part 3": {
+          "title": "Electrical transient transmission by capacitive and inductive coupling via lines other than supply lines",
+          "scope": "Coupling to non-power lines",
+          "test_methods": ["Capacitive coupling", "Inductive coupling"],
+          "status": "Published"
+        },
+        "Part 4": {
+          "title": "Electrical transient conduction along shielded high voltage supply lines only",
+          "scope": "High voltage system transients",
+          "voltage_systems": [">60V DC", ">30V AC"],
+          "status": "Under development"
+        }
+      },
+      "test_pulses": {
+        "Pulse 1": "Starting transients",
+        "Pulse 2a/2b": "Switching transients",
+        "Pulse 3a/3b": "Load dump",
+        "Pulse 4": "Reset pulse", 
+        "Pulse 5a/5b": "Motor transients"
+      },
+      "related_standards": ["ISO 11452", "IEC 61000-4-4", "IEC 61000-4-5"],
+      "geographical_adoption": "Global"
+    },
+    "ECER10": {
+      "id": "ECER10",
+      "name": "ECE R10 - 电磁兼容性法规",
+      "full_title": "Uniform provisions concerning the approval of vehicles with regard to electromagnetic compatibility",
+      "organization": "UNECE",
+      "regulation_type": "Type approval regulation",
+      "current_version": "Revision 6 (2019)",
+      "next_version": "Revision 7 (in development)",
+      "status": "Active, under revision",
+      "geographical_scope": "UNECE member countries (50+)",
+      "vehicle_categories": {
+        "L": "Motorcycles and mopeds",
+        "M": "Passenger vehicles",
+        "N": "Commercial vehicles", 
+        "O": "Trailers",
+        "T": "Agricultural tractors",
+        "R": "Road construction vehicles",
+        "S": "Special vehicles"
+      },
+      "frequency_scope_current": "150 kHz - 1 GHz",
+      "frequency_scope_planned": "150 kHz - 6 GHz",
+      "referenced_standards": {
+        "Emissions": ["CISPR 12", "CISPR 25"],
+        "Immunity": ["ISO 11451", "ISO 11452"],
+        "Transients": ["ISO 7637"],
+        "Measurement": ["CISPR 16 series"]
+      },
+      "approval_types": {
+        "Vehicle": "Complete vehicle approval",
+        "ESA": "Electronic sub-assembly approval",
+        "Component": "Individual component approval"
+      },
+      "key_changes_rev7": [
+        "Frequency extension to 6 GHz",
+        "Enhanced immunity requirements",
+        "Updated measurement procedures",
+        "Improved correlation with international standards"
+      ],
+      "implementation_date": "Expected 2025-2026"
+    },
+    "IEC61000": {
+      "id": "IEC61000",
+      "name": "IEC 61000 - 电磁兼容基础标准系列",
+      "full_title": "Electromagnetic compatibility (EMC)",
+      "organization": "IEC",
+      "technical_committee": "IEC/TC 77",
+      "standard_type": "Standard series",
+      "structure": {
+        "Part 1": "General - Application and interpretation of fundamental definitions and terms",
+        "Part 2": "Environment - Description of the environment, Classification of the environment, Compatibility levels",
+        "Part 3": "Limits - Emission limits, Immunity limits",
+        "Part 4": "Testing and measurement techniques - Measurement techniques, Test techniques",
+        "Part 5": "Installation and mitigation guidelines - Installation guidelines, Mitigation methods",
+        "Part 6": "Generic standards - Immunity for residential/commercial environments, Emission for residential/commercial/industrial environments"
+      },
+      "key_parts_automotive": {
+        "IEC 61000-4-2": "Electrostatic discharge immunity test",
+        "IEC 61000-4-3": "Radiated electromagnetic field immunity test", 
+        "IEC 61000-4-4": "Electrical fast transient/burst immunity test",
+        "IEC 61000-4-5": "Surge immunity test",
+        "IEC 61000-4-6": "Conducted disturbances immunity test",
+        "IEC 61000-4-8": "Power frequency magnetic field immunity test",
+        "IEC 61000-4-11": "Voltage dips and interruptions immunity test"
+      },
+      "automotive_relevance": "Referenced by ECE R10 and automotive EMC standards",
+      "geographical_adoption": "Global"
+    },
+    "SAEJ551": {
+      "id": "SAEJ551", 
+      "name": "SAE J551 - 整车EMC标准系列(已撤回)",
+      "full_title": "Performance Levels and Methods of Measurement of Electromagnetic Compatibility of Vehicles and Devices",
+      "organization": "SAE",
+      "status": "Withdrawn/Historical",
+      "historical_parts": {
+        "J551/1": "General requirements",
+        "J551/2": "Limits and methods of measurement of radio disturbance characteristics of vehicles",
+        "J551/3": "Limits and methods of measurement of radio disturbance characteristics for the protection of on-board receivers",
+        "J551/4": "Immunity to electromagnetic fields",
+        "J551/5": "Immunity to bulk current injection"
+      },
+      "withdrawal_reason": "Superseded by international standards (ISO/CISPR)",
+      "current_role": "Reference for North American variations",
+      "related_standards": ["ISO 11451", "CISPR 12", "CISPR 25"]
+    },
+    "SAEJ1113": {
+      "id": "SAEJ1113",
+      "name": "SAE J1113 - 组件EMC标准系列(已撤回)",
+      "full_title": "Electromagnetic Compatibility Measurement Procedures for Vehicle Components", 
+      "organization": "SAE",
+      "status": "Withdrawn/Historical",
+      "historical_parts": {
+        "J1113/1": "General requirements",
+        "J1113/2": "Conducted immunity, 12V",
+        "J1113/3": "Immunity to electromagnetic fields",
+        "J1113/4": "Immunity to bulk current injection", 
+        "J1113/11": "Immunity to electrostatic discharge",
+        "J1113/12": "Immunity to conducted transients",
+        "J1113/13": "Immunity to electromagnetic fields, 200 MHz to 1 GHz",
+        "J1113/21": "Immunity to electromagnetic fields, 1 GHz to 18 GHz",
+        "J1113/22": "Immunity to conducted transients on power leads",
+        "J1113/23": "Immunity to conducted AC power at audio frequencies",
+        "J1113/24": "Immunity to electromagnetic fields, 10 kHz to 200 MHz",
+        "J1113/25": "Immunity to conducted transients on non-power leads",
+        "J1113/26": "Immunity to conducted swept frequency currents, 1 to 200 MHz",
+        "J1113/27": "Immunity to radiated electromagnetic fields, 200 MHz to 1 GHz"
+      },
+      "withdrawal_reason": "Superseded by ISO 11452 series",
+      "current_role": "Reference for North American variations", 
+      "related_standards": ["ISO 11452", "ISO 11451"]
+    },
+    "CISPR16": {
+      "id": "CISPR16",
+      "name": "CISPR 16 - 测量方法和设备规范",
+      "full_title": "Specification for radio disturbance and immunity measuring apparatus and methods",
+      "organization": "CISPR",
+      "standard_type": "Multi-part measurement standard", 
+      "parts": {
+        "Part 1-1": "Radio disturbance and immunity measuring apparatus - Measuring apparatus",
+        "Part 1-2": "Ancillary equipment - Conducted disturbances",
+        "Part 1-3": "Ancillary equipment - Disturbance power",
+        "Part 1-4": "Ancillary equipment - Radiated disturbances",
+        "Part 1-5": "Ancillary equipment - Antenna calibration test sites for 30 MHz to 1000 MHz",
+        "Part 1-6": "Ancillary equipment - EMC antenna calibration", 
+        "Part 2-1": "Methods of measurement of disturbances and immunity - Conducted disturbance measurements",
+        "Part 2-2": "Methods of measurement of disturbances and immunity - Measurement of disturbance power",
+        "Part 2-3": "Methods of measurement of disturbances and immunity - Radiated disturbance measurements",
+        "Part 3-1": "Reports and recommendations of CISPR - Uncertainties, statistics and limit modelling",
+        "Part 3-2": "Reports and recommendations of CISPR - Measurement instrumentation uncertainty",
+        "Part 4-1": "Uncertainties, statistics and limit modelling - Uncertainties in EMC measurements",
+        "Part 4-2": "Uncertainties, statistics and limit modelling - Measurement instrumentation uncertainty"
+      },
+      "key_equipment_specs": {
+        "EMI_receiver": "Peak, quasi-peak, average detectors",
+        "LISN": "Line impedance stabilization network",
+        "Antennas": "Rod, biconical, log-periodic, horn",
+        "Test_sites": "OATS, anechoic chamber, TEM cell"
+      },
+      "automotive_relevance": "Referenced by all automotive EMC standards",
+      "geographical_adoption": "Global"
+    }
+  },
+  "metadata": {
+    "version": "1.0",
+    "last_updated": "2024-12-01",
+    "total_standards": 11,
+    "active_standards": 8,
+    "withdrawn_standards": 2,
+    "under_development": 1,
+    "data_source": "Official standards organizations and industry references",
+    "coverage": "Comprehensive automotive EMC standards landscape"
+  }
+}

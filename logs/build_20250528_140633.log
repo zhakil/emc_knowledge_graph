@@ -1,0 +1,81 @@
+2025-05-28 14:06:33,784 - BUILD - INFO - 初始化知识图谱构建系统 - E:\EMC_Knowledge_Graph
+2025-05-28 14:06:33,785 - BUILD - INFO - 初始化知识图谱构建系统 - E:\EMC_Knowledge_Graph
+2025-05-28 14:06:33,785 - BUILD - INFO - [START] 启动完整构建流程
+2025-05-28 14:06:33,785 - BUILD - INFO - 
+[STEP] 执行步骤: 环境验证
+2025-05-28 14:06:33,785 - BUILD - INFO - [VALIDATE] 环境依赖验证
+2025-05-28 14:06:33,785 - BUILD - INFO -   [OK] Python版本
+2025-05-28 14:06:33,802 - BUILD - INFO -   [OK] Git可用性
+2025-05-28 14:06:33,802 - BUILD - INFO -   [OK] 项目结构
+2025-05-28 14:06:34,074 - BUILD - INFO - Note: NumExpr detected 20 cores but "NUMEXPR_MAX_THREADS" not set, so enforcing safe limit of 8.
+2025-05-28 14:06:34,074 - BUILD - INFO - NumExpr defaulting to 8 threads.
+2025-05-28 14:06:34,188 - BUILD - INFO -   [OK] 核心依赖
+2025-05-28 14:06:34,189 - BUILD - INFO - 
+[STEP] 执行步骤: 虚拟环境
+2025-05-28 14:06:34,189 - BUILD - INFO - 🔄 虚拟环境已存在，跳过创建
+2025-05-28 14:06:34,189 - BUILD - INFO - 
+[STEP] 执行步骤: 依赖安装
+2025-05-28 14:06:34,189 - BUILD - INFO - [PACKAGE] 安装项目依赖
+2025-05-28 14:06:34,462 - BUILD - ERROR - 依赖安装失败: Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "E:\EMC_Knowledge_Graph\venv\Scripts\pip.exe\__main__.py", line 7, in <module>
+  File "E:\EMC_Knowledge_Graph\venv\Lib\site-packages\pip\_internal\cli\main.py", line 77, in main
+    command = create_command(cmd_name, isolated=("--isolated" in cmd_args))
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\EMC_Knowledge_Graph\venv\Lib\site-packages\pip\_internal\commands\__init__.py", line 114, in create_command
+    module = importlib.import_module(module_path)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\ProgramData\anaconda3\Lib\importlib\__init__.py", line 90, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1387, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1360, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1331, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 935, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 995, in exec_module
+  File "<frozen importlib._bootstrap>", line 488, in _call_with_frames_removed
+  File "E:\EMC_Knowledge_Graph\venv\Lib\site-packages\pip\_internal\commands\install.py", line 15, in <module>
+    from pip._internal.cli.req_command import (
+  File "E:\EMC_Knowledge_Graph\venv\Lib\site-packages\pip\_internal\cli\req_command.py", line 21, in <module>
+    from pip._internal.index.package_finder import PackageFinder
+  File "E:\EMC_Knowledge_Graph\venv\Lib\site-packages\pip\_internal\index\package_finder.py", line 30, in <module>
+    from pip._internal.req import InstallRequirement
+  File "E:\EMC_Knowledge_Graph\venv\Lib\site-packages\pip\_internal\req\__init__.py", line 8, in <module>
+    from .req_install import InstallRequirement
+  File "E:\EMC_Knowledge_Graph\venv\Lib\site-packages\pip\_internal\req\req_install.py", line 32, in <module>
+    from pip._internal.operations.build.metadata import generate_metadata
+ModuleNotFoundError: No module named 'pip._internal.operations.build'
+
+2025-05-28 14:06:34,463 - BUILD - ERROR - 步骤失败: 依赖安装
+2025-05-28 14:06:34,463 - BUILD - INFO - 
+[STEP] 执行步骤: 代码质量
+2025-05-28 14:06:34,463 - BUILD - INFO - [QUALITY] 执行代码质量检查
+2025-05-28 14:06:35,730 - BUILD - INFO -   [OK] formatting
+2025-05-28 14:06:36,234 - BUILD - WARNING - 代码风格问题: 
+2025-05-28 14:06:36,234 - BUILD - INFO -   [FAIL] linting
+2025-05-28 14:06:37,419 - BUILD - INFO -   [FAIL] type_checking
+2025-05-28 14:06:37,560 - BUILD - INFO -   [OK] import_sorting
+2025-05-28 14:06:37,560 - BUILD - INFO - 
+[STEP] 执行步骤: 测试执行
+2025-05-28 14:06:37,560 - BUILD - INFO - [TEST] 执行测试套件
+2025-05-28 14:06:46,301 - BUILD - WARNING - 测试覆盖率低于阈值: 62.0% < 85%
+2025-05-28 14:06:46,301 - BUILD - INFO -   [OK] 测试完成，覆盖率: 62.0%
+2025-05-28 14:06:46,301 - BUILD - INFO - 
+[STEP] 执行步骤: 知识图谱构建
+2025-05-28 14:06:46,302 - BUILD - INFO - [KG-BUILD] 构建EMC知识图谱
+2025-05-28 14:06:47,037 - BUILD - ERROR - 知识图谱构建失败: Traceback (most recent call last):
+  File "E:\EMC_Knowledge_Graph\src\knowledge_graph.py", line 1226, in <module>
+    main()
+  File "E:\EMC_Knowledge_Graph\src\knowledge_graph.py", line 1163, in main
+    print("\U0001f680 EMC知识图谱系统启动")
+UnicodeEncodeError: 'gbk' codec can't encode character '\U0001f680' in position 0: illegal multibyte sequence
+
+2025-05-28 14:06:47,037 - BUILD - ERROR - 步骤失败: 知识图谱构建
+2025-05-28 14:06:47,038 - BUILD - INFO - 
+[STEP] 执行步骤: 文档生成
+2025-05-28 14:06:47,038 - BUILD - INFO - [DOCS] 生成项目文档
+2025-05-28 14:06:47,039 - BUILD - INFO -   [OK] 文档生成完成
+2025-05-28 14:06:47,040 - BUILD - INFO - [REPORT] 构建报告: E:\EMC_Knowledge_Graph\build_report.json
+2025-05-28 14:06:47,040 - BUILD - INFO - 
+[ERROR] 构建失败 - 耗时: 0:00:13.255813

@@ -1,0 +1,302 @@
+# EMC Knowledge Graph System Configuration
+# Comprehensive configuration for automotive electronics EMC standards analysis
+
+# Project Information
+project:
+  name: "EMC Knowledge Graph System"
+  version: "1.0.0"
+  description: "Automotive Electronics EMC Standards Knowledge Graph and Analysis System"
+  author: "EMC Standards Research Team"
+  license: "MIT"
+  created_date: "2024-01-01"
+  last_updated: "2024-12-01"
+
+# Application Settings
+application:
+  debug_mode: false
+  log_level: "INFO"
+  max_workers: 4
+  timeout_seconds: 30
+  cache_enabled: true
+  cache_ttl_hours: 24
+
+# Database and Data Configuration
+data:
+  # Data source files
+  sources:
+    standards: "data/standards.json"
+    organizations: "data/organizations.json"
+    relationships: "data/relationships.json"
+    test_methods: "data/test_methods.json"
+    regulations: "data/regulations.json"
+  
+  # Data validation settings
+  validation:
+    strict_mode: true
+    required_fields: ["id", "name", "type", "description"]
+    max_description_length: 1000
+    allowed_node_types: ["organization", "standard", "regulation", "test_method", "test_environment", "vehicle_type"]
+  
+  # Data export settings
+  export:
+    include_metadata: true
+    compress_output: false
+    encoding: "utf-8"
+
+# Knowledge Graph Configuration
+graph:
+  # Layout algorithms
+  layout:
+    default: "spring"
+    options: ["spring", "circular", "hierarchical", "kamada_kawai", "shell"]
+    spring_k: 3
+    spring_iterations: 50
+    random_seed: 42
+  
+  # Node visualization settings
+  nodes:
+    default_size: 1500
+    min_size: 800
+    max_size: 3000
+    font_size: 10
+    font_family: "Arial, sans-serif"
+    border_width: 2
+    
+    # Color scheme for different node types
+    colors:
+      organization: "#667eea"
+      standard: "#11998e"
+      regulation: "#fa709a"
+      test_method: "#fee140"
+      test_environment: "#a8caba"
+      vehicle_type: "#fcb69f"
+      frequency_range: "#c471ed"
+  
+  # Edge visualization settings
+  edges:
+    default_width: 2
+    min_width: 1
+    max_width: 5
+    color: "#888888"
+    alpha: 0.6
+    arrow_size: 20
+    
+    # Relationship type styling
+    styles:
+      develops:
+        color: "#3498db"
+        width: 3
+      includes:
+        color: "#2ecc71"
+        width: 2
+      applies_to:
+        color: "#e74c3c"
+        width: 2
+      uses:
+        color: "#f39c12"
+        width: 2
+      requires:
+        color: "#9b59b6"
+        width: 2
+      references:
+        color: "#1abc9c"
+        width: 1
+
+# Visualization Configuration
+visualization:
+  # Static visualization settings
+  static:
+    figure_size: [20, 16]
+    dpi: 300
+    format: "png"
+    style: "default"
+    title_font_size: 16
+    legend_font_size: 12
+    save_transparent: false
+    
+    # Matplotlib Chinese font support
+    font_config:
+      chinese_fonts: ["SimHei", "Microsoft YaHei", "DejaVu Sans"]
+      unicode_minus: false
+  
+  # Interactive visualization settings
+  interactive:
+    width: 1200
+    height: 800
+    format: "html"
+    template: "plotly_white"
+    show_toolbar: true
+    
+    # Plotly configuration
+    config:
+      displayModeBar: true
+      displaylogo: false
+      modeBarButtonsToRemove: ["pan2d", "lasso2d"]
+      scrollZoom: true
+      doubleClick: "reset"
+
+# Analysis Configuration
+analysis:
+  # Centrality measures
+  centrality:
+    compute_degree: true
+    compute_betweenness: true
+    compute_closeness: true
+    compute_eigenvector: true
+    compute_pagerank: true
+    
+    # PageRank parameters
+    pagerank:
+      alpha: 0.85
+      max_iter: 100
+      tolerance: 1e-06
+  
+  # Path analysis
+  paths:
+    max_path_length: 6
+    find_all_paths: false
+    weight_threshold: 0.1
+  
+  # Community detection
+  communities:
+    algorithm: "louvain"
+    resolution: 1.0
+    random_state: 42
+
+# Output Configuration
+output:
+  # Directory structure
+  directories:
+    base: "output"
+    graphs: "output/graphs"
+    reports: "output/reports"
+    exports: "output/exports"
+    cache: "output/cache"
+    logs: "output/logs"
+  
+  # File naming conventions
+  naming:
+    timestamp_format: "%Y%m%d_%H%M%S"
+    include_version: true
+    use_underscores: true
+  
+  # Report generation
+  reports:
+    formats: ["json", "html", "pdf"]
+    include_statistics: true
+    include_visualizations: true
+    template_dir: "templates"
+
+# Testing Configuration
+testing:
+  # Test execution settings
+  execution:
+    parallel: true
+    verbose: true
+    stop_on_first_failure: false
+  
+  # Coverage settings
+  coverage:
+    minimum_threshold: 80
+    include_patterns: ["src/*"]
+    exclude_patterns: ["tests/*", "build/*", "venv/*"]
+    report_formats: ["html", "term", "xml"]
+  
+  # Test data
+  test_data:
+    use_sample_data: true
+    sample_size: 100
+    random_seed: 12345
+
+# Logging Configuration
+logging:
+  # Log levels: DEBUG, INFO, WARNING, ERROR, CRITICAL
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  date_format: "%Y-%m-%d %H:%M:%S"
+  
+  # Log files
+  files:
+    main: "logs/emc_kg.log"
+    error: "logs/error.log"
+    debug: "logs/debug.log"
+  
+  # Log rotation
+  rotation:
+    max_size_mb: 10
+    backup_count: 5
+    when: "midnight"
+    interval: 1
+
+# Performance Configuration
+performance:
+  # Memory management
+  memory:
+    max_memory_mb: 2048
+    gc_threshold: 0.8
+    cache_size_mb: 512
+  
+  # Processing optimization
+  processing:
+    chunk_size: 1000
+    batch_size: 100
+    parallel_workers: 4
+    timeout_seconds: 300
+
+# Security Configuration
+security:
+  # Data privacy
+  privacy:
+    anonymize_sensitive_data: false
+    redact_personal_info: false
+    encrypt_exports: false
+  
+  # Access control
+  access:
+    require_authentication: false
+    allowed_origins: ["localhost", "127.0.0.1"]
+    rate_limit_requests_per_minute: 100
+
+# Integration Configuration
+integrations:
+  # Web API settings
+  api:
+    enabled: false
+    host: "localhost"
+    port: 8000
+    debug: false
+    cors_enabled: true
+  
+  # Database connections
+  databases:
+    enabled: false
+    type: "sqlite"
+    connection_string: "sqlite:///emc_knowledge_graph.db"
+    pool_size: 10
+  
+  # External services
+  external:
+    enable_web_scraping: false
+    scraping_delay_seconds: 1
+    user_agent: "EMC-KG-Bot/1.0"
+
+# Development Configuration
+development:
+  # Code quality
+  code_quality:
+    auto_format: true
+    run_linting: true
+    type_checking: true
+    pre_commit_hooks: true
+  
+  # Debug settings
+  debug:
+    verbose_output: false
+    save_intermediate_results: false
+    profile_performance: false
+    
+  # Hot reload (for development server)
+  hot_reload:
+    enabled: false
+    watch_directories: ["src", "data", "templates"]
+    ignore_patterns: ["*.pyc", "__pycache__", ".git"]
