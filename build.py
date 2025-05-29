@@ -204,37 +204,58 @@ class KnowledgeGraphBuilder:
             logger.error(f"虚拟环境创建失败: {e}")
             return False
     
-    def install_dependencies(self, upgrade: bool = False) -> bool:
-        """依赖包安装管理"""
-        logger.info("📦 安装项目依赖")
+    def install_dependencies(self, minimal: bool = False, timeout: int = 60):
+        """智能分阶段依赖安装"""
+        logger.info(f"📦 {'最小' if minimal else '完整'}依赖安装")
         
         pip_cmd = self._get_pip_command()
-        requirements_path = self.project_root / BUILD_CONFIG['requirements_file']
-        
-        if not requirements_path.exists():
-            logger.error(f"requirements文件不存在: {requirements_path}")
-            return False
         
         try:
-            install_args = [pip_cmd, 'install', '-r', str(requirements_path)]
-            if upgrade:
-                install_args.append('--upgrade')
+            if minimal:
+                # 仅安装核心依赖
+                core_deps = [
+                    "networkx>=3.1,<4.0",
+                    "pyyaml>=6.0,<7.0", 
+                    "numpy>=1.24.0,<2.0"
+                ]
+                
+                for dep in core_deps:
+                    logger.info(f"  安装核心依赖: {dep}")
+                    result = subprocess.run([
+                        pip_cmd, 'install', dep,
+                        '--timeout', str(timeout),
+                        '--retries', '2'
+                    ], capture_output=True, text=True, timeout=timeout)
+                    
+                    if result.returncode != 0:
+                        logger.error(f"核心依赖安装失败: {dep}")
+                        return False
+            else:
+                # 分组安装完整依赖
+                dep_groups = {
+                    "core": ["networkx>=3.1", "pyyaml>=6.0", "numpy>=1.24.0"],
+                    "visualization": ["matplotlib>=3.7.0", "plotly>=5.15.0"],  
+                    "development": ["pytest>=7.4.0", "black>=23.7.0", "mypy>=1.5.0"]
+                }
+                
+                for group_name, deps in dep_groups.items():
+                    logger.info(f"  安装 {group_name} 依赖组...")
+                    for dep in deps:
+                        result = subprocess.run([
+                            pip_cmd, 'install', dep,
+                            '--timeout', str(timeout//2),
+                            '--retries', '1'
+                        ], capture_output=True, text=True)
+                        
+                        if result.returncode != 0:
+                            logger.warning(f"可选依赖安装失败: {dep}")
             
-            result = subprocess.run(
-                install_args,
-                check=True,
-                capture_output=True,
-                text=True,
-                cwd=self.project_root
-            )
-            
-            logger.info("  ✓ 依赖包安装完成")
+            logger.info("  ✓ 依赖安装完成")
             return True
             
-        except subprocess.CalledProcessError as e:
-            logger.error(f"依赖安装失败: {e.stderr}")
+        except Exception as e:
+            logger.error(f"依赖安装异常: {e}")
             return False
-    
     def execute_code_quality_checks(self) -> Dict[str, bool]:
         """代码质量检查管道"""
         logger.info("🔧 执行代码质量检查")
