@@ -1,0 +1,9 @@
+2025-05-29 08:54:52,446 - __main__ - ERROR - json导出失败: keys must be str, int, float, bool or None, not tuple
+2025-05-29 08:54:52,470 - __main__ - ERROR - graphml导出失败: GraphML does not support type <class 'enum.EnumType'> as data values.
+2025-05-29 08:54:52,472 - __main__ - ERROR - gexf导出失败: attribute value type is not allowed: <enum 'NodeType'>
+2025-05-29 09:04:17,063 - __main__ - ERROR - json导出失败: keys must be str, int, float, bool or None, not tuple
+2025-05-29 09:04:17,070 - __main__ - ERROR - graphml导出失败: GraphML does not support type <class 'enum.EnumType'> as data values.
+2025-05-29 09:04:17,071 - __main__ - ERROR - gexf导出失败: attribute value type is not allowed: <enum 'NodeType'>
+2025-05-29 10:03:16,209 - __main__ - ERROR - json导出失败: keys must be str, int, float, bool or None, not tuple
+2025-05-29 10:03:16,216 - __main__ - ERROR - graphml导出失败: GraphML does not support type <class 'enum.EnumType'> as data values.
+2025-05-29 10:03:16,217 - __main__ - ERROR - gexf导出失败: attribute value type is not allowed: <enum 'NodeType'>

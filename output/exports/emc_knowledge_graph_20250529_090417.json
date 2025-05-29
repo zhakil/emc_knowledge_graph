@@ -1,0 +1,13 @@
+{
+  "metadata": {
+    "name": "EMC Standards Knowledge Graph",
+    "description": "Automotive Electronics EMC Standards Semantic Network",
+    "version": "1.0.0",
+    "created_date": "2025-05-29T09:04:15.653573",
+    "last_updated": "2025-05-29T09:04:15.664573",
+    "author": "EMC Standards Research Team",
+    "license": "MIT",
+    "node_count": 25,
+    "edge_count": 37,
+    "node_types": {
+      

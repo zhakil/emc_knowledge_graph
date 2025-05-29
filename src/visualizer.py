@@ -51,6 +51,94 @@ class VisualizationConfig:
     interactive_width: int = 1200
 
 
+class GraphVisualizer:
+    def __init__(self):
+        self.color_scheme = {
+            "standard": "#1f77b4",
+            "organization": "#ff7f0e",
+            "test_method": "#2ca02c",
+            "test_environment": "#d62728",
+            "vehicle_type": "#9467bd",
+            "frequency_range": "#8c564b",
+        }
+
+    def create_interactive_graph(
+        self, graph: nx.Graph, layout_algorithm: str = "force"
+    ) -> go.Figure:
+        """创建交互式知识图谱"""
+
+        # 计算布局
+        if layout_algorithm == "force":
+            pos = nx.spring_layout(graph, k=3, iterations=50)
+        elif layout_algorithm == "hierarchical":
+            pos = self._hierarchical_layout(graph)
+        else:
+            pos = nx.circular_layout(graph)
+
+        # 准备节点数据
+        node_trace = self._prepare_node_trace(graph, pos)
+        edge_trace = self._prepare_edge_trace(graph, pos)
+
+        fig = go.Figure(data=[edge_trace, node_trace])
+
+        # 配置交互性
+        fig.update_layout(
+            title="EMC标准知识图谱",
+            titlefont_size=16,
+            showlegend=False,
+            hovermode="closest",
+            margin=dict(b=20, l=5, r=5, t=40),
+            annotations=[
+                dict(
+                    text="拖拽节点进行交互，悬停查看详情",
+                    showarrow=False,
+                    xref="paper",
+                    yref="paper",
+                    x=0.005,
+                    y=-0.002,
+                )
+            ],
+            xaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
+            yaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
+        )
+
+        return fig
+
+    def create_metrics_dashboard(self, metrics: Dict) -> go.Figure:
+        """创建图谱指标仪表板"""
+        fig = make_subplots(
+            rows=2,
+            cols=2,
+            subplot_titles=("节点统计", "边统计", "密度分析", "连通性"),
+            specs=[
+                [{"type": "bar"}, {"type": "pie"}],
+                [{"type": "indicator"}, {"type": "scatter"}],
+            ],
+        )
+
+        # 节点类型分布
+        fig.add_trace(
+            go.Bar(
+                x=list(metrics["node_types"].keys()),
+                y=list(metrics["node_types"].values()),
+            ),
+            row=1,
+            col=1,
+        )
+
+        # 关系类型分布
+        fig.add_trace(
+            go.Pie(
+                labels=list(metrics["relation_types"].keys()),
+                values=list(metrics["relation_types"].values()),
+            ),
+            row=1,
+            col=2,
+        )
+
+        return fig
+
+
 class KnowledgeGraphVisualizer:
     """
     知识图谱可视化引擎
@@ -713,11 +801,13 @@ class KnowledgeGraphVisualizer:
 
     def _compute_centrality_metrics(self, graph: nx.Graph) -> Dict[str, Dict]:
         """计算中心性指标"""
+        simple_graph = nx.Graph(graph)
+
         return {
-            "degree": nx.degree_centrality(graph),
-            "betweenness": nx.betweenness_centrality(graph),
-            "closeness": nx.closeness_centrality(graph),
-            "eigenvector": nx.eigenvector_centrality(graph, max_iter=1000),
+            "degree": dict(nx.degree_centrality(simple_graph)),
+            "betweenness": dict(nx.betweenness_centrality(simple_graph)),
+            "closeness": dict(nx.closeness_centrality(simple_graph)),
+            "eigenvector": dict(nx.eigenvector_centrality(simple_graph, max_iter=1000)),
         }
 
     def _detect_communities(self, graph: nx.Graph) -> Dict:

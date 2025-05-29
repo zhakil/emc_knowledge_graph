@@ -236,6 +236,18 @@
       },
       "args": ["--source", "data/", "--format", "json", "--validate"],
       "justMyCode": false
+    },
+    {
+      "name": "EMC Knowledge Graph",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/src/knowledge_graph.py",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src",
+        "PYTHONIOENCODING": "utf-8"
+      },
+      "console": "integratedTerminal"
     }
+    
   ]
 }

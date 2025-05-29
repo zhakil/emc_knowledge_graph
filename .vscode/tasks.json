@@ -5,7 +5,11 @@
       "label": "安装项目依赖",
       "type": "shell",
       "command": "pip",
-      "args": ["install", "-r", "requirements.txt"],
+      "args": [
+        "install",
+        "-r",
+        "requirements.txt"
+      ],
       "group": "build",
       "presentation": {
         "echo": true,
@@ -19,14 +23,19 @@
       "detail": "安装项目所需的所有Python依赖包"
     },
     {
-      "label": "升级项目依赖", 
+      "label": "升级项目依赖",
       "type": "shell",
       "command": "pip",
-      "args": ["install", "-r", "requirements.txt", "--upgrade"],
+      "args": [
+        "install",
+        "-r",
+        "requirements.txt",
+        "--upgrade"
+      ],
       "group": "build",
       "presentation": {
         "echo": true,
-        "reveal": "always", 
+        "reveal": "always",
         "focus": false,
         "panel": "shared"
       },
@@ -37,7 +46,14 @@
       "label": "代码格式化",
       "type": "shell",
       "command": "black",
-      "args": ["src/", "tests/", "--line-length", "88", "--target-version", "py38"],
+      "args": [
+        "src/",
+        "tests/",
+        "--line-length",
+        "88",
+        "--target-version",
+        "py38"
+      ],
       "group": "build",
       "presentation": {
         "echo": true,
@@ -50,9 +66,16 @@
     },
     {
       "label": "导入排序",
-      "type": "shell", 
+      "type": "shell",
       "command": "isort",
-      "args": ["src/", "tests/", "--profile", "black", "--line-length", "88"],
+      "args": [
+        "src/",
+        "tests/",
+        "--profile",
+        "black",
+        "--line-length",
+        "88"
+      ],
       "group": "build",
       "presentation": {
         "echo": true,
@@ -68,9 +91,9 @@
       "type": "shell",
       "command": "flake8",
       "args": [
-        "src/", 
-        "tests/", 
-        "--max-line-length=88", 
+        "src/",
+        "tests/",
+        "--max-line-length=88",
         "--extend-ignore=E203,W503,E501",
         "--statistics"
       ],
@@ -83,7 +106,10 @@
       },
       "problemMatcher": {
         "owner": "python",
-        "fileLocation": ["relative", "${workspaceFolder}"],
+        "fileLocation": [
+          "relative",
+          "${workspaceFolder}"
+        ],
         "pattern": {
           "regexp": "^(.*):(\\d+):(\\d+):\\s+(\\w+\\d+)\\s+(.*)$",
           "file": 1,
@@ -100,8 +126,8 @@
       "type": "shell",
       "command": "mypy",
       "args": [
-        "src/", 
-        "--ignore-missing-imports", 
+        "src/",
+        "--ignore-missing-imports",
         "--follow-imports=silent",
         "--show-column-numbers",
         "--show-error-codes"
@@ -115,7 +141,10 @@
       },
       "problemMatcher": {
         "owner": "python",
-        "fileLocation": ["relative", "${workspaceFolder}"],
+        "fileLocation": [
+          "relative",
+          "${workspaceFolder}"
+        ],
         "pattern": {
           "regexp": "^(.*):(\\d+):(\\d+):\\s+(error|warning|note):\\s+(.*)$",
           "file": 1,
@@ -132,10 +161,10 @@
       "type": "shell",
       "command": "pytest",
       "args": [
-        "tests/", 
-        "-v", 
-        "--cov=src", 
-        "--cov-report=html", 
+        "tests/",
+        "-v",
+        "--cov=src",
+        "--cov-report=html",
         "--cov-report=term",
         "--tb=short"
       ],
@@ -148,7 +177,10 @@
       },
       "problemMatcher": {
         "owner": "python",
-        "fileLocation": ["relative", "${workspaceFolder}"],
+        "fileLocation": [
+          "relative",
+          "${workspaceFolder}"
+        ],
         "pattern": {
           "regexp": "^(.*):(\\d+).*FAILED.*$",
           "file": 1,
@@ -161,7 +193,12 @@
       "label": "快速测试",
       "type": "shell",
       "command": "pytest",
-      "args": ["tests/", "-v", "--tb=line", "-x"],
+      "args": [
+        "tests/",
+        "-v",
+        "--tb=line",
+        "-x"
+      ],
       "group": "test",
       "presentation": {
         "echo": true,
@@ -176,7 +213,10 @@
       "label": "构建完整项目",
       "type": "shell",
       "command": "python",
-      "args": ["build.py", "--all"],
+      "args": [
+        "build.py",
+        "--all"
+      ],
       "group": "build",
       "presentation": {
         "echo": true,
@@ -191,7 +231,9 @@
       "label": "生成知识图谱",
       "type": "shell",
       "command": "python",
-      "args": ["src/knowledge_graph.py"],
+      "args": [
+        "src/knowledge_graph.py"
+      ],
       "group": "build",
       "presentation": {
         "echo": true,
@@ -206,7 +248,12 @@
       "label": "启动Jupyter Lab",
       "type": "shell",
       "command": "jupyter",
-      "args": ["lab", "--no-browser", "--port=8888", "--ip=127.0.0.1"],
+      "args": [
+        "lab",
+        "--no-browser",
+        "--port=8888",
+        "--ip=127.0.0.1"
+      ],
       "group": "build",
       "presentation": {
         "echo": true,
@@ -222,8 +269,13 @@
       "label": "启动Jupyter Notebook",
       "type": "shell",
       "command": "jupyter",
-      "args": ["notebook", "--no-browser", "--port=8889", "--ip=127.0.0.1"],
-      "group": "build", 
+      "args": [
+        "notebook",
+        "--no-browser",
+        "--port=8889",
+        "--ip=127.0.0.1"
+      ],
+      "group": "build",
       "presentation": {
         "echo": true,
         "reveal": "always",
@@ -238,7 +290,10 @@
       "label": "清理构建文件",
       "type": "shell",
       "command": "python",
-      "args": ["build.py", "--clean"],
+      "args": [
+        "build.py",
+        "--clean"
+      ],
       "group": "build",
       "presentation": {
         "echo": true,
@@ -253,7 +308,11 @@
       "label": "创建虚拟环境",
       "type": "shell",
       "command": "python",
-      "args": ["-m", "venv", "venv"],
+      "args": [
+        "-m",
+        "venv",
+        "venv"
+      ],
       "group": "build",
       "presentation": {
         "echo": true,
@@ -291,7 +350,11 @@
       "label": "生成需求文件",
       "type": "shell",
       "command": "pip",
-      "args": ["freeze", ">", "requirements-freeze.txt"],
+      "args": [
+        "freeze",
+        ">",
+        "requirements-freeze.txt"
+      ],
       "group": "build",
       "presentation": {
         "echo": true,
@@ -306,7 +369,11 @@
       "label": "打包项目",
       "type": "shell",
       "command": "python",
-      "args": ["setup.py", "sdist", "bdist_wheel"],
+      "args": [
+        "setup.py",
+        "sdist",
+        "bdist_wheel"
+      ],
       "group": "build",
       "presentation": {
         "echo": true,
@@ -321,7 +388,11 @@
       "label": "安装项目到开发环境",
       "type": "shell",
       "command": "pip",
-      "args": ["install", "-e", "."],
+      "args": [
+        "install",
+        "-e",
+        "."
+      ],
       "group": "build",
       "presentation": {
         "echo": true,
@@ -333,10 +404,25 @@
       "detail": "以开发模式安装项目包"
     },
     {
+      "label": "Knowledge Graph Build",
+      "type": "shell",
+      "command": "python",
+      "args": [
+        "src/knowledge_graph.py"
+      ],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always"
+      }
+    },
+    {
       "label": "运行演示程序",
       "type": "shell",
       "command": "python",
-      "args": ["demo.py"],
+      "args": [
+        "demo.py"
+      ],
       "group": "build",
       "presentation": {
         "echo": true,
@@ -352,7 +438,7 @@
       "dependsOrder": "sequence",
       "dependsOn": [
         "代码格式化",
-        "导入排序", 
+        "导入排序",
         "代码质量检查",
         "类型检查"
       ],

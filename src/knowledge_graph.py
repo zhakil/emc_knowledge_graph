@@ -22,10 +22,12 @@ Author: EMC Standards Research Team
 Version: 1.0.0
 """
 
+import codecs
 import itertools
 import json
 import logging
 import os
+import sys
 from collections import Counter, defaultdict
 from dataclasses import asdict
 from datetime import datetime
@@ -35,6 +37,9 @@ from typing import Any, Dict, List, Optional, Set, Tuple, Union
 import networkx as nx
 import numpy as np
 import pandas as pd
+
+sys.stdout = codecs.getwriter("utf-8")(sys.stdout.buffer, "strict")
+os.environ["PYTHONIOENCODING"] = "utf-8"
 
 try:
     from data_models import (
@@ -60,6 +65,7 @@ except ImportError:
         ValidationResult,
         validate_graph_data,
     )
+
 from utils import ensure_directory, load_config, setup_logging
 from visualizer import KnowledgeGraphVisualizer
 
@@ -1160,14 +1166,14 @@ def main():
     # 配置日志
     setup_logging()
 
-    print("🚀 EMC知识图谱系统启动")
+    print("EMC知识图谱系统启动")
     print("=" * 60)
 
     # 创建知识图谱实例
     kg = EMCKnowledgeGraph()
 
     # 生成分析报告
-    print("\n📊 生成知识图谱分析报告...")
+    print("生成知识图谱分析报告...")
     report = kg.generate_knowledge_report()
 
     print(f"图谱基本信息:")
@@ -1177,14 +1183,14 @@ def main():
     print(f"  质量评分: {report['quality_metrics']['overall_quality']:.3f}")
 
     # 语义搜索演示
-    print(f"\n🔍 语义搜索演示:")
+    print(f"语义搜索演示:")
     search_results = kg.semantic_search("电动车 EMC", max_results=3)
     for node_id, score in search_results:
         node = kg.nodes_data[node_id]
         print(f"  {node.name} (相关度: {score:.2f})")
 
     # 路径发现演示
-    print(f"\n🔗 语义路径发现演示:")
+    print(f"语义路径发现演示:")
     paths = kg.find_semantic_paths("CISPR", "ElectricVehicles", max_depth=3)
     if paths:
         path = paths[0]
@@ -1192,7 +1198,7 @@ def main():
         print(f"  路径: {' → '.join(path_names)}")
 
     # 创建可视化
-    print(f"\n🎨 生成可视化图谱...")
+    print(f"生成可视化图谱...")
     ensure_directory("output/graphs")
 
     # 静态图谱
@@ -1213,13 +1219,13 @@ def main():
     print("  ✓ 分析仪表板已生成")
 
     # 多格式导出
-    print(f"\n💾 执行多格式导出...")
+    print(f" 执行多格式导出...")
     export_paths = kg.export_to_formats()
     for fmt, path in export_paths.items():
         print(f"  ✓ {fmt.upper()}: {path}")
 
-    print(f"\n🎉 EMC知识图谱系统演示完成！")
-    print(f"📁 输出文件位置: output/ 目录")
+    print(f" EMC知识图谱系统演示完成！")
+    print(f" 输出文件位置: output/ 目录")
 
 
 if __name__ == "__main__":
