@@ -1,0 +1,20 @@
+{
+  "name": "emc_knowledge_graph",
+  "version": "1.0.0",
+  "description": "EMC知识图谱系统是一个专为电磁兼容性(EMC)领域设计的智能知识管理平台。系统集成了DeepSeek AI大语言模型和Neo4j图数据库，提供智能文档分析、实体提取、知识图谱构建和可视化等功能。",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zhakil/emc_knowledge_graph.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/zhakil/emc_knowledge_graph/issues"
+  },
+  "homepage": "https://github.com/zhakil/emc_knowledge_graph#readme"
+}

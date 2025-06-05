@@ -1,0 +1,98 @@
+// GraphEditor.tsx - 核心图编辑器组件
+import React, { useState, useCallback } from 'react';
+import { ForceGraph2D } from 'react-force-graph';
+import { GraphData, Node, Link } from '../../types/graph';
+
+interface GraphEditorProps {
+  initialData: GraphData;
+  onSave: (data: GraphData) => Promise<void>;
+  onNodeClick: (node: Node) => void;
+}
+
+export const GraphEditor: React.FC<GraphEditorProps> = ({ 
+  initialData, 
+  onSave,
+  onNodeClick 
+}) => {
+  const [graphData, setGraphData] = useState<GraphData>(initialData);
+  const [selectedNode, setSelectedNode] = useState<Node | null>(null);
+  const [editMode, setEditMode] = useState<'view' | 'edit' | 'link'>('view');
+
+  // 节点拖拽更新
+  const handleNodeDrag = useCallback((node: Node, x: number, y: number) => {
+    const updatedNodes = graphData.nodes.map(n => 
+      n.id === node.id ? { ...n, x, y } : n
+    );
+    setGraphData({ ...graphData, nodes: updatedNodes });
+  }, [graphData]);
+
+  // 创建新节点
+  const handleCreateNode = useCallback((x: number, y: number) => {
+    const newNode: Node = {
+      id: `node_${Date.now()}`,
+      label: 'New Node',
+      type: 'EMCStandard',
+      x,
+      y,
+      properties: {}
+    };
+    setGraphData({
+      ...graphData,
+      nodes: [...graphData.nodes, newNode]
+    });
+  }, [graphData]);
+
+  // 创建关系
+  const handleCreateLink = useCallback((source: string, target: string) => {
+    const newLink: Link = {
+      source,
+      target,
+      type: 'RELATES_TO',
+      properties: {}
+    };
+    setGraphData({
+      ...graphData,
+      links: [...graphData.links, newLink]
+    });
+  }, [graphData]);
+
+  return (
+    <div className="graph-editor-container">
+      <div className="toolbar">
+        <button onClick={() => setEditMode('view')}>查看模式</button>
+        <button onClick={() => setEditMode('edit')}>编辑模式</button>
+        <button onClick={() => setEditMode('link')}>连接模式</button>
+        <button onClick={() => onSave(graphData)}>保存</button>
+      </div>
+      
+      <ForceGraph2D
+        graphData={graphData}
+        nodeLabel="label"
+        onNodeClick={node => {
+          setSelectedNode(node as Node);
+          onNodeClick(node as Node);
+        }}
+        onNodeDragEnd={handleNodeDrag}
+        onBackgroundClick={(event) => {
+          if (editMode === 'edit') {
+            const { x, y } = event;
+            handleCreateNode(x, y);
+          }
+        }}
+        enableNodeDrag={editMode === 'edit'}
+      />
+      
+      {selectedNode && (
+        <NodePropertyEditor
+          node={selectedNode}
+          onUpdate={(updatedNode) => {
+            const updatedNodes = graphData.nodes.map(n =>
+              n.id === updatedNode.id ? updatedNode : n
+            );
+            setGraphData({ ...graphData, nodes: updatedNodes });
+          }}
+        />
+      )}
+    </div>
+  );
+};

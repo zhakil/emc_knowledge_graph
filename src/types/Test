@@ -1,0 +1,13 @@
+export interface TestConfig {
+  id?: string;
+  testName: string;
+  standard: string;
+  frequencyRange: string;
+  equipmentUsed: string[];
+  notes: string;
+  limits: {
+    radiated: number;
+    conducted: number;
+    harmonic: number;
+  };
+}

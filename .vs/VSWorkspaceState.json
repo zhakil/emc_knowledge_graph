@@ -1,0 +1,16 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\.github\\workflows",
+    "\\alembic\\versions",
+    "\\frontend\\components\\Display",
+    "\\frontend\\components\\Display\\nodes",
+    "\\frontend\\components\\Editor",
+    "\\monitoring\\grafana",
+    "\\monitoring\\grafana\\dashboards",
+    "\\services\\file_processing",
+    "\\services\\knowledge_graph"
+  ],
+  "SelectedNode": "\\.github",
+  "PreviewInSolutionExplorer": false
+}

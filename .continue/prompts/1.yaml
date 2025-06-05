@@ -1,0 +1,15 @@
+repo_url = "https://github.com/zhakil/emc_knowledge_graph"
+prompt = f"访问知识图谱项目：{repo_url}，请基于以下要求进行代码修改：\n\n" \
+         "1. 修改目标：在知识图谱构建模块中增加实体消歧功能\n\n" \
+         "2. 关联文件：\n" \
+         "   • kg_construction/entity_linking.py\n" \
+         "   • data_processing/clean_utils.py\n\n" \
+         "3. 修改要求：\n" \
+         "   - 核心需求：使用基于词向量的相似度匹配消除同名实体歧义\n" \
+         "   - 输入/输出：输入为原始实体列表，输出为带唯一ID的消歧后实体\n" \
+         "   - 性能指标：处理10,000实体耗时<30秒\n" \
+         "   - 依赖调整：新增gensim库\n\n" \
+         "4. 边界条件：\n" \
+         "   • 保持现有函数接口不变\n" \
+         "   • 兼容spaCy v3.2+\n\n" \
+        

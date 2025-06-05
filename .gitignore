@@ -1,0 +1,380 @@
+# ================================
+# EMC知识图谱系统 - .gitignore配置
+# 实用高效，覆盖全栈开发需求
+# ================================
+
+# ===== 敏感信息和配置 =====
+# 最重要：绝不能提交的安全文件
+.env
+.env.*
+!.env.example
+config/secrets.json
+**/*secret*
+**/*password*
+**/*key*.pem
+**/*key*.key
+*.p12
+*.pfx
+
+# JWT和API密钥
+jwt_secret.txt
+api_keys.json
+deepseek_config.json
+
+# ===== Python后端 =====
+# Python缓存和编译文件
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# 虚拟环境 - 实际开发必需
+venv/
+env/
+ENV/
+.venv/
+.conda/
+
+# Python包管理
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+*.manifest
+*.spec
+
+# 测试覆盖率
+htmlcov/
+.tox/
+.coverage
+.coverage.*
+.cache
+.pytest_cache/
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# IPython
+profile_default/
+ipython_config.py
+
+# ===== Node.js前端 =====
+# 依赖包 - 体积大且可重新安装
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# 运行时文件
+.npm
+.eslintcache
+.node_repl_history
+
+# 构建输出
+build/
+dist/
+.next/
+out/
+
+# TypeScript编译缓存
+*.tsbuildinfo
+
+# 可选的npm缓存目录
+.npm
+
+# ===== 数据库和存储 =====
+# 本地数据库文件 - 避免数据污染
+data/
+*.db
+*.sqlite
+*.sqlite3
+*.db-journal
+
+# Neo4j数据
+neo4j_data/
+graph.db/
+data/databases/
+data/dbms/
+
+# PostgreSQL数据
+postgres_data/
+pg_data/
+
+# Redis数据
+redis_data/
+dump.rdb
+appendonly.aof
+
+# ===== Docker相关 =====
+# Docker构建缓存
+.dockerignore
+
+# ===== 上传和临时文件 =====
+# 用户上传的文件 - 避免大文件
+uploads/
+temp/
+tmp/
+*.tmp
+temp_uploads/
+
+# 文件处理临时目录
+file_processing_temp/
+extract_temp/
+
+# ===== 日志文件 =====
+# 各种日志 - 避免仓库膨胀
+logs/
+*.log
+log/
+*.log.*
+access.log
+error.log
+debug.log
+app.log
+
+# 系统日志
+/var/log/
+
+# ===== IDE和编辑器 =====
+# VS Code
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# PyCharm
+.idea/
+*.iws
+*.iml
+*.ipr
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim
+*.swp
+*.swo
+*~
+
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\#*
+
+# ===== 操作系统文件 =====
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon?
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+*.stackdump
+[Dd]esktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
+
+# ===== 监控和分析 =====
+# 性能分析文件
+*.prof
+*.trace
+profile.out
+
+# 监控数据
+monitoring_data/
+metrics/
+prometheus_data/
+grafana_data/
+
+# ===== 测试相关 =====
+# 测试输出
+test-results/
+coverage/
+.nyc_output
+junit.xml
+
+# 端到端测试
+e2e/screenshots/
+e2e/videos/
+
+# ===== 文档生成 =====
+# Sphinx文档
+docs/_build/
+docs/.doctrees/
+
+# MkDocs
+site/
+
+# ===== 部署相关 =====
+# Kubernetes配置（如果包含敏感信息）
+k8s-secrets.yaml
+*.secret.yaml
+
+# Terraform状态
+*.tfstate
+*.tfstate.*
+.terraform/
+
+# ===== AI和机器学习 =====
+# 模型文件 - 通常很大
+*.model
+*.pkl
+*.h5
+*.pb
+models/
+checkpoints/
+
+# 训练数据
+training_data/
+datasets/
+
+# ===== 备份文件 =====
+# 各种备份
+*.bak
+*.backup
+*.old
+*.orig
+*.save
+*~
+
+# 数据库备份
+*.sql.gz
+*.dump
+backup/
+backups/
+
+# ===== 压缩包 =====
+# 避免意外提交大文件
+*.zip
+*.tar.gz
+*.rar
+*.7z
+*.tar
+*.gz
+*.bz2
+*.xz
+
+# ===== 证书和密钥 =====
+# SSL证书
+*.crt
+*.pem
+*.p12
+*.pfx
+ssl/
+certs/
+
+# SSH密钥
+id_rsa
+id_rsa.pub
+*.pub
+known_hosts
+
+# ===== 缓存目录 =====
+# 各种缓存
+.cache/
+cache/
+.parcel-cache/
+.sass-cache/
+
+# ===== 特定于EMC项目 =====
+# EMC标准文档（通常有版权）
+standards/
+emc_docs/
+test_reports/
+
+# 实体提取结果缓存
+entity_cache/
+extraction_results/
+
+# 图数据库导出
+graph_exports/
+*.graphml
+*.gexf
+
+# AI模型缓存
+deepseek_cache/
+ai_responses/
+
+# ===== 开发工具 =====
+# 代码分析工具
+.sonar/
+.scannerwork/
+
+# 包管理器锁文件（根据团队策略）
+# package-lock.json  # 如果团队不统一管理
+# yarn.lock         # 如果团队不统一管理
+
+# ===== 自定义忽略 =====
+# 本地开发配置
+.local
+local/
+dev_config/
+
+# 个人笔记
+notes/
+TODO.md
+NOTES.md
+
+# 临时实验代码
+experiments/
+playground/
+scratch/
+
+# ================================
+# 注意事项：
+# 1. 敏感信息务必不要提交
+# 2. 大文件建议使用Git LFS
+# 3. 团队共享配置放在相应示例文件中
+# 4. 定期检查并更新此文件
+# ================================
