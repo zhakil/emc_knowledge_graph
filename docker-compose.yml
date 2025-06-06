@@ -1,59 +1,76 @@
+version: '3.8'
+
 services:
-  frontend:
-    build: ./frontend
+  postgres:
+    image: postgres:15-alpine
+    container_name: emc_postgres
     ports:
-      - "3000:3000"
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
     environment:
-      - REACT_APP_API_URL=http://localhost:8000
-      - REACT_APP_WS_URL=ws://localhost:8000
-    depends_on:
-      - gateway
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: Zqz112233
+      POSTGRES_DB: emc_knowledge
+    restart: unless-stopped
+
+  neo4j:
+    image: neo4j:5.15-community
+    container_name: emc_neo4j
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    volumes:
+      - neo4j_data:/data
+    environment:
+      NEO4J_AUTH: neo4j/Zqz112233
+      NEO4J_dbms_memory_pagecache_size: 512M
+      NEO4J_dbms_memory_heap_max__size: 1G
+      NEO4J_ACCEPT_LICENSE_AGREEMENT: "yes"
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: emc_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --requirepass Zqz112233
+    restart: unless-stopped
 
   gateway:
     build:
       context: .
       dockerfile: gateway/Dockerfile
+    container_name: emc_gateway
     ports:
       - "8000:8000"
-    env_file:
-      - .env
-    depends_on:
-      - neo4j
-      - postgres
-      - redis
+    environment:
+      EMC_POSTGRES_PASSWORD: Zqz112233
+      EMC_NEO4J_PASSWORD: Zqz112233
+      EMC_REDIS_PASSWORD: Zqz112233
+      EMC_DEEPSEEK_API_KEY: sk-c23ccb18185d488ab996189cd62b7216
     volumes:
       - ./uploads:/app/uploads
+    depends_on:
+      - postgres
+      - neo4j
+      - redis
+    restart: unless-stopped
 
-  neo4j:
-    image: neo4j:5.15-community
+  frontend:
+    build: ./frontend
+    container_name: emc_frontend
     ports:
-      - "7474:7474"
-      - "7687:7687"
+      - "3000:3000"
     environment:
-      - NEO4J_AUTH=neo4j/${EMC_NEO4J_PASSWORD}
-      - NEO4J_PLUGINS=["apoc"]
-    volumes:
-      - neo4j_data:/data
-
-  postgres:
-    image: postgres:15-alpine
-    ports:
-      - "5432:5432"
-    environment:
-      - POSTGRES_DB=${EMC_POSTGRES_DB}
-      - POSTGRES_USER=${EMC_POSTGRES_USER}
-      - POSTGRES_PASSWORD=${EMC_POSTGRES_PASSWORD}
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-
-  redis:
-    image: redis:7-alpine
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis_data:/data
+      REACT_APP_API_URL: http://localhost:8000
+    depends_on:
+      - gateway
+    restart: unless-stopped
 
 volumes:
-  neo4j_data:
   postgres_data:
+  neo4j_data:
   redis_data:
