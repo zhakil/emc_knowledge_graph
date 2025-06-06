@@ -76,10 +76,10 @@ pytest tests/unit/test_kg_service.py -v
 pytest tests/api/test_api.py
 
 # 示例输出
-test_create_standard (tests.unit.test_kg_service) ... OK
-test_link_standards (tests.unit.test_kg_service) ... OK
-test_health_check (tests.api.test_api) ... OK
-test_standard_search (tests.api.test_api) ... OK
+# test_create_standard (tests.unit.test_kg_service) ... OK
+# test_link_standards (tests.unit.test_kg_service) ... OK
+# test_health_check (tests.api.test_api) ... OK
+# test_standard_search (tests.api.test_api) ... OK
 
 # 启动前端
 cd frontend
