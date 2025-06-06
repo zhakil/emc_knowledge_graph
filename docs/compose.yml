@@ -10,6 +10,7 @@ services:
       - REACT_APP_WS_URL=ws://localhost:8000
     depends_on:
       - gateway
+    restart: unless-stopped
 
   gateway:
     build:
@@ -25,6 +26,7 @@ services:
       - redis
     volumes:
       - ./uploads:/app/uploads
+    restart: unless-stopped
 
   neo4j:
     image: neo4j:5.15-community
@@ -35,11 +37,13 @@ services:
       - neo4j_data:/data
     environment:
       - NEO4J_AUTH=neo4j/${EMC_NEO4J_PASSWORD}
-      - NEO4J_dbms_memory_pagecache_size=1G
-      - NEO4J_dbms_memory_heap_initial__size=1G
+      - NEO4J_dbms_memory_pagecache_size=512M
+      - NEO4J_dbms_memory_heap_initial__size=512M
       - NEO4J_dbms_memory_heap_max__size=1G
+      - NEO4J_ACCEPT_LICENSE_AGREEMENT=yes
     env_file:
       - .env
+    restart: unless-stopped
 
   postgres:
     image: postgres:15-alpine
@@ -53,6 +57,7 @@ services:
       - POSTGRES_DB=${EMC_POSTGRES_DB}
     env_file:
       - .env
+    restart: unless-stopped
 
   redis:
     image: redis:7-alpine
@@ -63,8 +68,13 @@ services:
     command: redis-server --requirepass ${EMC_REDIS_PASSWORD}
     env_file:
       - .env
+    restart: unless-stopped
 
 volumes:
   neo4j_data:
   postgres_data:
   redis_data:
+
+networks:
+  default:
+    name: emc_network
