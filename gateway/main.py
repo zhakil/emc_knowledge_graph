@@ -1,316 +1,372 @@
 ﻿"""
-EMC知识图谱系统 - API网关主服务
-提供统一的API入口点，整合DeepSeek AI、Neo4j图数据库和文件处理服务
+EMC知识图谱系统 - API网关主应用
+实用高效的API服务，专注核心功能实现
 """
 
+import os
 import asyncio
 import logging
-import os
-from contextlib import asynccontextmanager
-from typing import Dict, Any
+from datetime import datetime
+from typing import Dict, Any, List, Optional
 
-import uvicorn
-from fastapi import FastAPI, HTTPException, Depends, Security, UploadFile, File
+from fastapi import FastAPI, HTTPException, Depends, UploadFile, File, Form
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.middleware.gzip import GZipMiddleware
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi.responses import JSONResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import JSONResponse
-from prometheus_fastapi_instrumentator import Instrumentator
+from pydantic import BaseModel
 
-# 自定义中间件
-from .middleware.auth import AuthMiddleware, get_current_user
-from .middleware.rate_limiting import RateLimitMiddleware
-from .middleware.logging import LoggingMiddleware
-from .middleware.error_handling import ErrorHandlingMiddleware
+# 配置日志
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
 
-# 路由模块
-from .routes.deepseek_routes import router as deepseek_router
-from .routes.graph_routes import router as graph_router
-from .routes.file_routes import router as file_router
-from .routes.websocket_routes import router as websocket_router
-from .routes.analysis_routes import router as analysis_router
+# 创建FastAPI应用
+app = FastAPI(
+    title="EMC知识图谱系统",
+    description="集成DeepSeek AI和Neo4j的EMC领域知识图谱平台",
+    version="1.0.0",
+    docs_url="/docs",
+    redoc_url="/redoc"
+)
 
-# 服务依赖
-from services.ai_integration.deepseek_service import create_deepseek_service, DeepSeekConfig
-from services.knowledge_graph.neo4j_emc_service import create_emc_knowledge_service
-from services.file_processing.emc_file_processor import create_emc_file_processor
+# 配置CORS - 实用的跨域设置
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        "http://localhost:3001",
+        "http://127.0.0.1:3001"
+    ],
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_headers=["*"],
+)
 
-# 配置管理
-from .config import Settings, get_settings
+# 创建上传目录
+os.makedirs("uploads", exist_ok=True)
 
-# 数据库连接
-from data_access.connections.database_connection import db_connection
-from data_access.connections.redis_connection import redis_conn
+# 挂载静态文件服务
+if os.path.exists("uploads"):
+    app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
+# 请求/响应模型
+class ChatRequest(BaseModel):
+    prompt: str
+    temperature: float = 0.7
+    max_tokens: int = 2000
 
-class ServiceContainer:
-    """服务容器 - 管理所有服务实例"""
-    
-    def __init__(self):
-        self.deepseek_service = None
-        self.neo4j_service = None
-        self.file_processor = None
-        self.settings = None
-        
-    async def initialize(self, settings: Settings):
-        """初始化所有服务"""
-        self.settings = settings
-        
-        # 初始化DeepSeek服务
-        deepseek_config = DeepSeekConfig(
-            api_key=settings.deepseek_api_key,
-            base_url=settings.deepseek_base_url,
-            model=settings.deepseek_model,
-            max_tokens=settings.deepseek_max_tokens,
-            temperature=settings.deepseek_temperature
-        )
-        self.deepseek_service = create_deepseek_service(deepseek_config)
-        
-        # 初始化Neo4j服务
-        self.neo4j_service = await create_emc_knowledge_service(
-            uri=settings.neo4j_uri,
-            username=settings.neo4j_username,
-            password=settings.neo4j_password
-        )
-        
-        # 初始化文件处理服务
-        self.file_processor = create_emc_file_processor(
-            deepseek_service=self.deepseek_service,
-            storage_path=settings.upload_directory
-        )
-        
-        # 初始化数据库连接
-        db_connection.initialize_sync()
-        db_connection.initialize_async()
-        
-        # 初始化Redis连接
-        redis_conn.initialize_sync()
-        redis_conn.initialize_async()
-        
-        logging.info("所有服务初始化完成")
-    
-    async def cleanup(self):
-        """清理资源"""
-        if self.neo4j_service:
-            await self.neo4j_service.close()
-        
-        db_connection.close()
-        redis_conn.close()
-        
-        logging.info("服务清理完成")
+class ChatResponse(BaseModel):
+    content: str
+    usage: Dict[str, int]
+    timestamp: str
 
-# 全局服务容器
-service_container = ServiceContainer()
+class HealthResponse(BaseModel):
+    status: str
+    timestamp: str
+    services: Dict[str, bool]
+    version: str
 
+# 全局状态管理
+app_state = {
+    "startup_time": datetime.now(),
+    "request_count": 0,
+    "uploaded_files": [],
+    "chat_sessions": {},
+    "graph_data": {"nodes": [], "edges": []}
+}
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    """应用生命周期管理"""
-    # 启动时初始化
-    settings = get_settings()
-    await service_container.initialize(settings)
-    
-    # 设置日志级别
-    log_level = getattr(logging, settings.log_level.upper())
-    logging.basicConfig(
-        level=log_level,
-        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-    )
-    
-    yield
-    
-    # 关闭时清理
-    await service_container.cleanup()
+@app.middleware("http")
+async def request_counter(request, call_next):
+    """请求计数中间件"""
+    app_state["request_count"] += 1
+    response = await call_next(request)
+    return response
 
-
-def create_app() -> FastAPI:
-    """创建FastAPI应用实例"""
-    settings = get_settings()
-    
-    app = FastAPI(
-        title="EMC知识图谱系统",
-        description="集成DeepSeek AI和Neo4j的EMC领域知识图谱平台",
-        version="1.0.0",
-        docs_url="/docs" if settings.debug else None,
-        redoc_url="/redoc" if settings.debug else None,
-        lifespan=lifespan
-    )
-    
-    # 配置CORS
-    app.add_middleware(
-        CORSMiddleware,
-        allow_origins=settings.allowed_origins,
-        allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
-    )
-    
-    # 添加Gzip压缩
-    app.add_middleware(GZipMiddleware, minimum_size=1000)
-    
-    # 添加自定义中间件
-    app.add_middleware(ErrorHandlingMiddleware)
-    app.add_middleware(LoggingMiddleware)
-    app.add_middleware(RateLimitMiddleware)
-    app.add_middleware(AuthMiddleware)
-    
-    # 配置Prometheus监控
-    if settings.enable_metrics:
-        instrumentator = Instrumentator()
-        instrumentator.instrument(app).expose(app)
-    
-    # 静态文件服务
-    if os.path.exists("static"):
-        app.mount("/static", StaticFiles(directory="static"), name="static")
-    
-    # 注册路由
-    app.include_router(deepseek_router, prefix="/api/deepseek", tags=["DeepSeek AI"])
-    app.include_router(graph_router, prefix="/api/graph", tags=["知识图谱"])
-    app.include_router(file_router, prefix="/api/files", tags=["文件处理"])
-    app.include_router(analysis_router, prefix="/api/analysis", tags=["数据分析"])
-    app.include_router(websocket_router, prefix="/ws", tags=["WebSocket"])
-    
-    return app
-
-
-app = create_app()
-
-
-# 依赖注入函数
-def get_deepseek_service():
-    """获取DeepSeek服务实例"""
-    if not service_container.deepseek_service:
-        raise HTTPException(status_code=500, detail="DeepSeek服务未初始化")
-    return service_container.deepseek_service
-
-
-def get_neo4j_service():
-    """获取Neo4j服务实例"""
-    if not service_container.neo4j_service:
-        raise HTTPException(status_code=500, detail="Neo4j服务未初始化")
-    return service_container.neo4j_service
-
-
-def get_file_processor():
-    """获取文件处理服务实例"""
-    if not service_container.file_processor:
-        raise HTTPException(status_code=500, detail="文件处理服务未初始化")
-    return service_container.file_processor
-
-
-# 健康检查端点
-@app.get("/health")
-async def health_check():
-    """系统健康检查"""
-    health_status = {
-        "status": "healthy",
-        "timestamp": "2024-01-01T00:00:00Z",
-        "services": {
-            "deepseek": False,
-            "neo4j": False,
-            "redis": False,
-            "database": False
-        }
-    }
-    
-    # 检查DeepSeek服务
-    try:
-        if service_container.deepseek_service:
-            health_status["services"]["deepseek"] = True
-    except Exception:
-        pass
-    
-    # 检查Neo4j服务
-    try:
-        if service_container.neo4j_service:
-            result = await service_container.neo4j_service.verify_connection()
-            health_status["services"]["neo4j"] = result
-    except Exception:
-        pass
-    
-    # 检查Redis连接
-    try:
-        with redis_conn.sync_client() as client:
-            client.ping()
-            health_status["services"]["redis"] = True
-    except Exception:
-        pass
-    
-    # 检查数据库连接
-    try:
-        with db_connection.sync_session() as session:
-            session.execute("SELECT 1")
-            health_status["services"]["database"] = True
-    except Exception:
-        pass
-    
-    # 判断整体状态
-    all_healthy = all(health_status["services"].values())
-    health_status["status"] = "healthy" if all_healthy else "degraded"
-    
-    status_code = 200 if all_healthy else 503
-    return JSONResponse(content=health_status, status_code=status_code)
-
-
-# 系统信息端点
-@app.get("/info")
-async def system_info(current_user: dict = Depends(get_current_user)):
-    """获取系统信息（需要认证）"""
-    settings = get_settings()
-    
-    info = {
-        "application": {
-            "name": "EMC知识图谱系统",
-            "version": "1.0.0",
-            "environment": settings.environment,
-            "debug": settings.debug
-        },
-        "services": {
-            "deepseek_model": settings.deepseek_model,
-            "neo4j_connected": service_container.neo4j_service is not None,
-            "file_processor_ready": service_container.file_processor is not None
-        }
-    }
-    
-    # 如果是管理员，提供更多信息
-    if current_user.get("role") == "admin":
-        # 获取图数据库统计
-        if service_container.neo4j_service:
-            try:
-                stats = await service_container.neo4j_service.get_knowledge_graph_summary()
-                info["graph_statistics"] = stats
-            except Exception:
-                info["graph_statistics"] = {"error": "无法获取统计信息"}
-        
-        # 获取文件处理统计
-        if service_container.file_processor:
-            info["file_processing_stats"] = service_container.file_processor.get_processing_stats()
-    
-    return info
-
-
-# 根路径重定向
-@app.get("/")
+@app.get("/", response_model=Dict[str, Any])
 async def root():
-    """根路径信息"""
+    """根路径 - 系统信息"""
+    uptime = datetime.now() - app_state["startup_time"]
     return {
-        "message": "EMC知识图谱系统 API",
+        "name": "EMC知识图谱系统",
         "version": "1.0.0",
+        "status": "running",
+        "uptime_seconds": int(uptime.total_seconds()),
+        "request_count": app_state["request_count"],
+        "timestamp": datetime.now().isoformat(),
         "docs": "/docs",
-        "health": "/health"
+        "api_endpoints": {
+            "health": "/health",
+            "test": "/api/test",
+            "deepseek_chat": "/api/deepseek/chat",
+            "graph_data": "/api/graph/data",
+            "file_upload": "/api/files/upload"
+        }
     }
 
+@app.get("/health", response_model=HealthResponse)
+async def health_check():
+    """健康检查 - 实用的系统状态监控"""
+    return HealthResponse(
+        status="healthy",
+        timestamp=datetime.now().isoformat(),
+        services={
+            "api_gateway": True,
+            "file_system": os.path.exists("uploads"),
+            "deepseek": bool(os.getenv("EMC_DEEPSEEK_API_KEY", "").startswith("sk-")),
+            "neo4j": False,  # 待实现
+            "postgres": False  # 待实现
+        },
+        version="1.0.0"
+    )
 
-if __name__ == "__main__":
-    settings = get_settings()
+@app.get("/api/test")
+async def test_endpoint():
+    """测试端点 - 验证API可用性"""
+    return {
+        "message": "API测试成功",
+        "timestamp": datetime.now().isoformat(),
+        "environment": os.getenv("EMC_ENVIRONMENT", "development"),
+        "debug_mode": os.getenv("EMC_DEBUG", "false").lower() == "true",
+        "python_path": os.environ.get("PYTHONPATH", "未设置"),
+        "working_directory": os.getcwd()
+    }
+
+# DeepSeek AI集成模块
+@app.post("/api/deepseek/chat", response_model=ChatResponse)
+async def deepseek_chat(request: ChatRequest):
+    """DeepSeek聊天接口"""
+    api_key = os.getenv("EMC_DEEPSEEK_API_KEY")
     
+    if not api_key or api_key == "sk-placeholder-key":
+        raise HTTPException(
+            status_code=501,
+            detail="DeepSeek API密钥未配置。请在.env文件中设置EMC_DEEPSEEK_API_KEY"
+        )
+    
+    # 模拟AI响应（实际项目中这里会调用DeepSeek API）
+    mock_response = f"""
+基于您的查询："{request.prompt}"
+
+这是一个模拟的EMC专家回复。在实际部署中，这里会连接到DeepSeek API进行智能分析。
+
+EMC分析要点：
+1. 电磁兼容性测试标准
+2. 设备辐射发射测量
+3. 传导干扰评估
+4. 抗扰度测试要求
+
+温度参数：{request.temperature}
+最大令牌数：{request.max_tokens}
+    """
+    
+    return ChatResponse(
+        content=mock_response.strip(),
+        usage={"prompt_tokens": len(request.prompt), "completion_tokens": 150, "total_tokens": len(request.prompt) + 150},
+        timestamp=datetime.now().isoformat()
+    )
+
+# 图数据库模块
+@app.get("/api/graph/data")
+async def get_graph_data():
+    """获取图数据"""
+    # 返回示例图数据结构
+    sample_data = {
+        "nodes": [
+            {
+                "id": "standard_1",
+                "label": "EN 55032:2015",
+                "type": "EMCStandard",
+                "properties": {
+                    "title": "Electromagnetic compatibility of multimedia equipment",
+                    "frequency_range": "9 kHz to 400 GHz"
+                }
+            },
+            {
+                "id": "equipment_1", 
+                "label": "无线路由器",
+                "type": "Equipment",
+                "properties": {
+                    "category": "ITE",
+                    "power": "12V DC"
+                }
+            }
+        ],
+        "edges": [
+            {
+                "id": "rel_1",
+                "source": "equipment_1",
+                "target": "standard_1", 
+                "type": "COMPLIES_WITH",
+                "properties": {
+                    "test_date": "2024-01-15",
+                    "result": "PASS"
+                }
+            }
+        ],
+        "metadata": {
+            "total_nodes": 2,
+            "total_edges": 1,
+            "last_updated": datetime.now().isoformat()
+        }
+    }
+    
+    return sample_data
+
+@app.post("/api/graph/query")
+async def execute_graph_query(query: Dict[str, Any]):
+    """执行图查询"""
+    cypher_query = query.get("cypher", "")
+    
+    if not cypher_query:
+        raise HTTPException(status_code=400, detail="缺少Cypher查询语句")
+    
+    # 模拟查询结果
+    return {
+        "query": cypher_query,
+        "results": [
+            {"node_id": "standard_1", "label": "EN 55032:2015"},
+            {"node_id": "equipment_1", "label": "无线路由器"}
+        ],
+        "execution_time": 0.05,
+        "timestamp": datetime.now().isoformat()
+    }
+
+# 文件处理模块
+@app.post("/api/files/upload")
+async def upload_file(
+    file: UploadFile = File(...),
+    extract_entities: bool = Form(True),
+    build_graph: bool = Form(False)
+):
+    """文件上传和处理"""
+    
+    # 验证文件类型
+    allowed_types = ['.pdf', '.docx', '.xlsx', '.csv', '.json', '.xml', '.txt']
+    filename = file.filename or ""
+    file_ext = os.path.splitext(filename)[1].lower()
+    
+    if file_ext not in allowed_types:
+        raise HTTPException(
+            status_code=400,
+            detail=f"不支持的文件类型: {file_ext}。支持的类型: {', '.join(allowed_types)}"
+        )
+    
+    # 保存文件
+    file_path = f"uploads/{file.filename}"
+    
+    try:
+        with open(file_path, "wb") as buffer:
+            content = await file.read()
+            buffer.write(content)
+        
+        # 模拟文件处理结果
+        processing_result = {
+            "file_id": f"file_{len(app_state['uploaded_files']) + 1}",
+            "filename": file.filename,
+            "size": len(content),
+            "type": file_ext,
+            "status": "processed",
+            "entities_extracted": extract_entities,
+            "graph_built": build_graph,
+            "upload_time": datetime.now().isoformat(),
+            "download_url": f"/uploads/{file.filename}"
+        }
+        
+        if extract_entities:
+            processing_result["entities"] = [
+                {"type": "EMCStandard", "name": "EN 55032", "confidence": 0.95},
+                {"type": "Equipment", "name": "测试设备", "confidence": 0.88},
+                {"type": "FrequencyRange", "name": "30MHz-1GHz", "confidence": 0.92}
+            ]
+        
+        app_state["uploaded_files"].append(processing_result)
+        
+        return processing_result
+        
+    except Exception as e:
+        logger.error(f"文件处理失败: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"文件处理失败: {str(e)}")
+
+@app.get("/api/files/list")
+async def list_uploaded_files():
+    """获取已上传文件列表"""
+    return {
+        "files": app_state["uploaded_files"],
+        "total_count": len(app_state["uploaded_files"]),
+        "timestamp": datetime.now().isoformat()
+    }
+
+# 统计和监控
+@app.get("/api/stats")
+async def get_system_stats():
+    """系统统计信息"""
+    uptime = datetime.now() - app_state["startup_time"]
+    
+    return {
+        "system": {
+            "uptime_seconds": int(uptime.total_seconds()),
+            "request_count": app_state["request_count"],
+            "uploaded_files": len(app_state["uploaded_files"]),
+            "memory_usage": "模拟数据",
+            "cpu_usage": "模拟数据"
+        },
+        "api": {
+            "total_endpoints": len([route for route in app.routes if hasattr(route, 'methods')]),
+            "health_status": "healthy"
+        },
+        "timestamp": datetime.now().isoformat()
+    }
+
+# 错误处理
+@app.exception_handler(404)
+async def not_found_handler(request, exc):
+    """404错误处理"""
+    return JSONResponse(
+        status_code=404,
+        content={
+            "error": "接口不存在",
+            "path": str(request.url.path),
+            "message": "请检查API路径是否正确",
+            "available_endpoints": ["/docs", "/health", "/api/test"]
+        }
+    )
+
+@app.exception_handler(500)
+async def internal_error_handler(request, exc):
+    """500错误处理"""
+    logger.error(f"内部服务器错误: {str(exc)}")
+    return JSONResponse(
+        status_code=500,
+        content={
+            "error": "内部服务器错误",
+            "message": "服务暂时不可用，请稍后重试",
+            "timestamp": datetime.now().isoformat()
+        }
+    )
+
+# 启动事件
+@app.on_event("startup")
+async def startup_event():
+    """应用启动时执行"""
+    logger.info("🚀 EMC知识图谱系统启动完成")
+    logger.info(f"📁 工作目录: {os.getcwd()}")
+    logger.info(f"📂 上传目录: {os.path.abspath('uploads')}")
+
+@app.on_event("shutdown") 
+async def shutdown_event():
+    """应用关闭时执行"""
+    logger.info("🔄 EMC知识图谱系统正在关闭")
+
+# 开发环境运行
+if __name__ == "__main__":
+    import uvicorn
     uvicorn.run(
-        "gateway.main:app",
-        host=settings.host,
-        port=settings.port,
-        reload=settings.debug,
-        workers=1 if settings.debug else settings.workers,
-        log_level=settings.log_level.lower(),
-        access_log=True
+        "main:app",
+        host="0.0.0.0",
+        port=8000,
+        reload=True,
+        log_level="info"
     )

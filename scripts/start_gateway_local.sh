@@ -1,190 +1,96 @@
 #!/bin/bash
 
-echo "=== 启动EMC API网关（本地运行）==="
+# EMC知识图谱系统 - 本地API网关启动脚本
+set -e
 
-# 1. 检查Python环境
-echo "1. 检查Python环境..."
-if command -v python &> /dev/null; then
-    python_version=$(python --version 2>&1)
-    echo "✓ Python版本: $python_version"
-else
-    echo "✗ Python未安装"
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m'
+
+echo -e "${GREEN}🚀 启动EMC知识图谱API网关...${NC}"
+
+# 获取脚本所在目录的父目录作为项目根目录
+PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$PROJECT_ROOT"
+
+echo -e "${BLUE}📁 项目根目录: $PROJECT_ROOT${NC}"
+
+# 检查Python环境
+if ! command -v python &> /dev/null; then
+    echo -e "${RED}❌ Python未安装，请先安装Python 3.8+${NC}"
     exit 1
 fi
 
-# 2. 检查虚拟环境
-if [ ! -d ".venv" ]; then
-    echo "2. 创建虚拟环境..."
-    python -m venv .venv
-    echo "✓ 虚拟环境已创建"
-else
-    echo "✓ 虚拟环境已存在"
+echo -e "${GREEN}✓ Python已安装: $(python --version)${NC}"
+
+# 设置Python路径
+export PYTHONPATH="${PROJECT_ROOT}:${PYTHONPATH}"
+echo -e "${BLUE}📦 PYTHONPATH: $PYTHONPATH${NC}"
+
+# 检查并安装最小依赖
+echo -e "${YELLOW}📦 安装必要依赖...${NC}"
+pip install -q fastapi==0.104.1 uvicorn[standard]==0.24.0 python-multipart==0.0.6 aiofiles==23.2.1 pydantic==2.5.0 python-dotenv==1.0.0
+
+# 创建gateway目录（如果不存在）
+mkdir -p gateway
+
+# 检查环境变量文件
+if [ ! -f ".env" ]; then
+    echo -e "${YELLOW}⚠ .env文件不存在，创建默认配置${NC}"
+    cat > .env << 'EOF'
+EMC_ENVIRONMENT=development
+EMC_SECRET_KEY=dev-secret-key-for-local-development-32chars
+EMC_DEEPSEEK_API_KEY=sk-placeholder-key
+EMC_DEBUG=true
+EMC_HOST=0.0.0.0
+EMC_PORT=8000
+EOF
 fi
 
-# 3. 激活虚拟环境并安装依赖
-echo "3. 安装Python依赖..."
-source .venv/Scripts/activate 2>/dev/null || source .venv/bin/activate
+# 创建uploads目录
+mkdir -p uploads
 
-# 安装核心依赖
-pip install fastapi uvicorn python-dotenv sqlalchemy psycopg2-binary redis neo4j openai
+# 启动API网关
+echo -e "${GREEN}🚀 启动API网关服务...${NC}"
+echo -e "${BLUE}📍 工作目录: $(pwd)${NC}"
+echo -e "${BLUE}📍 网关模块: gateway.main:app${NC}"
 
-# 4. 设置环境变量
-echo "4. 配置环境变量..."
-export EMC_ENVIRONMENT=development
-export EMC_POSTGRES_PASSWORD=Zqz112233
-export EMC_NEO4J_PASSWORD=Zqz112233
-export EMC_REDIS_PASSWORD=Zqz112233
-export EMC_DEEPSEEK_API_KEY=sk-c23ccb18185d488ab996189cd62b7216
+# 使用nohup在后台启动服务
+nohup python -m uvicorn gateway.main:app \
+    --host 0.0.0.0 \
+    --port 8000 \
+    --reload \
+    --log-level info \
+    --access-log > gateway.log 2>&1 &
 
-# 5. 创建简化的网关启动文件
-echo "5. 创建启动文件..."
-cat > start_gateway.py << 'EOF'
-#!/usr/bin/env python3
-"""
-EMC知识图谱系统 - 简化API网关
-实用性优先的启动方案
-"""
+GATEWAY_PID=$!
+echo -e "${GREEN}✓ API网关已启动 (PID: $GATEWAY_PID)${NC}"
 
-import uvicorn
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
-import asyncio
-import os
+# 等待服务启动
+echo -e "${YELLOW}等待服务就绪...${NC}"
+sleep 3
 
-# 创建FastAPI实例
-app = FastAPI(
-    title="EMC知识图谱API",
-    description="实用的EMC知识管理系统",
-    version="1.0.0"
-)
+# 验证服务
+for i in {1..10}; do
+    if curl -s http://localhost:8000/health > /dev/null; then
+        echo -e "${GREEN}✓ API网关服务就绪${NC}"
+        break
+    fi
+    if [ $i -eq 10 ]; then
+        echo -e "${RED}❌ API网关启动超时${NC}"
+        cat gateway.log
+        exit 1
+    fi
+    sleep 1
+done
 
-# 配置CORS
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-@app.get("/")
-async def root():
-    """根路径"""
-    return {
-        "message": "EMC知识图谱系统API",
-        "version": "1.0.0",
-        "status": "运行中"
-    }
-
-@app.get("/health")
-async def health_check():
-    """健康检查 - 实用的服务状态检查"""
-    import psycopg2
-    import redis
-    import requests
-    
-    status = {
-        "api": "healthy",
-        "timestamp": "2025-06-06T16:15:00Z",
-        "services": {
-            "postgres": False,
-            "redis": False, 
-            "neo4j": False
-        }
-    }
-    
-    # 检查PostgreSQL
-    try:
-        conn = psycopg2.connect(
-            host="localhost",
-            port=5432,
-            database="emc_knowledge",
-            user="postgres", 
-            password="Zqz112233"
-        )
-        conn.close()
-        status["services"]["postgres"] = True
-    except Exception:
-        pass
-    
-    # 检查Redis
-    try:
-        r = redis.Redis(host='localhost', port=6379, password='Zqz112233')
-        r.ping()
-        status["services"]["redis"] = True
-    except Exception:
-        pass
-    
-    # 检查Neo4j
-    try:
-        response = requests.get("http://localhost:7474", timeout=5)
-        status["services"]["neo4j"] = response.status_code == 200
-    except Exception:
-        pass
-    
-    # 判断整体状态
-    all_healthy = all(status["services"].values())
-    status_code = 200 if all_healthy else 503
-    
-    return JSONResponse(content=status, status_code=status_code)
-
-@app.get("/api/test")
-async def test_endpoint():
-    """测试端点"""
-    return {
-        "message": "API测试成功",
-        "data": {
-            "postgres_host": "localhost:5432",
-            "redis_host": "localhost:6379", 
-            "neo4j_host": "localhost:7474"
-        }
-    }
-
-if __name__ == "__main__":
-    print("🚀 启动EMC知识图谱API网关...")
-    print("📋 访问地址:")
-    print("   - API文档: http://localhost:8000/docs")
-    print("   - 健康检查: http://localhost:8000/health")
-    print("   - 测试接口: http://localhost:8000/api/test")
-    
-    uvicorn.run(
-        app,
-        host="0.0.0.0",
-        port=8000,
-        reload=True,
-        log_level="info"
-    )
-EOF
-
-echo "6. 启动API网关..."
-python start_gateway.py &
-gateway_pid=$!
-
-echo "✓ API网关已启动 (PID: $gateway_pid)"
-echo "等待服务就绪..."
-sleep 5
-
-# 7. 验证API服务
-echo "7. 验证API服务..."
-if curl -f http://localhost:8000/health 2>/dev/null; then
-    echo "✓ API网关运行正常"
-else
-    echo "⚠ API网关启动中..."
-fi
-
-echo "=== API网关启动完成 ==="
+echo -e "${GREEN}🎯 EMC知识图谱系统启动完成${NC}"
+echo -e "${GREEN}📋 访问地址:${NC}"
+echo -e "   - API文档: ${BLUE}http://localhost:8000/docs${NC}"
+echo -e "   - 健康检查: ${BLUE}http://localhost:8000/health${NC}"
+echo -e "   - 测试接口: ${BLUE}http://localhost:8000/api/test${NC}"
 echo ""
-echo "🎯 系统状态总览:"
-echo "   ✓ PostgreSQL: localhost:5432"
-echo "   ✓ Redis: localhost:6379"
-echo "   ✓ Neo4j: localhost:7474" 
-echo "   🚀 API网关: localhost:8000"
-echo ""
-echo "📖 接下来可以:"
-echo "   1. 访问API文档: http://localhost:8000/docs"
-echo "   2. 测试健康检查: curl http://localhost:8000/health"
-echo "   3. 启动前端应用"
-echo ""
-echo "停止服务: kill $gateway_pid"
-EOF
+echo -e "${YELLOW}💡 停止服务: kill $GATEWAY_PID${NC}"
+echo -e "${YELLOW}📋 查看日志: tail -f gateway.log${NC}"

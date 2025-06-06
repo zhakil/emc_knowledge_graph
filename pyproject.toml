@@ -1,0 +1,15 @@
+[tool.pylance]
+# 忽略特定的类型检查错误
+reportArgumentTypes = "warning"
+reportGeneralTypeIssues = "warning"
+
+[tool.mypy]
+# MyPy配置
+ignore_missing_imports = true
+warn_return_any = false
+warn_unused_configs = true
+
+# Neo4j相关的类型忽略
+[[tool.mypy.overrides]]
+module = "neo4j.*"
+ignore_errors = true

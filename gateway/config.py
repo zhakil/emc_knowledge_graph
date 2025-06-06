@@ -6,7 +6,10 @@
 import os
 from typing import List, Optional
 from functools import lru_cache
-from pydantic import BaseSettings, validator, Field
+try:
+    from pydantic import BaseSettings, validator, Field
+except ImportError:
+    raise ImportError("pydantic is not installed. Please install it with 'pip install pydantic'.")
 
 
 class Settings(BaseSettings):
