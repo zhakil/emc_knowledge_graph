@@ -1,0 +1,70 @@
+version: '3.13'
+
+services:
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - REACT_APP_API_URL=http://localhost:8000
+      - REACT_APP_WS_URL=ws://localhost:8000
+    depends_on:
+      - gateway
+
+  gateway:
+    build:
+      context: .
+      dockerfile: gateway/Dockerfile
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    depends_on:
+      - neo4j
+      - postgres
+      - redis
+    volumes:
+      - ./uploads:/app/uploads
+
+  neo4j:
+    image: neo4j:5.15-community
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    volumes:
+      - neo4j_data:/data
+    environment:
+      - NEO4J_AUTH=neo4j/${EMC_NEO4J_PASSWORD}
+      - NEO4J_dbms_memory_pagecache_size=1G
+      - NEO4J_dbms_memory_heap_initial__size=1G
+      - NEO4J_dbms_memory_heap_max__size=1G
+    env_file:
+      - .env
+
+  postgres:
+    image: postgres:15-alpine
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=${EMC_POSTGRES_USER}
+      - POSTGRES_PASSWORD=${EMC_POSTGRES_PASSWORD}
+      - POSTGRES_DB=${EMC_POSTGRES_DB}
+    env_file:
+      - .env
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --requirepass ${EMC_REDIS_PASSWORD}
+    env_file:
+      - .env
+
+volumes:
+  neo4j_data:
+  postgres_data:
+  redis_data:
