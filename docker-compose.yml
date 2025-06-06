@@ -1,11 +1,38 @@
-version: '3.8'
-
+# 移除version行，使用现代Docker Compose格式
 services:
+  # 🚀 API网关 - 使用备用端口避免冲突
+  gateway:
+    image: python:3.11-slim
+    container_name: emc_gateway
+    ports:
+      - "8001:8000"  # 外部8001，内部8000
+    volumes:
+      - .:/app
+      - ./uploads:/app/uploads
+    working_dir: /app
+    environment:
+      - EMC_ENVIRONMENT=development
+      - EMC_SECRET_KEY=dev-secret-key
+      - EMC_DEEPSEEK_API_KEY=sk-c23ccb18185d488ab996189cd62b7216
+    command: >
+      bash -c "
+        echo '🚀 安装依赖并启动服务...' &&
+        pip install --no-cache-dir fastapi uvicorn python-dotenv python-multipart aiofiles &&
+        echo '✅ 启动EMC知识图谱API网关...' &&
+        python gateway/main.py
+      "
+    depends_on:
+      - postgres
+      - redis
+      - neo4j
+    restart: unless-stopped
+
+  # 🗄️ PostgreSQL - 使用备用端口
   postgres:
     image: postgres:15-alpine
     container_name: emc_postgres
     ports:
-      - "5432:5432"
+      - "5433:5432"  # 外部5433，避免与本地PostgreSQL冲突
     volumes:
       - postgres_data:/var/lib/postgresql/data
     environment:
@@ -14,12 +41,24 @@ services:
       POSTGRES_DB: emc_knowledge
     restart: unless-stopped
 
+  # 🔴 Redis
+  redis:
+    image: redis:7-alpine
+    container_name: emc_redis
+    ports:
+      - "6380:6379"  # 外部6380，避免本地Redis冲突
+    volumes:
+      - redis_data:/data
+    command: redis-server --requirepass Zqz112233
+    restart: unless-stopped
+
+  # 📊 Neo4j
   neo4j:
     image: neo4j:5.15-community
     container_name: emc_neo4j
     ports:
-      - "7474:7474"
-      - "7687:7687"
+      - "7475:7474"  # 外部7475
+      - "7688:7687"  # 外部7688
     volumes:
       - neo4j_data:/data
     environment:
@@ -29,48 +68,7 @@ services:
       NEO4J_ACCEPT_LICENSE_AGREEMENT: "yes"
     restart: unless-stopped
 
-  redis:
-    image: redis:7-alpine
-    container_name: emc_redis
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis_data:/data
-    command: redis-server --requirepass Zqz112233
-    restart: unless-stopped
-
-  gateway:
-    build:
-      context: .
-      dockerfile: gateway/Dockerfile
-    container_name: emc_gateway
-    ports:
-      - "8000:8000"
-    environment:
-      EMC_POSTGRES_PASSWORD: Zqz112233
-      EMC_NEO4J_PASSWORD: Zqz112233
-      EMC_REDIS_PASSWORD: Zqz112233
-      EMC_DEEPSEEK_API_KEY: sk-c23ccb18185d488ab996189cd62b7216
-    volumes:
-      - ./uploads:/app/uploads
-    depends_on:
-      - postgres
-      - neo4j
-      - redis
-    restart: unless-stopped
-
-  frontend:
-    build: ./frontend
-    container_name: emc_frontend
-    ports:
-      - "3000:3000"
-    environment:
-      REACT_APP_API_URL: http://localhost:8000
-    depends_on:
-      - gateway
-    restart: unless-stopped
-
 volumes:
   postgres_data:
-  neo4j_data:
   redis_data:
+  neo4j_data:
