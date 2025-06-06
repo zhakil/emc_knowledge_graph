@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>EMC知识图谱测试页面</title>
+    <style>
+        body { font-family: Arial; margin: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .panel { border: 1px solid #ddd; padding: 20px; margin: 10px 0; }
+        textarea { width: 100%; height: 200px; }
+        button { padding: 10px 20px; background: #007bff; color: white; border: none; cursor: pointer; }
+        #result { background: #f8f9fa; padding: 15px; margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔬 EMC知识图谱系统测试</h1>
+        
+        <div class="panel">
+            <h3>AI分析测试</h3>
+            <textarea id="prompt" placeholder="输入EMC相关问题，例如：分析EN 55032标准的主要测试要求"></textarea>
+            <button onclick="testAI()">测试AI分析</button>
+            <div id="result"></div>
+        </div>
+        
+        <div class="panel">
+            <h3>系统状态</h3>
+            <button onclick="checkHealth()">检查系统健康状态</button>
+            <button onclick="testGraph()">测试图数据库</button>
+            <div id="status"></div>
+        </div>
+    </div>
+
+    <script>
+        async function testAI() {
+            const prompt = document.getElementById('prompt').value;
+            try {
+                const response = await fetch('http://localhost:8000/api/deepseek/chat', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({prompt, temperature: 0.7, max_tokens: 1000})
+                });
+                const data = await response.json();
+                document.getElementById('result').innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+            } catch (e) {
+                document.getElementById('result').innerHTML = `错误: ${e.message}`;
+            }
+        }
+
+        async function checkHealth() {
+            try {
+                const response = await fetch('http://localhost:8000/health');
+                const data = await response.json();
+                document.getElementById('status').innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+            } catch (e) {
+                document.getElementById('status').innerHTML = `错误: ${e.message}`;
+            }
+        }
+
+        async function testGraph() {
+            try {
+                const response = await fetch('http://localhost:8000/api/graph/data');
+                const data = await response.json();
+                document.getElementById('status').innerHTML = `<pre>图数据: ${JSON.stringify(data, null, 2)}</pre>`;
+            } catch (e) {
+                document.getElementById('status').innerHTML = `错误: ${e.message}`;
+            }
+        }
+    </script>
+</body>
+</html>
