@@ -9,55 +9,115 @@ EMC知识图谱系统是一个专为电磁兼容性领域设计的智能知识�
     *   **实体提取 (`entity_extractor.py`):** 从文本中识别定义的本体实体。
     *   **关系构建 (`relation_builder.py`):** 在提取的实体之间建立联系。
     *   **图谱管理 (`graph_manager.py`):** 编排实体提取和关系构建流程，并将其存入图数据库。
-    *   **Neo4j服务 (`neo4j_emc_service.py`):** 与Neo4j图数据库进行交互（*注意：此组件的实现目前遇到工具问题，正在积极解决中*）。
+    *   **Neo4j服务 (`neo4j_emc_service.py`):** 提供与Neo4j图数据库的健壮交互。它使用`MERGE`操作来确保数据的一致性，避免重复创建节点和关系。在应用启动时，该服务还会自动为核心实体类型创建唯一性约束，以保证数据完整性和查询性能。
 *   **EMC领域服务 (`services.emc_domain`):** 包含特定于EMC领域逻辑的服务，如标准处理、合规性检查等（利用知识图谱，开发中）。
 
-🚀 快速开始（5分钟部署）
-环境要求
+🚀 安装与部署
 
-Docker Desktop 4.0+
-Git
-8GB+ RAM，20GB+ 磁盘空间
-网络环境：确保v2rayn代理正常工作
+本系统可以作为Windows桌面应用程序（推荐给终端用户）或作为一组开发者部署的服务来运行。
 
-一键部署步骤
-bash# 1. 克隆项目
-git clone https://github.com/zhakil/emc_knowledge_graph.git
-cd emc_knowledge_graph
+### 1. 终端用户 (Windows桌面应用程序)
 
-# 2. 配置环境变量
-cp .env.example .env
-# 编辑.env文件，填入你的DeepSeek API密钥和Neo4j密码
+对于希望直接使用本系统的用户，我们提供了预构建的Windows桌面应用程序。
 
-# 3. 启动所有服务
-docker-compose up -d
+*   **获取应用:**
+    *   预构建的安装包 (`EMC知识图谱系统 Setup X.Y.Z.exe`) 和便携版ZIP (`EMC_Knowledge_Graph_Portable.zip`) 通常会在项目的 "Releases" 页面提供。
+    *   如果从源码构建，这些文件会生成在项目根目录下的 `build_output` 文件夹中。
+*   **包含内容:** 这些包内已集成用户界面和必要的Python后端服务。用户**无需单独安装Python或配置复杂的开发环境**。
+*   **数据库依赖:**
+    *   **重要:** 桌面应用程序需要后端数据库服务 (Neo4j, PostgreSQL, Redis) 才能完全运行。这些数据库服务**不包含**在桌面应用包内。
+    *   **推荐设置:** 在运行桌面应用程序前，请使用Docker启动这些数据库。您可以使用项目根目录下的 `docker-compose.yml` 文件配合 `docker-compose up -d neo4j postgres redis` 命令，或者使用单独的配置文件如 `docker-compose-neo4j.yml`, `docker-compose-postgres.yml`, `docker-compose-redis.yml` 来分别启动它们。
+    *   默认情况下，桌面应用的后端会尝试连接到 `localhost` 上的标准数据库端口和预设的凭据。对于高级用户，这些连接参数可以在后端服务的配置中修改（通常通过 `.env` 文件，详见配置部分）。
+*   **运行:**
+    1.  确保Docker已安装并正在运行。
+    2.  使用 `docker-compose up -d neo4j postgres redis` (或针对性的docker-compose文件) 启动数据库服务。等待它们完全初始化。
+    3.  运行安装程序 `EMC知识图谱系统 Setup X.Y.Z.exe` 并按提示安装，或解压 `EMC_Knowledge_Graph_Portable.zip` 到您选择的文件夹。
+    4.  启动 "EMC知识图谱系统" 应用程序 (通过桌面快捷方式或便携文件夹中的启动脚本)。
 
-# 4. 验证部署
-curl http://localhost:8000/health
+### 2. 开发者 (设置完整开发环境)
 
-🔧 详细配置说明
+开发者如果需要修改代码、参与贡献或在非Windows系统上运行，应设置完整的开发环境。
+
+*   **环境要求:**
+    *   Git
+    *   Python 3.9+ (推荐使用虚拟环境)
+    *   Node.js (LTS版本，包含npm)
+    *   Docker Desktop (最新版)
+    *   (Windows) Windows Terminal 或 PowerShell
+*   **自动化部署 (Windows开发者):**
+    *   项目根目录下的 `deploy_windows.bat` 脚本提供了一个自动化部署流程：
+        *   检查并提示安装 Scoop (Windows包管理器)。
+        *   通过Scoop安装Git, Python, Node.js, Docker (如果尚未安装)。
+        *   克隆项目仓库 (如果脚本不在项目内)。
+        *   设置Python虚拟环境并安装依赖。
+        *   安装前端依赖。
+        *   创建并提示配置 `.env` 文件。
+        *   使用 Docker Compose 启动后端数据库服务 (Neo4j, PostgreSQL, Redis)。
+        *   (可选) 构建并启动完整的Electron桌面应用。
+    *   **使用:** 以管理员身份运行 `deploy_windows.bat` 并按照提示操作。
+*   **手动部署 (所有系统):**
+    1.  **克隆项目:**
+        ```bash
+        git clone https://github.com/zhakil/emc_knowledge_graph.git
+        cd emc_knowledge_graph
+        ```
+    2.  **配置环境变量:**
+        复制 `.env.example` 为 `.env`，并根据您的环境和API密钥进行配置 (详见下方“配置说明”部分)。
+        ```bash
+        cp .env.example .env
+        # 编辑 .env 文件，至少填入 EMC_DEEPSEEK_API_KEY 和数据库密码
+        ```
+    3.  **启动后端服务 (Docker):**
+        这将启动API网关、Neo4j、PostgreSQL和Redis。
+        ```bash
+        docker-compose up -d
+        ```
+        *   若要仅启动数据库服务: `docker-compose up -d neo4j postgres redis`
+        *   若要单独启动某个数据库 (例如使用 `docker-compose-neo4j.yml`):
+            ```bash
+            docker-compose -f docker-compose-neo4j.yml up -d
+            ```
+    4.  **构建和运行桌面应用 (可选):**
+        如果您希望从源码运行或构建Windows桌面应用：
+        ```bash
+        python scripts/build_windows_app.py
+        ```
+        构建完成后，产物位于 `build_output` 目录。
+        要运行Electron应用的开发版本 (假设后端服务已通过Docker或其他方式启动)：
+        ```bash
+        cd desktop
+        npm install
+        npm start
+        ```
+    5.  **前端开发 (可选):**
+        如果仅需进行前端开发 (假设后端服务已运行)：
+        ```bash
+        cd frontend
+        npm install
+        npm start
+        ```
+    6.  **验证部署:**
+        ```bash
+        curl http://localhost:8000/health # 检查API网关 (如果已启动)
+        # 访问 http://localhost:7474 查看Neo4j (如果已启动)
+        # 访问 http://localhost:3000 查看前端 (如果已启动)
+        ```
+
+🔧 配置说明
 1. 环境变量配置 (.env文件)
-创建.env文件并配置以下必需参数：
-bash# 安全配置
-EMC_SECRET_KEY=your-super-secret-key-min-32-chars
-EMC_ENVIRONMENT=production # development or production
+`.env` 文件用于存储所有敏感配置和环境特定参数。在首次启动任何服务或脚本前，请确保已从 `.env.example` 复制并正确配置了 `.env` 文件。
+*   **创建:** `cp .env.example .env`
+*   **关键参数:**
+    *   `EMC_DEEPSEEK_API_KEY`: 您的DeepSeek API密钥 (**必填**)。
+    *   `EMC_NEO4J_PASSWORD`, `EMC_POSTGRES_PASSWORD`, `EMC_REDIS_PASSWORD`: 数据库服务的密码。如果您在 `docker-compose.yml` 中修改了这些服务的默认密码，请务必在此处同步更新。
+    *   `EMC_SECRET_KEY`: 用于API安全的密钥，应为一个长随机字符串。
+    *   `EMC_NEO4J_URI`, `EMC_NEO4J_USER`: Neo4j连接参数，通常保持默认值，除非您的Neo4j实例位于不同地址或使用不同用户。
+*   **桌面应用配置:**
+    *   打包的Windows桌面应用 (`emc_backend.exe`) 在启动时会尝试加载位于其工作目录下的 `.env` 文件。当通过Electron主进程启动时，这个工作目录通常是 `emc_backend.exe` 所在的 `desktop/resources/backend/` 目录（在打包应用中，这会是 `process.resourcesPath + '/backend/'`）。
+    *   如果您直接运行从 `build_output/EMC_Knowledge_Graph_Portable/` 启动的便携版，可以尝试将 `.env` 文件放置在该目录下。
+    *   `deploy_windows.bat` 脚本会自动在项目根目录创建 `.env` 文件，构建过程可能会将其包含或按需复制。
 
-# DeepSeek API配置（必填）
-EMC_DEEPSEEK_API_KEY=sk-your-deepseek-api-key-here
-EMC_DEEPSEEK_BASE_URL=https://api.deepseek.com/v1
-
-# 数据库密码（必填）
-EMC_NEO4J_URI=bolt://localhost:7687 # Or your Neo4j instance URI
-EMC_NEO4J_USER=neo4j
-EMC_NEO4J_PASSWORD=YourNeo4jPassword123 # 修改为您自己的强密码
-EMC_POSTGRES_PASSWORD=YourPostgresPassword123
-EMC_REDIS_PASSWORD=YourRedisPassword123
-
-# 可选配置
-EMC_MAX_FILE_SIZE=104857600 # Maximum upload file size in bytes
-EMC_RATE_LIMIT_REQUESTS_PER_MINUTE=60 # API rate limit
-
-2. 代理环境特殊配置
+2. 代理环境特殊配置 (如果需要通过代理访问外部API如DeepSeek)
 由于使用v2rayn代理，需要特别注意：
 bash# Docker代理配置
 mkdir -p ~/.docker
@@ -77,52 +137,14 @@ EOF
 # export DOCKER_REGISTRY=registry.cn-hangzhou.aliyuncs.com/library/
 
 3. 服务端口说明
-服务端口用途访问地址前端应用3000Web界面http://localhost:3000API网关8000后端APIhttp://localhost:8000Neo4j7474图数据库管理http://localhost:7474PostgreSQL5432关系数据库localhost:5432Redis6379缓存服务localhost:6379
-📋 分步部署指南
-步骤1：准备工作
-bash# 检查Docker状态
-docker --version
-docker-compose --version
+服务端口用途默认访问地址 (可能因配置而异)前端应用 (开发模式)3000Web界面http://localhost:3000API网关 (通过Docker或直接运行)8000后端APIhttp://localhost:8000 (或网关配置的端口，如8001)Neo4j7474图数据库管理http://localhost:7474 (或Docker映射的端口，如7475)PostgreSQL5432关系数据库localhost:5432 (或Docker映射的端口，如5433)Redis6379缓存服务localhost:6379 (或Docker映射的端口，如6380)
 
-# 检查端口占用 (Linux/macOS)
-# netstat -tuln | grep -E ":(3000|8000|7474|5432|6379)"
-# Windows: netstat -ano | findstr ":3000 :8000 :7474 :5432 :6379"
+## 技术细节与可扩展性
 
-# 创建必要目录 (如果项目未包含)
-mkdir -p uploads temp logs data/neo4j data/postgres
-步骤2：获取DeepSeek API密钥
-
-访问 DeepSeek官网
-注册并登录账户
-进入API管理页面
-创建新的API密钥
-复制密钥到`.env`文件的`EMC_DEEPSEEK_API_KEY`。
-
-步骤3：启动数据库服务
-bash# 仅启动数据库服务
-docker-compose up -d postgres neo4j redis
-
-# 等待数据库初始化（重要）
-echo "Waiting for databases to initialize..."
-sleep 30 # 增加等待时间确保Neo4j完全启动
-
-# 验证数据库连接
-docker-compose logs postgres | grep "ready to accept connections"
-docker-compose logs neo4j | grep "Remote interface available at" # Neo4j 4.x/5.x
-# 或者 docker-compose logs neo4j | grep "Started." (旧版)
-docker-compose logs redis | grep "Ready to accept connections"
-
-步骤4：启动应用服务
-bash# 启动网关和前端
-docker-compose up -d gateway frontend
-
-# 查看启动日志
-docker-compose logs -f gateway
-docker-compose logs -f frontend
-
-步骤5：验证部署
-bash# 健康检查 (API 网关)
-curl -s http://localhost:8000/health | jq
+*   **Neo4j性能:**
+    *   **内存配置:** 对于通过 Docker 运行 Neo4j 服务的用户，可以在 `docker-compose.yml` 文件中调整 Neo4j 的内存设置 (如 `NEO4J_dbms_memory_pagecache_size` 和 `NEO4J_dbms_memory_heap_max__size`) 以适应不同规模的数据集和负载。
+    *   **数据完整性与查询:** 系统现在会自动在 Neo4j 数据库中为核心实体类型（如 `EMCStandard`, `Product`, `Document`, `Component` 等）的 `id` 属性创建唯一性约束。这不仅增强了数据的一致性，也显著提升了相关查询的性能。此功能在应用启动时由 `Neo4jEMCService`自动处理。
+*   **后端服务:** API网关和核心服务被设计为可独立扩展。
 
 # 测试AI对话API (通过网关)
 curl -X POST http://localhost:8000/api/deepseek/chat   -H "Content-Type: application/json"   -d '{
@@ -175,7 +197,7 @@ bash# 上传EMC文档 (API示例)
 curl -X POST http://localhost:8000/api/files/upload   -F "file=@path/to/your/emc_document.pdf"   # -F "extract_entities=true" # (旧参数，新流程由GraphManager处理)
   # -F "build_graph=true"     # (旧参数，新流程由GraphManager处理)
 
-*注意：文件上传后的知识图谱构建流程依赖于 `EMCGraphManager` 和 `Neo4jEMCService`。由于 `Neo4jEMCService` 当前实现存在问题，此部分功能可能未完全激活。*
+*注意：文件上传后的知识图谱构建流程依赖于 `EMCGraphManager` 和 `Neo4jEMCService`。*
 
 3. 图数据库查询 (通过Neo4j浏览器或API)
 直接查询Neo4j数据库以探索已构建的知识图谱。
@@ -185,8 +207,6 @@ bash# 执行Cypher查询 (此API端点 `/api/graph/query` 可能需要实现或�
 curl -X POST http://localhost:8000/api/graph/query   -H "Content-Type: application/json"   -d '{
     "query": "MATCH (s:EMCStandard) WHERE s.category = 'Emissions' RETURN s.name, s.version LIMIT 10"
   }'
-
-*当前知识图谱的自动构建和查询功能受限于 `Neo4jEMCService` 的状态。*
 
 🚨 故障排除
 常见问题及解决方案
@@ -307,8 +327,8 @@ isort .
 
 部署完成后可以：
 
-🌐 访问 `http://localhost:3000` 使用Web界面
-📖 访问 `http://localhost:8000/docs` 查看API文档 (若网关服务包含Swagger)
+🌐 访问 `http://localhost:3000` 使用Web界面 (如果通过 `docker-compose up -d frontend` 或类似方式启动)
+📖 访问 `http://localhost:8000/docs` 查看API文档 (若API网关服务启动)
 💾 访问 `http://localhost:7474` 管理Neo4j数据库 (默认用户: `neo4j`, 密码见 `.env` 文件)
 
-**重要提示:** 确保v2rayn（或其他网络代理）配置正确，以便Docker容器可以访问外部网络（如DeepSeek API）。由于`Neo4jEMCService`组件的实现问题，知识图谱的自动构建和利用功能目前可能不完整。我们正在努力解决此问题。
+**重要提示:** 确保v2rayn（或其他网络代理）配置正确，以便Docker容器或本地运行的服务可以访问外部网络（如DeepSeek API）。

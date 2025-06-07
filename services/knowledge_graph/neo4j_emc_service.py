@@ -76,9 +76,12 @@ class Neo4jEMCService:
             
             self.logger.info("Neo4j连接成功")
             return True
-            
+
+        except (Neo4jError, neo4j.exceptions.ServiceUnavailable, neo4j.exceptions.AuthError) as e:
+            self.logger.error(f"Neo4j连接失败: {type(e).__name__} - {str(e)}")
+            return False
         except Exception as e:
-            self.logger.error(f"Neo4j连接失败: {str(e)}")
+            self.logger.error(f"Neo4j连接时发生未知错误: {type(e).__name__} - {str(e)}")
             return False
     
     async def close(self):
@@ -86,6 +89,24 @@ class Neo4jEMCService:
         if self.driver:
             await self.driver.close()
             self.logger.info("Neo4j连接已关闭")
+
+    async def ensure_constraints_and_indexes(self):
+        """确保知识图谱的约束和索引符合EMC本体定义"""
+        node_types_for_constraints = ["EMCStandard", "Product", "Document", "Component"]
+
+        for node_type in node_types_for_constraints:
+            constraint_query = f"CREATE CONSTRAINT IF NOT EXISTS FOR (n:{node_type}) REQUIRE n.id IS UNIQUE"
+            try:
+                await self._execute_write_query(constraint_query)
+                self.logger.info(f"Constraint created or already exists for node type: {node_type}")
+            except Neo4jError as e:
+                self.logger.error(f"Failed to create constraint for node type {node_type}: {str(e)}")
+            except Exception as e:
+                self.logger.error(f"An unexpected error occurred while creating constraint for {node_type}: {str(e)}")
+
+        # TODO: 根据EMC_ONTOLOGY.md中的定义，扩展此方法以覆盖所有节点类型，
+        # 并考虑为经常查询的属性添加其他索引 (例如: CREATE INDEX IF NOT EXISTS FOR (n:Product) ON (n.name);)
+        pass
     
     async def _execute_query(
         self, 
@@ -133,13 +154,16 @@ class Neo4jEMCService:
     async def create_emc_node(self, node: EMCNode) -> str:
         """创建EMC节点 - 实用版本"""
         query_str = f"""
-        CREATE (n:{node.node_type} {{
-            id: $id,
-            label: $label,
-            created_at: datetime(),
-            updated_at: datetime()
-        }})
-        SET n += $properties
+        MERGE (n:{node.node_type} {{id: $id}})
+        ON CREATE SET
+            n.label = $label,
+            n.created_at = datetime(),
+            n.updated_at = datetime(),
+            n += $properties
+        ON MATCH SET
+            n.label = $label,
+            n.updated_at = datetime(),
+            n += $properties
         RETURN n.id as id
         """
         
@@ -180,10 +204,15 @@ class Neo4jEMCService:
         """创建关系 - 实用版本"""
         query_str = f"""
         MATCH (a {{id: $source_id}}), (b {{id: $target_id}})
-        CREATE (a)-[r:{relationship.relationship_type}]->(b)
-        SET r += $properties
-        SET r.created_at = datetime()
-        RETURN count(r) as created
+        MERGE (a)-[r:{relationship.relationship_type}]->(b)
+        ON CREATE SET
+            r.created_at = datetime(),
+            r.updated_at = datetime(),
+            r += $properties
+        ON MATCH SET
+            r.updated_at = datetime(),
+            r += $properties
+        RETURN r IS NOT NULL as created_or_matched
         """
         
         result = await self._execute_write_query(query_str, {
@@ -192,7 +221,7 @@ class Neo4jEMCService:
             'properties': relationship.properties
         })
         
-        return result[0]['created'] > 0 if result else False
+        return result[0]['created_or_matched'] if result else False
     
     async def get_knowledge_graph_summary(self) -> Dict[str, Any]:
         """获取知识图谱统计摘要 - 高效版本"""

@@ -9,6 +9,7 @@ from datetime import datetime
 from fastapi import FastAPI, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from services.knowledge_graph.neo4j_emc_service import create_emc_knowledge_service
 from fastapi.responses import HTMLResponse
 
 logging.basicConfig(level=logging.INFO)
@@ -423,3 +424,41 @@ async def upload_file(file: UploadFile = File(...)):
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
+
+
+@app.on_event("startup")
+async def startup_event():
+    """
+    应用启动时执行的事件：
+    确保Neo4j数据库的约束和索引已正确设置。
+    """
+    logger.info("Application startup: Ensuring Neo4j constraints and indexes.")
+
+    neo4j_uri = os.getenv("EMC_NEO4J_URI", "bolt://localhost:7687")
+    neo4j_user = os.getenv("EMC_NEO4J_USER", "neo4j")
+    neo4j_password = os.getenv("EMC_NEO4J_PASSWORD")
+
+    if not neo4j_password:
+        logger.error("Neo4j password (EMC_NEO4J_PASSWORD) not set. Skipping constraint/index setup.")
+        return
+
+    emc_service = None
+    try:
+        emc_service = await create_emc_knowledge_service(
+            uri=neo4j_uri,
+            username=neo4j_user,
+            password=neo4j_password
+        )
+        if emc_service:
+            logger.info("Successfully connected to Neo4j for constraint/index setup.")
+            await emc_service.ensure_constraints_and_indexes()
+            logger.info("Neo4j constraints and indexes setup/verification complete.")
+        else:
+            logger.error("Failed to create Neo4jEMCService instance.")
+
+    except Exception as e:
+        logger.error(f"Error during Neo4j constraint/index setup: {str(e)}", exc_info=True)
+    finally:
+        if emc_service and emc_service.driver:
+            await emc_service.close()
+            logger.info("Neo4j connection closed after constraint/index setup.")

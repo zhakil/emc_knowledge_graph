@@ -129,15 +129,21 @@ if __name__ == "__main__":
     def setup_electron(self):
         """设置Electron环境"""
         print("⚡ 设置Electron环境...")
-        
-        # 复制Electron配置文件（如果不存在）
-        electron_files = {
-            "main.js": self.get_main_js_content(),
+
+        # 检查关键的main.js文件是否存在
+        main_js_path = self.desktop_dir / "main.js"
+        if not main_js_path.exists():
+            raise FileNotFoundError(
+                "Critical file desktop/main.js is missing. Cannot proceed with build."
+            )
+
+        # 处理 preload.js 和 package.json，如果不存在则创建
+        optional_electron_files = {
             "preload.js": self.get_preload_js_content(),
             "package.json": self.get_package_json_content()
         }
         
-        for filename, content in electron_files.items():
+        for filename, content in optional_electron_files.items():
             file_path = self.desktop_dir / filename
             if not file_path.exists():
                 file_path.write_text(content, encoding='utf-8')
@@ -179,62 +185,72 @@ if __name__ == "__main__":
     def create_installer(self):
         """创建安装程序"""
         print("📦 创建安装程序...")
-        
-        # 创建便携版
-        portable_dir = self.build_dir / "EMC_Knowledge_Graph_Portable"
-        portable_dir.mkdir(exist_ok=True)
-        
-        # 复制可执行文件和资源
-        exe_files = list(self.build_dir.glob("*.exe"))
-        for exe_file in exe_files:
-            if "Setup" not in exe_file.name:
-                shutil.copy2(exe_file, portable_dir)
-        
-        # 创建启动脚本
-        start_script = portable_dir / "启动EMC知识图谱.bat"
-        start_script.write_text('''
-@echo off
-echo 启动EMC知识图谱系统...
+
+        # Define package.json path to read productName
+        package_json_path = self.desktop_dir / "package.json"
+        product_name = "EMC知识图谱系统" # Default
+        if package_json_path.exists():
+            with open(package_json_path, 'r', encoding='utf-8') as f:
+                pkg_json = json.load(f)
+                product_name = pkg_json.get("build", {}).get("productName", product_name)
+
+        # Source for portable version is the win-unpacked directory
+        # This directory should have been copied to self.build_dir by build_electron_app
+        unpacked_src_dir_name = "win-unpacked" # Default name from electron-builder
+        # A more robust way might involve finding the directory that contains productName.exe
+        # For now, we assume "win-unpacked" or a directory named after the product.
+
+        possible_unpacked_dirs = [
+            self.build_dir / unpacked_src_dir_name,
+            self.build_dir / f"{product_name}-win32-x64", # Another common pattern
+            self.build_dir / f"{product_name}-win-x64"
+        ]
+
+        actual_unpacked_src_dir = None
+        for d in possible_unpacked_dirs:
+            if d.exists() and d.is_dir() and (d / f"{product_name}.exe").exists():
+                actual_unpacked_src_dir = d
+                break
+
+        if not actual_unpacked_src_dir:
+            raise FileNotFoundError(
+                f"Could not find suitable unpacked directory (e.g., win-unpacked, {product_name}-win32-x64) "
+                f"containing '{product_name}.exe' in {self.build_dir}. "
+                "Ensure build_electron_app correctly copies it."
+            )
+
+        # 创建便携版目标目录
+        portable_target_dir = self.build_dir / "EMC_Knowledge_Graph_Portable"
+        if portable_target_dir.exists():
+            shutil.rmtree(portable_target_dir) # Clean up old portable dir
+
+        # 复制整个 win-unpacked 目录的内容到便携版目标目录
+        shutil.copytree(actual_unpacked_src_dir, portable_target_dir)
+
+        # 创建启动脚本 inside the portable directory
+        # The .bat file will be at the root of the portable directory,
+        # and it will launch the executable which is also at the root.
+        start_script_content = f'''@echo off
+echo 启动 {product_name}...
 echo 请等待服务启动完成...
-start "" "EMC知识图谱系统.exe"
-''', encoding='gbk')
+start "" "{product_name}.exe"
+'''
+        start_script_path = portable_target_dir / f"启动{product_name}.bat"
+        start_script_path.write_text(start_script_content, encoding='gbk')
         
         # 创建便携版压缩包
-        portable_zip = self.build_dir / "EMC_Knowledge_Graph_Portable.zip"
-        with zipfile.ZipFile(portable_zip, 'w', zipfile.ZIP_DEFLATED) as zf:
-            for file_path in portable_dir.rglob('*'):
+        portable_zip_path = self.build_dir / "EMC_Knowledge_Graph_Portable.zip"
+        if portable_zip_path.exists():
+            portable_zip_path.unlink() # Remove old zip if exists
+
+        with zipfile.ZipFile(portable_zip_path, 'w', zipfile.ZIP_DEFLATED) as zf:
+            for file_path in portable_target_dir.rglob('*'):
                 if file_path.is_file():
-                    arcname = file_path.relative_to(portable_dir)
+                    arcname = file_path.relative_to(portable_target_dir)
                     zf.write(file_path, arcname)
         
-        print("✅ 安装程序创建完成")
-    
-    def get_main_js_content(self):
-        """获取main.js内容"""
-        # 返回操作1中的main.js内容（简化版）
-        return '''
-const { app, BrowserWindow } = require('electron');
-const path = require('path');
-
-function createWindow() {
-    const mainWindow = new BrowserWindow({
-        width: 1400,
-        height: 900,
-        webPreferences: {
-            nodeIntegration: false,
-            contextIsolation: true,
-            preload: path.join(__dirname, 'preload.js')
-        }
-    });
-
-    mainWindow.loadFile('build/index.html');
-}
-
-app.whenReady().then(createWindow);
-app.on('window-all-closed', () => {
-    if (process.platform !== 'darwin') app.quit();
-});
-'''
+        print(f"✅ 便携版创建完成: {portable_zip_path}")
+        print("✅ 安装程序和便携版创建流程结束")
     
     def get_preload_js_content(self):
         """获取preload.js内容"""
