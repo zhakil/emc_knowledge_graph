@@ -26,6 +26,7 @@ import chardet
 from .content_extractor import EMCContentExtractor
 from .format_converter import FormatConverter
 from ..ai_integration.deepseek_service import DeepSeekEMCService
+from ..knowledge_graph.graph_manager import EMCGraphManager
 
 
 @dataclass
@@ -71,30 +72,43 @@ class EMCFileProcessor:
     
     def __init__(
         self, 
-        deepseek_service: DeepSeekEMCService,
-        storage_path: str = "./uploads"
+        deepseek_service: DeepSeekEMCService, # Assuming DeepSeekEMCService is correctly typed
+        storage_path: str = "./uploads",
+        graph_manager: Optional[EMCGraphManager] = None # New argument
     ):
         self.deepseek = deepseek_service
         self.storage_path = Path(storage_path)
         self.storage_path.mkdir(exist_ok=True)
         self.logger = logging.getLogger(__name__)
         
-        # 内容提取器
+        if graph_manager:
+            self.graph_manager = graph_manager
+            self.logger.info("EMCFileProcessor initialized with provided EMCGraphManager.")
+        else:
+            try:
+                self.graph_manager = EMCGraphManager() # EMCGraphManager might need its own dependencies
+                self.logger.info("EMCFileProcessor automatically initialized a new EMCGraphManager.")
+            except Exception as e:
+                self.logger.error(f"Failed to auto-initialize EMCGraphManager in EMCFileProcessor: {e}", exc_info=True)
+                self.graph_manager = None
+
         self.content_extractor = EMCContentExtractor()
         self.format_converter = FormatConverter()
         
-        # 处理统计
         self._processing_stats = {
             'files_processed': 0,
             'entities_extracted': 0,
             'relationships_found': 0,
-            'processing_errors': 0
+            'processing_errors': 0,
+            'graph_processing_invocation_errors': 0, # Renamed for clarity
+            'graph_processing_content_errors': 0
         }
     
     async def process_file(
         self, 
         file_path: Union[str, Path],
-        file_id: Optional[str] = None
+        file_id: Optional[str] = None,
+        trigger_graph_processing: bool = True # New flag
     ) -> Tuple[FileMetadata, Optional[ExtractionResult]]:
         """
         处理单个文件
@@ -117,6 +131,8 @@ class EMCFileProcessor:
             metadata.extraction_status = "unsupported_format"
             return metadata, None
         
+        extraction_result: Optional[ExtractionResult] = None
+
         try:
             # 提取文件内容
             content = await self._extract_content(file_path, metadata.mime_type)
@@ -125,20 +141,68 @@ class EMCFileProcessor:
                 metadata.extraction_status = "empty_content"
                 return metadata, None
             
-            # 使用DeepSeek进行实体提取
-            extraction_result = await self._extract_entities_with_ai(
-                file_id, content, metadata
-            )
-            
+            # --- Current AI extraction (for ExtractionResult) ---
+            # This part can remain for now, but its output (ExtractionResult) might be
+            # less critical if graph_manager handles the primary structured data output.
+            try:
+                extraction_result = await self._extract_entities_with_ai(
+                    file_id, content, metadata # metadata is FileMetadata object
+                )
+                # Statistics for this extraction are handled within _extract_entities_with_ai
+            except Exception as e:
+                self.logger.error(f"Original _extract_entities_with_ai failed for {file_id}: {e}", exc_info=True)
+                # self._processing_stats['ai_invocation_errors'] += 1 # Assuming this was the old stat name
+                if extraction_result is None:
+                    extraction_result = ExtractionResult(
+                        file_id=file_id, entities=[], relationships=[], content_summary="AI extraction failed.",
+                        confidence_score=0.0, processing_time=0.0, extracted_at=datetime.now()
+                    )
+
+            # --- New: EMCGraphManager processing ---
+            if trigger_graph_processing:
+                if self.graph_manager:
+                    self.logger.info(f"Calling EMCGraphManager to process document: {file_id}")
+                    try:
+                        # Convert FileMetadata object to dict for graph_manager
+                        metadata_dict = asdict(metadata) # Ensure asdict is imported from dataclasses
+                        graph_summary = await self.graph_manager.process_document_content(
+                            text_content=content,
+                            document_id=file_id,
+                            document_metadata=metadata_dict
+                        )
+                        self.logger.info(f"Graph processing summary for {file_id}: {graph_summary.get('status')}")
+                        if graph_summary.get("status") == "failed" or graph_summary.get("errors"):
+                            self._processing_stats['graph_processing_content_errors'] += 1
+                            # Update status only if it's not already a more severe failure
+                            if not metadata.extraction_status or "failed" not in metadata.extraction_status.lower():
+                                metadata.extraction_status = "completed_with_graph_errors"
+                        # Optionally, you could merge entities/rels from graph_summary into extraction_result if needed
+
+                    except Exception as e:
+                        self.logger.error(f"EMCGraphManager invocation failed for {file_id}: {e}", exc_info=True)
+                        self._processing_stats['graph_processing_invocation_errors'] += 1
+                        if not metadata.extraction_status or "failed" not in metadata.extraction_status.lower():
+                             metadata.extraction_status = "graph_processing_failed"
+                else:
+                    self.logger.warning(f"Graph manager not available for document {file_id}. Skipping graph processing.")
+                    if not metadata.extraction_status or "failed" not in metadata.extraction_status.lower():
+                        metadata.extraction_status = "graph_processing_skipped_no_manager"
+
+
             metadata.processed = True
-            metadata.extraction_status = "completed"
             self._processing_stats['files_processed'] += 1
+            # Final status update if not set by graph processing stages
+            if not metadata.extraction_status or metadata.extraction_status == "pending":
+                 if extraction_result and extraction_result.entities: # From old method
+                      metadata.extraction_status = "completed_basic_extraction_only"
+                 else: # This implies extraction_result might be None or have no entities
+                      metadata.extraction_status = "completed_no_entities_found"
             
             return metadata, extraction_result
             
         except Exception as e:
-            self.logger.error(f"文件处理失败: {file_path}, 错误: {str(e)}")
-            metadata.extraction_status = "failed"
+            self.logger.error(f"文件处理失败: {file_path}, 错误: {str(e)}", exc_info=True) # Original error logging
+            metadata.extraction_status = "failed_in_file_processing" # More specific outer failure
             self._processing_stats['processing_errors'] += 1
             return metadata, None
     
@@ -605,7 +669,12 @@ class FormatConverter:
 # 工厂函数
 def create_emc_file_processor(
     deepseek_service: DeepSeekEMCService,
-    storage_path: str = "./uploads"
+    storage_path: str = "./uploads",
+    graph_manager: Optional[EMCGraphManager] = None # Add graph_manager
 ) -> EMCFileProcessor:
     """创建EMC文件处理器实例"""
-    return EMCFileProcessor(deepseek_service, storage_path)
+    return EMCFileProcessor(
+        deepseek_service,
+        storage_path,
+        graph_manager=graph_manager # Pass it to constructor
+    )
