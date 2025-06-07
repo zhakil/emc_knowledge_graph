@@ -55,7 +55,7 @@ class EMCDesktopApp {
             const isDev = process.env.NODE_ENV === 'development';
             const backendPath = isDev 
                 ? path.join(__dirname, '..', 'start_gateway.py')
-                : path.join(process.resourcesPath, 'backend', 'start_gateway.exe');
+                : path.join(process.resourcesPath, 'backend', 'emc_backend.exe');
 
             if (isDev) {
                 // 开发环境：启动Python脚本
