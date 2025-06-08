@@ -181,8 +181,18 @@ class EnvironmentChecker:
         我们检查是否能够导入关键的Python模块，这有助于提前发现依赖问题。
         """
         try:
-            import uvicorn
-            import fastapi
+            try:
+                import uvicorn
+            except ImportError:
+                raise EnvironmentError(
+                    "未找到 'uvicorn' 模块。请运行 'pip install uvicorn' 安装依赖。"
+                )
+            try:
+                import fastapi
+            except ImportError:
+                raise EnvironmentError(
+                    "未找到 'fastapi' 模块。请运行 'pip install fastapi' 安装依赖。"
+                )
         except ImportError as e:
             raise EnvironmentError(
                 f"Python依赖检查失败: {e}\n"

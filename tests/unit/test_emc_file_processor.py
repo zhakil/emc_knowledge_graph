@@ -22,7 +22,7 @@ from services.file_processing.emc_file_processor import (
 # A dummy DeepSeekEMCService class for type hinting if the actual import is problematic
 class MockDeepSeekEMCService:
     async def extract_entities_from_text(self, text_content: str, session_id: str):
-        return {"content": "{"entities": [], "relationships": []}"} # Default mock response
+        return {"content": '{"entities": [], "relationships": []}'} # Default mock response
 
 class MockEMCGraphManager:
     async def process_document_content(self, text_content: str, document_id: str, document_metadata: dict):

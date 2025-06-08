@@ -122,4 +122,4 @@ if __name__ == '__main__':
         runner.run(suite)
     asyncio.run(main_async())
     # Or run with: python -m unittest tests.unit.test_equipment_manager
-```
+
