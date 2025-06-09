@@ -1,4 +1,4 @@
-﻿{
+{
     "name": "emc-knowledge-graph-frontend",
     "version": "1.0.0",
     "description": "EMC知识图谱系统前端应用",
@@ -35,8 +35,8 @@
         "react-hook-form": "^7.48.2",
         "react-query": "^3.39.3",
         "react-router-dom": "^6.20.1",
-        "react-scripts": "5.0.1",
-        "react-syntax-highlighter": "^15.5.0",
+        "react-scripts": "^0.0.0",
+        "react-syntax-highlighter": "^5.8.0",
         "reactflow": "^11.10.1",
         "recharts": "^2.8.0",
         "uuid": "^9.0.1",
