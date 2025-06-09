@@ -40,7 +40,7 @@ EMC知识图谱系统是一个专为电磁兼容性领域设计的智能知识�
 
 *   **环境要求:**
     *   Git
-    *   Python 3.9+ (推荐使用虚拟环境)
+    *   Python 3.11 (推荐使用虚拟环境)
     *   Node.js (LTS版本，包含npm)
     *   Docker Desktop (最新版)
     *   (Windows) Windows Terminal 或 PowerShell
