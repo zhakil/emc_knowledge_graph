@@ -182,7 +182,16 @@ class EnvironmentChecker:
         """
         try:
             try:
-                import uvicorn
+                try:
+                    try:
+                        import uvicorn
+                    except ImportError:
+                        print("❌ 未找到 'uvicorn' 模块。请运行 'pip install uvicorn' 安装依赖。")
+                        sys.exit(1)
+
+                except ImportError:
+                    print("❌ 未找到 'uvicorn' 模块。请运行 'pip install uvicorn' 安装依赖。")
+                    sys.exit(1)
             except ImportError:
                 raise EnvironmentError(
                     "未找到 'uvicorn' 模块。请运行 'pip install uvicorn' 安装依赖。"
@@ -380,6 +389,13 @@ except ImportError as e:
         """
         output_dir.mkdir(parents=True, exist_ok=True)
         
+        # 确保临时目录已创建
+        if self.temp_dir is None:
+            self._create_temp_directory()
+        # 再次检查，防止self.temp_dir仍为None
+        if self.temp_dir is None:
+            raise RuntimeError("临时目录未能成功创建")
+
         pyinstaller_command = [
             "pyinstaller",
             "--onefile",

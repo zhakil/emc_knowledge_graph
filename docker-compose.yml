@@ -1,74 +1,162 @@
-# 移除version行，使用现代Docker Compose格式
+version: '3.8'
+
 services:
-  # 🚀 API网关 - 使用备用端口避免冲突
-  gateway:
-    image: python:3.11-slim
-    container_name: emc_gateway
+  # EMC知识图谱核心应用
+  emc-kg-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: emc-kg-api
     ports:
-      - "8001:8000"  # 外部8001，内部8000
-    volumes:
-      - .:/app
-      - ./uploads:/app/uploads
-    working_dir: /app
+      - "8000:8000"
     environment:
-      - EMC_ENVIRONMENT=development
-      - EMC_SECRET_KEY=dev-secret-key
-      - EMC_DEEPSEEK_API_KEY=sk-c23ccb18185d488ab996189cd62b7216
-    command: >
-      bash -c "
-        echo '🚀 安装依赖并启动服务...' &&
-        pip install --no-cache-dir fastapi uvicorn python-dotenv python-multipart aiofiles &&
-        echo '✅ 启动EMC知识图谱API网关...' &&
-        python gateway/main.py
-      "
+      - NEO4J_URI=bolt://neo4j:7687
+      - REDIS_URL=redis://redis:6379/0
+      - DATABASE_URL=postgresql://postgres:password@postgres:5432/emc_kg
+      - PYTHONPATH=/app
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
     depends_on:
-      - postgres
-      - redis
       - neo4j
+      - redis
+      - postgres
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: '1.0'
+    networks:
+      - emc-network
 
-  # 🗄️ PostgreSQL - 使用备用端口
-  postgres:
-    image: postgres:15-alpine
-    container_name: emc_postgres
-    ports:
-      - "5433:5432"  # 外部5433，避免与本地PostgreSQL冲突
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: Zqz112233
-      POSTGRES_DB: emc_knowledge
-    restart: unless-stopped
-
-  # 🔴 Redis
-  redis:
-    image: redis:7-alpine
-    container_name: emc_redis
-    ports:
-      - "6380:6379"  # 外部6380，避免本地Redis冲突
-    volumes:
-      - redis_data:/data
-    command: redis-server --requirepass Zqz112233
-    restart: unless-stopped
-
-  # 📊 Neo4j
+  # Neo4j图数据库
   neo4j:
-    image: neo4j:5.15-community
-    container_name: emc_neo4j
+    image: neo4j:5.28-community
+    container_name: emc-neo4j
     ports:
-      - "7475:7474"  # 外部7475
-      - "7688:7687"  # 外部7688
+      - "7474:7474"   # HTTP
+      - "7687:7687"   # Bolt
+    environment:
+      - NEO4J_AUTH=neo4j/emc_password_123
+      - NEO4J_PLUGINS=["apoc", "n10s"]
+      - NEO4J_apoc_export_file_enabled=true
+      - NEO4J_apoc_import_file_enabled=true
+      - NEO4J_dbms_memory_heap_initial_size=1G
+      - NEO4J_dbms_memory_heap_max_size=2G
+      - NEO4J_dbms_memory_pagecache_size=1G
     volumes:
       - neo4j_data:/data
-    environment:
-      NEO4J_AUTH: neo4j/Zqz112233
-      NEO4J_dbms_memory_pagecache_size: 2G
-      NEO4J_dbms_memory_heap_max__size: 2G
-      NEO4J_ACCEPT_LICENSE_AGREEMENT: "yes"
+      - neo4j_logs:/logs
+      - neo4j_import:/var/lib/neo4j/import
+      - neo4j_plugins:/plugins
     restart: unless-stopped
+    networks:
+      - emc-network
+
+  # Redis缓存
+  redis:
+    image: redis:7.4-alpine
+    container_name: emc-redis
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes --maxmemory 512mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    networks:
+      - emc-network
+
+  # PostgreSQL关系数据库
+  postgres:
+    image: postgres:16-alpine
+    container_name: emc-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=emc_kg
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_INITDB_ARGS=--encoding=UTF-8 --lc-collate=C --lc-ctype=C
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-scripts:/docker-entrypoint-initdb.d
+    restart: unless-stopped
+    networks:
+      - emc-network
+
+  # Nginx反向代理
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: emc-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/ssl:/etc/nginx/ssl
+      - ./static:/var/www/static
+    depends_on:
+      - emc-kg-api
+    restart: unless-stopped
+    networks:
+      - emc-network
+
+  # 监控: Prometheus
+  prometheus:
+    image: prom/prometheus:v2.55.1
+    container_name: emc-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+    restart: unless-stopped
+    networks:
+      - emc-network
+
+  # 可视化: Grafana
+  grafana:
+    image: grafana/grafana:11.3.0
+    container_name: emc-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=emc_admin_123
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards
+      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources
+    restart: unless-stopped
+    networks:
+      - emc-network
 
 volumes:
-  postgres_data:
-  redis_data:
   neo4j_data:
+  neo4j_logs:
+  neo4j_import:
+  neo4j_plugins:
+  redis_data:
+  postgres_data:
+  prometheus_data:
+  grafana_data:
+
+networks:
+  emc-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
