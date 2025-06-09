@@ -16,14 +16,13 @@
         "analyze": "npm run build && npx bundle-analyzer build/static/js/*.js",
         "dev": "concurrently \"npm start\" \"npm run type-check -- --watch\"",
         "preview": "npm run build && serve -s build",
-        "clean": "rimraf build node_modules/.cache"
+        "clean": "rimraf build node_modules"
     },
     "dependencies": {
         "@emotion/react": "^11.11.1",
         "@emotion/styled": "^11.11.0",
         "@monaco-editor/react": "^4.6.0",
         "@mui/icons-material": "^5.15.0",
-        "@mui/lab": "^5.0.0-alpha.156",
         "@mui/material": "^5.15.0",
         "@mui/x-data-grid": "^6.18.2",
         "@reduxjs/toolkit": "^2.0.1",
@@ -35,12 +34,8 @@
         "react-hook-form": "^7.48.2",
         "react-query": "^3.39.3",
         "react-router-dom": "^6.20.1",
-        "react-scripts": "^0.0.0",
-        "react-syntax-highlighter": "^5.8.0",
-        "reactflow": "^11.10.1",
-        "recharts": "^2.8.0",
-        "uuid": "^9.0.1",
-        "web-vitals": "^3.5.0",
+        "react-scripts": "^5.0.1",
+        "react-syntax-highlighter": "^15.5.11",
         "zustand": "^4.4.7"
     },
     "devDependencies": {
@@ -72,13 +67,7 @@
     "eslintConfig": {
         "extends": [
             "react-app",
-            "react-app/jest",
-            "@typescript-eslint/recommended",
-            "prettier"
-        ],
-        "plugins": [
-            "@typescript-eslint",
-            "prettier"
+            "react-app/jest"
         ],
         "rules": {
             "prettier/prettier": "error",
@@ -87,29 +76,6 @@
             "@typescript-eslint/explicit-module-boundary-types": "off",
             "@typescript-eslint/no-explicit-any": "warn",
             "react-hooks/exhaustive-deps": "warn"
-        }
-    },
-    "prettier": {
-        "semi": true,
-        "trailingComma": "es5",
-        "singleQuote": true,
-        "printWidth": 100,
-        "tabWidth": 2,
-        "useTabs": false
-    },
-    "lint-staged": {
-        "src/**/*.{ts,tsx,js,jsx}": [
-            "eslint --fix",
-            "prettier --write"
-        ],
-        "src/**/*.{json,css,md}": [
-            "prettier --write"
-        ]
-    },
-    "husky": {
-        "hooks": {
-            "pre-commit": "lint-staged",
-            "pre-push": "npm run type-check"
         }
     },
     "browserslist": {
@@ -124,9 +90,5 @@
             "last 1 safari version"
         ]
     },
-    "proxy": "http://localhost:8000",
-    "engines": {
-        "node": ">=16.0.0",
-        "npm": ">=8.0.0"
-    }
+    "proxy": "http://localhost:8000"
 }
