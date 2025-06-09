@@ -6,11 +6,17 @@ EMC知识图谱系统 - 完整版网关
 import os
 import logging
 from datetime import datetime
-from fastapi import FastAPI, UploadFile, File
+from pathlib import Path
+from typing import List
+import mimetypes
+
+from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from services.knowledge_graph.neo4j_emc_service import create_emc_knowledge_service
 from fastapi.responses import HTMLResponse
+from pydantic import BaseModel
+
+from services.knowledge_graph.neo4j_emc_service import create_emc_knowledge_service
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -29,9 +35,18 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Define FileInfo Pydantic model
+class FileInfo(BaseModel):
+    name: str
+    size: int
+    type: str
+    download_url: str
+    last_modified: str
+
 # 创建上传目录
-os.makedirs("/app/uploads", exist_ok=True)
-app.mount("/uploads", StaticFiles(directory="/app/uploads"), name="uploads")
+UPLOAD_DIRECTORY = Path("/app/uploads")
+UPLOAD_DIRECTORY.mkdir(exist_ok=True)
+app.mount("/uploads", StaticFiles(directory=UPLOAD_DIRECTORY), name="uploads")
 
 @app.get("/")
 async def root():
@@ -420,6 +435,46 @@ async def upload_file(file: UploadFile = File(...)):
     except Exception as e:
         logger.error(f"文件上传失败: {str(e)}")
         return {"error": f"上传失败: {str(e)}"}
+
+@app.get("/api/files", response_model=List[FileInfo])
+async def list_uploaded_files():
+    files_info = []
+    if not UPLOAD_DIRECTORY.exists() or not UPLOAD_DIRECTORY.is_dir():
+        # This case should ideally not happen if mkdir_exist_ok is called at startup
+        return files_info
+
+    for item in UPLOAD_DIRECTORY.iterdir():
+        if item.is_file():
+            file_stat = item.stat()
+            mime_type, _ = mimetypes.guess_type(item.name)
+            files_info.append(
+                FileInfo(
+                    name=item.name,
+                    size=file_stat.st_size,
+                    type=mime_type or "application/octet-stream",
+                    download_url=f"/uploads/{item.name}", # Assuming /uploads is mounted
+                    last_modified=datetime.fromtimestamp(file_stat.st_mtime).isoformat()
+                )
+            )
+    return files_info
+
+@app.delete("/api/files/{filename}")
+async def delete_uploaded_file(filename: str):
+    if not filename or ".." in filename or "/" in filename:
+        raise HTTPException(status_code=400, detail="Invalid filename.")
+
+    file_path = UPLOAD_DIRECTORY / filename
+
+    if not file_path.exists() or not file_path.is_file():
+        raise HTTPException(status_code=404, detail=f"File not found: {filename}")
+
+    try:
+        os.remove(file_path)
+        return {"message": f"File '{filename}' deleted successfully."}
+    except Exception as e:
+        # Log the exception e
+        logger.error(f"Could not delete file {filename}: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Could not delete file: {str(e)}")
 
 if __name__ == "__main__":
     import uvicorn

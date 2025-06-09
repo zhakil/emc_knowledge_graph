@@ -23,7 +23,10 @@ import {
   Menu,
   MenuItem,
   Avatar,
-  Tooltip
+  Tooltip,
+  TextField,
+  ListItemSecondaryAction,
+  CircularProgress
 } from '@mui/material';
 import {
   Menu as MenuIcon,
@@ -38,7 +41,8 @@ import {
   Notifications,
   AccountCircle,
   ExitToApp,
-  Help
+  Help,
+  Delete as DeleteIcon
 } from '@mui/icons-material';
 
 // 组件导入
@@ -52,6 +56,7 @@ import FileContentViewer from './components/Display/FileContentViewer';
 // Store hooks
 import { useDeepSeekStore } from './stores/deepSeekStore';
 import { useGraphStore } from './stores/graphStore';
+import { useFileStore } from './stores/fileStore'; // Added for FileUploadView
 
 // 主题配置
 const createAppTheme = (darkMode: boolean) => createTheme({
@@ -550,27 +555,103 @@ const KnowledgeGraphView: React.FC = () => (
 );
 
 const FileUploadView: React.FC = () => {
-  const handleFilesSelected = (files: File[]) => {
-    console.log('Selected files:', files);
+  // This onFilesSelected is from the original FileUploadZone,
+  // ensure it's still relevant or integrate its logic if needed.
+  const handleFilesSelectedForUpload = (selectedFiles: File[]) => {
+    console.log('Selected files for upload:', selectedFiles);
+    // This is where you would typically trigger an upload to the backend.
+    // After successful upload, you might want to call fetchFiles() from useFileStore
+    // to refresh the list, or optimistically add to the store.
+  };
+
+  const {
+    files,
+    isLoading,
+    error,
+    fetchFiles,
+    deleteFile,
+    clearError, // Added for dismissing errors
+  } = useFileStore();
+
+  useEffect(() => {
+    fetchFiles();
+    // Cleanup function to clear any errors when the component unmounts or before re-fetching
+    return () => {
+      clearError();
+    };
+  }, [fetchFiles, clearError]);
+
+  const handleDeleteFile = async (filename: string) => {
+    // Basic confirmation, can be replaced with a modal dialog
+    if (window.confirm(`Are you sure you want to delete ${filename}?`)) {
+      await deleteFile(filename);
+      // The file list will auto-refresh due to deleteFile calling fetchFiles in the store.
+    }
+  };
+
+  // Function to format bytes into a readable string
+  const formatBytes = (bytes: number, decimals = 2) => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const dm = decimals < 0 ? 0 : decimals;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
   };
 
   return (
-    <Container maxWidth="xl">
-      <Typography variant="h4" gutterBottom>
+    <Container maxWidth="xl"> {/* Assuming Container is imported */}
+      <Typography variant="h4" gutterBottom> {/* Assuming Typography is imported */}
         文件处理
       </Typography>
-      <Grid container spacing={3}>
+      <Grid container spacing={3}> {/* Assuming Grid is imported */}
         <Grid item xs={12} md={6}>
-          <FileUploadZone onFilesSelected={handleFilesSelected} />
+          {/* FileUploadZone is an existing component, ensure its props are correct */}
+          <FileUploadZone onFilesSelected={handleFilesSelectedForUpload} />
         </Grid>
         <Grid item xs={12} md={6}>
-          <Paper sx={{ p: 3, height: 400 }}>
+          <Paper sx={{ p: 3, minHeight: 400 }}> {/* Assuming Paper is imported */}
             <Typography variant="h6" gutterBottom>
-              处理结果
+              已上传文件
             </Typography>
-            <Typography variant="body2" color="textSecondary">
-              上传文件后，处理结果将显示在这里
-            </Typography>
+            <Divider sx={{ mb: 2 }} /> {/* Assuming Divider is imported */}
+
+            {isLoading && (
+              <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', p: 2 }}>
+                <CircularProgress /> {/* Assuming CircularProgress is imported */}
+                <Typography sx={{ ml: 2 }}>正在加载文件列表...</Typography>
+              </Box>
+            )}
+
+            {error && (
+              <Alert severity="error" onClose={() => clearError()}> {/* Assuming Alert is imported */}
+                {error}
+              </Alert>
+            )}
+
+            {!isLoading && !error && files.length === 0 && (
+              <Typography variant="body2" color="textSecondary" sx={{ textAlign: 'center', mt: 2 }}>
+                尚未上传任何文件。
+              </Typography>
+            )}
+
+            {!isLoading && !error && files.length > 0 && (
+              <List dense> {/* Assuming List is imported */}
+                {files.map((file) => (
+                  <ListItem key={file.name} divider> {/* Assuming ListItem is imported */}
+                    <ListItemText {/* Assuming ListItemText is imported */}
+                      primary={file.name}
+                      secondary={`大小: ${formatBytes(file.size)} - 类型: ${file.type} - 修改日期: ${new Date(file.last_modified || 0).toLocaleDateString()}`}
+                    />
+                    <ListItemSecondaryAction> {/* Assuming ListItemSecondaryAction is imported */}
+                      <IconButton edge="end" aria-label="delete" onClick={() => handleDeleteFile(file.name)}>
+                        <DeleteIcon /> {/* Assuming DeleteIcon is imported from @mui/icons-material */}
+                      </IconButton>
+                    </ListItemSecondaryAction>
+                  </ListItem>
+                ))}
+              </List>
+            )}
           </Paper>
         </Grid>
       </Grid>
@@ -591,34 +672,107 @@ const AnalyticsView: React.FC = () => (
   </Container>
 );
 
-const SettingsView: React.FC = () => (
-  <Container maxWidth="xl">
-    <Typography variant="h4" gutterBottom>
-      系统设置
-    </Typography>
-    <Grid container spacing={3}>
-      <Grid item xs={12} md={6}>
-        <Paper sx={{ p: 3 }}>
-          <Typography variant="h6" gutterBottom>
-            API 配置
-          </Typography>
-          <Typography variant="body2" color="textSecondary">
-            配置DeepSeek API密钥和其他集成设置
-          </Typography>
-        </Paper>
+const SettingsView: React.FC = () => {
+  const {
+    apiKey,
+    baseUrl,
+    config,
+    setApiKey,
+    setBaseUrl,
+    updateConfig,
+  } = useDeepSeekStore(); // Assuming useDeepSeekStore is already imported in App.tsx
+
+  const handleConfigChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = event.target;
+    let processedValue: string | number = value;
+    if (name === 'maxTokens' || name === 'temperature') {
+      processedValue = name === 'temperature' ? parseFloat(value) : parseInt(value, 10);
+      if (isNaN(processedValue as number)) {
+        // Handle invalid number input if necessary, or let the browser/store handle it
+        // Revert to current store value if input is not a valid number
+        processedValue = name === 'temperature' ? config.temperature : config.maxTokens;
+      }
+    }
+    updateConfig({ ...config, [name]: processedValue });
+  };
+
+  const handleBaseUrlChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setBaseUrl(event.target.value);
+  };
+
+  const handleApiKeyChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setApiKey(event.target.value);
+  };
+
+  return (
+    <Container maxWidth="xl"> {/* Assuming Container is imported */}
+      <Typography variant="h4" gutterBottom> {/* Assuming Typography is imported */}
+        系统设置
+      </Typography>
+      <Grid container spacing={3}> {/* Assuming Grid is imported */}
+        <Grid item xs={12} md={6}>
+          <Paper sx={{ p: 3 }}> {/* Assuming Paper is imported */}
+            <Typography variant="h6" gutterBottom>
+              DeepSeek API 配置
+            </Typography>
+            <TextField // Assuming TextField is imported
+              label="API Key"
+              value={apiKey}
+              onChange={handleApiKeyChange}
+              fullWidth
+              margin="normal"
+              type="password"
+            />
+            <TextField
+              label="Base URL"
+              value={baseUrl}
+              onChange={handleBaseUrlChange}
+              fullWidth
+              margin="normal"
+            />
+            <TextField
+              label="Model"
+              name="model" // Name attribute for handleConfigChange
+              value={config.model}
+              onChange={handleConfigChange}
+              fullWidth
+              margin="normal"
+            />
+            <TextField
+              label="Max Tokens"
+              name="maxTokens" // Name attribute for handleConfigChange
+              type="number"
+              value={config.maxTokens}
+              onChange={handleConfigChange}
+              fullWidth
+              margin="normal"
+            />
+            <TextField
+              label="Temperature"
+              name="temperature" // Name attribute for handleConfigChange
+              type="number"
+              value={config.temperature}
+              onChange={handleConfigChange}
+              inputProps={{ step: "0.1", min: "0", max: "2" }}
+              fullWidth
+              margin="normal"
+            />
+          </Paper>
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <Paper sx={{ p: 3 }}>
+            <Typography variant="h6" gutterBottom>
+              图数据库设置
+            </Typography>
+            <Typography variant="body2" color="textSecondary">
+              Neo4j连接和知识图谱配置 (此处暂时为占位符)
+            </Typography>
+            {/* Future Neo4j settings can go here */}
+          </Paper>
+        </Grid>
       </Grid>
-      <Grid item xs={12} md={6}>
-        <Paper sx={{ p: 3 }}>
-          <Typography variant="h6" gutterBottom>
-            图数据库设置
-          </Typography>
-          <Typography variant="body2" color="textSecondary">
-            Neo4j连接和知识图谱配置
-          </Typography>
-        </Paper>
-      </Grid>
-    </Grid>
-  </Container>
-);
+    </Container>
+  );
+};
 
 export default EMCKnowledgeGraphApp;
