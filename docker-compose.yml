@@ -37,7 +37,7 @@ services:
 
   # Neo4j图数据库
   neo4j:
-    image: neo4j:5.28-community
+    image: neo4j:5.15.0-community
     container_name: emc-neo4j
     ports:
       - "7474:7474"   # HTTP
