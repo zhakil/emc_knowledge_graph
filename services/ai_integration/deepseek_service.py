@@ -1,4 +1,4 @@
-﻿"""
+"""
 DeepSeek AI API集成服务
 支持OpenAI兼容的API格式，专为EMC知识图谱优化
 """

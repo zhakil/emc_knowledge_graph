@@ -1,4 +1,4 @@
-﻿"""
+"""
 DeepSeek API路由模块
 处理所有与DeepSeek AI交互相关的API端点
 """

@@ -1,66 +1,60 @@
-# File Descriptions for EMC Knowledge Graph System
+# Python File Descriptions
 
-This document provides an overview of the main directories and key files within the EMC Knowledge Graph System project.
+This document provides a summary of the Python files in this project, including their purpose.
 
-## Root Directory
-
--   **`.github/workflows/`**: Contains GitHub Actions CI/CD workflow configurations (e.g., `ci.yml`).
--   **`.venv311/`**: Python virtual environment directory (specific to this setup).
--   **`data_access/`**: Likely intended for data access layer components (currently has `.gitkeep`).
--   **`desktop/`**: Contains files related to the Electron desktop application.
-    -   `main.js`: The main process script for Electron. Handles window creation and backend process management.
-    -   `package.json`: Defines dependencies and scripts for the Electron app.
-    -   `resources/backend/`: Target directory for the packaged Python backend executable.
--   **`docker/`**: Contains Docker-related files, like `compose.yml` for service orchestration.
--   **`frontend/`**: Contains the React frontend application.
-    -   `public/`: Static assets for the frontend.
-    -   `src/`: Older source structure (might be partially migrated or deprecated).
-    -   `components/`: React components organized by function (Display, Editor, EMC, Input).
-        -   `Display/GraphVisualization.tsx`: Core ReactFlow component for rendering the knowledge graph.
-        -   `Display/KnowledgeGraphViewer.tsx`: Wrapper component that uses `GraphVisualization` and `graphStore` to display the KG.
-        -   `Display/OLD_KnowledgeGraphViewer.py`: (Misnamed backend Python code, kept for reference, should be reviewed/moved).
-        -   `Editor/DeepSeekPromptEditor.tsx`: UI for editing and sending prompts to DeepSeek.
-        -   `Input/FileUploadZone.tsx`: Component for handling file drag-and-drop and selection.
-    -   `services/`: Frontend services for API calls (e.g., `aiService.ts`, `fileService.ts`, `graphService.ts`).
-    -   `stores/`: Zustand stores for frontend state management (e.g., `deepSeekStore.ts`, `graphStore.ts`, `fileStore.ts`).
-    -   `App.tsx`: Main application component, handles routing for different views (Dashboard, AI Chat, KG, File Upload, Settings).
-    -   `package.json`: Defines dependencies and scripts for the frontend React app.
--   **`gateway/`**: Contains the FastAPI backend application (API gateway).
-    -   `main.py`: Main FastAPI application file, defines API endpoints, middleware, and startup events.
-    -   `config.py`: Likely for gateway configuration.
-    -   `routing/`: Defines specific API routes (e.g., `deepseek_routes.py`, `file_routes.py`, `graph_routes.py`).
-    -   `websocket/`: Websocket communication logic (e.g., `graph_sync.py`).
--   **`nginx/`**: Configuration for Nginx reverse proxy, if used.
--   **`scripts/`**: Various helper and build scripts.
-    -   `build_windows_app.py`: Python script to build the Windows executable using PyInstaller and Electron Builder.
-    -   `init_databases.sh`: Shell script to initialize databases.
-    -   Other utility scripts for deployment, checks, etc.
--   **`services/`**: Backend services (business logic).
-    -   `ai_integration/`: Services for integrating with AI models like DeepSeek.
-        -   `deepseek_service.py`: Core service for interacting with the DeepSeek API.
-        -   `prompt_manager.py`: Manages prompt templates for AI interaction.
-    -   `emc_domain/`: Services related to the EMC domain logic (compliance, equipment, standards).
-    -   `file_processing/`: Services for handling and processing uploaded files.
-    -   `graph_editing/`: Services for real-time graph editing.
-    -   `knowledge_graph/`: Services for interacting with the Neo4j knowledge graph.
-        -   `neo4j_emc_service.py`: (Referenced in `gateway/main.py` for startup) Python service for Neo4j interactions. Note: `frontend/components/Display/OLD_KnowledgeGraphViewer.py` seems to be a duplicated or misplaced version of this.
--   **`src/types/`**: TypeScript type definitions, primarily for the frontend.
--   **`tests/`**: Automated tests (unit, integration, API).
--   **`utils/`**: Utility functions shared across the backend.
--   **`Dockerfile`**: Dockerfile for building the main application container.
--   **`docker-compose.yml`**: Docker Compose file for orchestrating the application and its services (Neo4j, Postgres, Redis).
--   **`requirements.txt`**: Python dependencies for the backend.
--   **`README.md`**: Main project README file.
--   **`EMC_ONTOLOGY.md`**: Document describing the EMC ontology used in the knowledge graph.
-
-## Key Files Summary
-
--   **`frontend/App.tsx`**: Central hub of the React frontend application.
--   **`gateway/main.py`**: Entry point and router for all backend API calls.
--   **`services/ai_integration/deepseek_service.py`**: Handles all communication with the DeepSeek AI.
--   **`services/knowledge_graph/neo4j_emc_service.py` (Expected) / `frontend/components/Display/OLD_KnowledgeGraphViewer.py` (Actual, Misplaced)**: Manages interactions with the Neo4j graph database.
--   **`frontend/stores/`**: Contains all Zustand state management stores for the frontend.
--   **`scripts/build_windows_app.py`**: Orchestrates the entire build process for the Windows desktop application.
--   **`docker-compose.yml`**: Defines how all the services (frontend, gateway, databases) run together in a containerized environment.
-
-This list is not exhaustive but covers the most critical parts of the application.
+| File Path | Purpose |
+|-----------|---------|
+| `conda_setup.py` | EMC知识图谱 - Conda环境自动化部署 |
+| `data_processing/clean_utils.py` | EMC知识图谱数据清理工具 |
+| `env_manager.py` | EMC知识图谱 - 环境管理工具 |
+| `frontend/components/Display/OLD_KnowledgeGraphViewer.py` | Neo4j EMC知识图谱服务 |
+| `gateway/config.py` | 系统配置管理 |
+| `gateway/gateway.py` | Purpose not automatically determined. |
+| `gateway/main.py` | EMC知识图谱系统 - 完整版网关 |
+| `gateway/middleware/auth.py` | 认证授权中间件 |
+| `gateway/routing/deepseek_routes.py` | DeepSeek API路由模块 |
+| `gateway/routing/file_routes.py` | 文件处理API路由模块 |
+| `gateway/routing/graph_routes.py` | 知识图谱API路由模块 |
+| `gateway/websocket/graph_sync.py` | Defines the class 'GraphSyncManager'. |
+| `kg_construction/entity_linking.py` | EMC知识图谱实体链接模块 |
+| `quick_start.py` | EMC知识图谱系统 - 最简运行脚本 |
+| `scripts/build_windows_app.py` | EMC知识图谱 Windows应用构建脚本 - 重构版 |
+| `scripts/generate_test_data.py` | Purpose not automatically determined. |
+| `services/ai_integration/deepseek_service.py` | DeepSeek AI API集成服务 |
+| `services/ai_integration/enhanced_deepseek_service.py` | Defines the class 'DeepSeekRequest'. |
+| `services/ai_integration/prompt_manager.py` | Purpose not automatically determined. |
+| `services/emc_domain/compliance_checker.py` | EMC Compliance Checker |
+| `services/emc_domain/equipment_manager.py` | EMC Equipment Manager |
+| `services/emc_domain/standards_processor.py` | EMC Standards Processor |
+| `services/file_processing/content_extractor.py` | Purpose not automatically determined. |
+| `services/file_processing/emc_file_processor.py` | EMC文件处理服务 |
+| `services/file_processing/file_handler.py` | Purpose not automatically determined. |
+| `services/graph_editing/real_time_editor.py` | Defines the class 'GraphEditOperation'. |
+| `services/knowledge_graph/emc_ontology.py` | EMC Knowledge Graph Ontology |
+| `services/knowledge_graph/enhanced_neo4j_service.py` | 增强的Neo4j服务 - 类型安全的实时编辑支持 |
+| `services/knowledge_graph/entity_disambiguation.py` | EMC知识图谱实体消歧模块 |
+| `services/knowledge_graph/entity_extractor.py` | EMC Entity Extractor |
+| `services/knowledge_graph/graph_manager.py` | EMC Graph Manager |
+| `services/knowledge_graph/graph_query_engine.py` | Purpose not automatically determined. |
+| `services/knowledge_graph/neo4j_emc_service.py` | Neo4j EMC知识图谱服务 - 修复类型错误 |
+| `services/knowledge_graph/relation_builder.py` | EMC Relationship Builder |
+| `setup.py` | EMC知识图谱系统安装配置 |
+| `start_gateway.py` | EMC知识图谱系统 - 高效API网关 |
+| `tests/Neo4j_SQL_Redis.py` | 实用高效的数据库连接检查工具 |
+| `tests/__init__.py` | Purpose not automatically determined. |
+| `tests/api/test_api.py` | Purpose not automatically determined. |
+| `tests/integration/test_emc_kg_pipeline.py` | Integration tests for the EMC Knowledge Graph pipeline. |
+| `tests/test_entity_disambiguation_integration.py` | 实体消歧功能集成测试 |
+| `tests/test_type_checking.py` | Purpose not automatically determined. |
+| `tests/unit/test_compliance_checker.py` | Unit tests for EMCComplianceChecker. |
+| `tests/unit/test_emc_file_processor.py` | Unit tests for EMCFileProcessor. |
+| `tests/unit/test_emc_ontology.py` | Unit tests for the EMC Knowledge Graph Ontology. |
+| `tests/unit/test_entity_extractor.py` | Unit tests for EMCEntityExtractor, focusing on rule-based extraction. |
+| `tests/unit/test_equipment_manager.py` | Unit tests for EMCEquipmentManager. |
+| `tests/unit/test_graph_manager.py` | Unit tests for EMCGraphManager. |
+| `tests/unit/test_kg_service.py` | 知识图谱服务测试 - 实用高效的单元测试 |
+| `tests/unit/test_neo4j_emc_service.py` | Unit tests for Neo4jEMCService. |
+| `tests/unit/test_relation_builder.py` | Unit tests for EMCRelationBuilder, focusing on rule-based relationship identification. |
+| `tests/unit/test_standards_processor.py` | Unit tests for EMCStandardsProcessor. |
+| `utils/security.py` | Purpose not automatically determined. |
+| `your_script.py` | Purpose not automatically determined. |

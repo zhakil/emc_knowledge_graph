@@ -94,4 +94,3 @@ if __name__ == '__main__':
 
     asyncio.run(main_async())
     # Or run with: python -m unittest tests.unit.test_compliance_checker
-```
