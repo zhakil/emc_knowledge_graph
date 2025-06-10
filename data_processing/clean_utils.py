@@ -211,11 +211,15 @@ class EMCDataCleaner:
                     normalized = f"EN {match}"
                 elif standard_type == 'iso':
                     normalized = f"ISO {match}"
+                else:
+                    normalized = str(match)
                 
                 # 替换原始匹配
                 original_match = pattern.search(result)
                 if original_match:
-                    result = result.replace(original_match.group(0), normalized)
+                    # 替换第一个匹配项
+                    result = result[:original_match.start()] + normalized + result[original_match.end():]
+
         
         return result
     

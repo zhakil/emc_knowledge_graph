@@ -152,7 +152,7 @@ curl -X POST http://localhost:8000/api/deepseek/chat   -H "Content-Type: applica
     "temperature": 0.5,
     "max_tokens": 500
   }'
-
+-r
 # 访问前端Web界面
 echo "Access Frontend at: http://localhost:3000"
 echo "Access Neo4j Browser at: http://localhost:7474 (User: neo4j, Password: your .env password)"

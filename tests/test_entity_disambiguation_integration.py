@@ -177,4 +177,4 @@ class TestEntityDisambiguationIntegration(unittest.TestCase):
         large_entities = (base_entities * multiplier)[:10000]
         large_contexts = (base_contexts * multiplier)[:10000]
         
-        print(f"准备测试 {len(large_entities)
+        print(f"准备测试 {len(large_entities)} 个实体进行消歧性能测试")

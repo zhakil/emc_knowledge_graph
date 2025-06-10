@@ -77,7 +77,11 @@ class DatabaseChecker:
             
             with conn.cursor() as cursor:
                 cursor.execute("SELECT current_database(), version()")
-                db_name, version = cursor.fetchone()
+                row = cursor.fetchone()
+                if row is None:
+                    conn.close()
+                    return False, "未能获取数据库信息"
+                db_name, version = row
                 
             conn.close()
             return True, f"连接成功 - 数据库: {db_name}"
@@ -137,7 +141,7 @@ class DatabaseChecker:
         except Exception as e:
             return False, f"连接失败: {str(e)}"
     
-    def run_comprehensive_check(self) -> Dict[str, any]:
+    def run_comprehensive_check(self) -> Dict[str, Dict[str, object]]:
         """运行完整检查 - 实用报告生成"""
         print("🔍 EMC数据库连接检查")
         print("=" * 40)
@@ -211,7 +215,7 @@ def main():
     results = checker.run_comprehensive_check()
     
     # 返回状态码，便于脚本集成
-    all_success = all(info['connection_success'] for info in results.values())
+    all_success = all(isinstance(info, dict) and info.get('connection_success', False) for info in results.values())
     sys.exit(0 if all_success else 1)
 
 
