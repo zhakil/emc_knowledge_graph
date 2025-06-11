@@ -16,7 +16,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
 
-from services.knowledge_graph.neo4j_emc_service import create_emc_knowledge_service
+from .routing import graph_routes
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -44,9 +44,12 @@ class FileInfo(BaseModel):
     last_modified: str
 
 # 创建上传目录
-UPLOAD_DIRECTORY = Path("/app/uploads")
+UPLOAD_DIRECTORY = Path("uploads")
 UPLOAD_DIRECTORY.mkdir(exist_ok=True)
 app.mount("/uploads", StaticFiles(directory=UPLOAD_DIRECTORY), name="uploads")
+
+# 注册图数据库路由
+app.include_router(graph_routes.router, prefix="/api/graph", tags=["知识图谱"])
 
 @app.get("/")
 async def root():
@@ -170,23 +173,30 @@ async def upload_page():
         <div class="container">
             <div class="header">
                 <h1>📁 EMC知识图谱文件导入</h1>
-                <p>支持 PDF、Word、Excel、CSV、JSON、XML、TXT 等格式</p>
+                <p>支持 PDF、Word、Excel、CSV、JSON、XML、TXT、PNG、JPG、GIF、SVG 等格式</p>
             </div>
             
             <div class="upload-section">
                 <div class="upload-area" id="uploadArea">
                     <div class="upload-icon">📤</div>
                     <div class="upload-text">点击选择文件或拖拽文件到此处</div>
-                    <div class="upload-hint">支持格式: PDF, DOCX, XLSX, CSV, JSON, XML, TXT</div>
+                    <div class="upload-hint">支持格式: PDF, DOCX, XLSX, CSV, JSON, XML, TXT, PNG, JPG, GIF, SVG</div>
                     <input type="file" id="fileInput" style="display: none;" multiple 
-                           accept=".pdf,.docx,.xlsx,.csv,.json,.xml,.txt">
+                           accept=".pdf,.docx,.xlsx,.csv,.json,.xml,.txt,.png,.jpg,.jpeg,.gif,.bmp,.webp,.svg">
                 </div>
                 
                 <div id="fileList" class="file-list"></div>
                 
                 <div style="text-align: center;">
-                    <button class="btn" onclick="uploadFiles()" id="uploadBtn" disabled>🚀 开始上传</button>
+                    <button class="btn" onclick="uploadFiles()" id="uploadBtn" disabled>🚀 批量上传</button>
+                    <button class="btn btn-success" onclick="uploadBatch()" id="batchUploadBtn" disabled>⚡ 快速批量上传</button>
                     <button class="btn btn-danger" onclick="clearFiles()" id="clearBtn" disabled>🗑️ 清空列表</button>
+                </div>
+                
+                <div style="text-align: center; margin-top: 10px;">
+                    <small style="color: #666;">
+                        💡 提示：可以同时选择多个文件进行批量上传，支持拖拽操作
+                    </small>
                 </div>
                 
                 <div class="stats" id="stats" style="display: none;">
@@ -290,6 +300,7 @@ async def upload_page():
             function updateButtons() {
                 const hasFiles = selectedFiles.length > 0;
                 document.getElementById('uploadBtn').disabled = !hasFiles;
+                document.getElementById('batchUploadBtn').disabled = !hasFiles;
                 document.getElementById('clearBtn').disabled = !hasFiles;
             }
             
@@ -367,6 +378,99 @@ async def upload_page():
                     }
                 }, 2000);
             }
+            
+            async function uploadBatch() {
+                if (selectedFiles.length === 0) return;
+                
+                const results = document.getElementById('results');
+                const progressContainer = document.getElementById('progressContainer');
+                const progressBar = document.getElementById('progressBar');
+                
+                results.innerHTML = '';
+                progressContainer.style.display = 'block';
+                uploadStats = { total: selectedFiles.length, success: 0, failed: 0 };
+                
+                document.getElementById('batchUploadBtn').disabled = true;
+                document.getElementById('uploadBtn').disabled = true;
+                
+                // 创建FormData包含所有文件
+                const formData = new FormData();
+                selectedFiles.forEach(file => {
+                    formData.append('files', file);
+                });
+                
+                try {
+                    progressBar.style.width = '50%';
+                    
+                    const response = await fetch('/api/batch-upload', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    const result = await response.json();
+                    progressBar.style.width = '100%';
+                    
+                    if (response.ok) {
+                        // 显示批量上传结果
+                        results.innerHTML = `
+                            <div class="result-item result-success">
+                                ✅ <strong>批量上传完成</strong>
+                                <br>📊 总计: ${result.summary.total} 个文件
+                                <br>✅ 成功: ${result.summary.success} 个
+                                <br>❌ 失败: ${result.summary.errors} 个
+                            </div>
+                        `;
+                        
+                        // 显示详细结果
+                        result.results.forEach(fileResult => {
+                            const statusClass = fileResult.status === 'success' ? 'result-success' : 'result-error';
+                            const statusIcon = fileResult.status === 'success' ? '✅' : '❌';
+                            
+                            results.innerHTML += `
+                                <div class="result-item ${statusClass}">
+                                    ${statusIcon} <strong>${fileResult.filename}</strong>
+                                    <br>💬 ${fileResult.message}
+                                    ${fileResult.download_url ? `<br>📎 <a href="${fileResult.download_url}" target="_blank">下载链接</a>` : ''}
+                                </div>
+                            `;
+                        });
+                        
+                        uploadStats.success = result.summary.success;
+                        uploadStats.failed = result.summary.errors;
+                        
+                    } else {
+                        results.innerHTML = `
+                            <div class="result-item result-error">
+                                ❌ <strong>批量上传失败</strong>
+                                <br>💬 错误: ${result.error || '未知错误'}
+                            </div>
+                        `;
+                    }
+                    
+                    // 更新统计
+                    document.getElementById('successCount').textContent = uploadStats.success;
+                    document.getElementById('failedCount').textContent = uploadStats.failed;
+                    
+                } catch (error) {
+                    results.innerHTML = `
+                        <div class="result-item result-error">
+                            ❌ <strong>批量上传网络错误</strong>
+                            <br>💬 ${error.message}
+                        </div>
+                    `;
+                }
+                
+                progressContainer.style.display = 'none';
+                document.getElementById('batchUploadBtn').disabled = false;
+                document.getElementById('uploadBtn').disabled = false;
+                
+                // 上传完成后清空列表
+                setTimeout(() => {
+                    if (uploadStats.success > 0) {
+                        clearFiles();
+                    }
+                }, 3000);
+            }
         </script>
     </body>
     </html>
@@ -382,7 +486,7 @@ async def health_check():
             "upload_interface": True,
             "upload_directory": os.path.exists("/app/uploads")
         },
-        "file_count": len(os.listdir("/app/uploads")),
+        "file_count": len(os.listdir("uploads")),
         "timestamp": datetime.now().isoformat()
     }
 
@@ -397,8 +501,8 @@ async def test_api():
             "file_upload": "http://localhost:8001/api/upload"
         },
         "file_stats": {
-            "upload_directory": "/app/uploads",
-            "files_count": len(os.listdir("/app/uploads"))
+            "upload_directory": "uploads",
+            "files_count": len(os.listdir("uploads"))
         },
         "timestamp": datetime.now().isoformat()
     }
@@ -408,7 +512,7 @@ async def upload_file(file: UploadFile = File(...)):
     """文件上传API"""
     try:
         # 验证文件类型
-        allowed_extensions = {'.pdf', '.docx', '.xlsx', '.csv', '.json', '.xml', '.txt'}
+        allowed_extensions = {'.pdf', '.docx', '.xlsx', '.csv', '.json', '.xml', '.txt', '.png', '.jpg', '.jpeg', '.gif', '.bmp', '.webp', '.svg'}
         file_ext = os.path.splitext(file.filename or "")[1].lower()
         
         if file_ext not in allowed_extensions:
@@ -418,7 +522,7 @@ async def upload_file(file: UploadFile = File(...)):
             }
         
         # 保存文件
-        file_path = f"/app/uploads/{file.filename}"
+        file_path = f"uploads/{file.filename}"
         with open(file_path, "wb") as f:
             content = await file.read()
             f.write(content)
@@ -476,44 +580,147 @@ async def delete_uploaded_file(filename: str):
         logger.error(f"Could not delete file {filename}: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Could not delete file: {str(e)}")
 
+@app.post("/api/batch-upload")
+async def batch_upload_files(files: List[UploadFile] = File(...)):
+    """批量文件上传API"""
+    results = []
+    allowed_extensions = {'.pdf', '.docx', '.xlsx', '.csv', '.json', '.xml', '.txt', '.png', '.jpg', '.jpeg', '.gif', '.bmp', '.webp', '.svg'}
+    
+    for file in files:
+        try:
+            # 验证文件类型
+            file_ext = os.path.splitext(file.filename or "")[1].lower()
+            
+            if file_ext not in allowed_extensions:
+                results.append({
+                    "filename": file.filename,
+                    "status": "error",
+                    "message": f"不支持的文件类型: {file_ext}",
+                    "supported": list(allowed_extensions)
+                })
+                continue
+            
+            # 保存文件
+            file_path = f"uploads/{file.filename}"
+            with open(file_path, "wb") as f:
+                content = await file.read()
+                f.write(content)
+            
+            results.append({
+                "filename": file.filename,
+                "status": "success",
+                "message": "文件上传成功",
+                "size": len(content),
+                "file_type": file_ext,
+                "download_url": f"http://localhost:8000/uploads/{file.filename}",
+                "timestamp": datetime.now().isoformat()
+            })
+            
+        except Exception as e:
+            logger.error(f"批量上传文件失败 {file.filename}: {str(e)}")
+            results.append({
+                "filename": file.filename,
+                "status": "error",
+                "message": f"上传失败: {str(e)}"
+            })
+    
+    success_count = sum(1 for r in results if r["status"] == "success")
+    error_count = len(results) - success_count
+    
+    return {
+        "summary": {
+            "total": len(results),
+            "success": success_count,
+            "errors": error_count
+        },
+        "results": results,
+        "timestamp": datetime.now().isoformat()
+    }
+
+@app.delete("/api/batch-delete")
+async def batch_delete_files(filenames: List[str]):
+    """批量删除文件API"""
+    results = []
+    
+    for filename in filenames:
+        try:
+            if not filename or ".." in filename or "/" in filename:
+                results.append({
+                    "filename": filename,
+                    "status": "error",
+                    "message": "Invalid filename"
+                })
+                continue
+
+            file_path = UPLOAD_DIRECTORY / filename
+
+            if not file_path.exists() or not file_path.is_file():
+                results.append({
+                    "filename": filename,
+                    "status": "error",
+                    "message": "File not found"
+                })
+                continue
+
+            os.remove(file_path)
+            results.append({
+                "filename": filename,
+                "status": "success",
+                "message": "File deleted successfully"
+            })
+            
+        except Exception as e:
+            logger.error(f"批量删除文件失败 {filename}: {str(e)}")
+            results.append({
+                "filename": filename,
+                "status": "error",
+                "message": f"Delete failed: {str(e)}"
+            })
+    
+    success_count = sum(1 for r in results if r["status"] == "success")
+    error_count = len(results) - success_count
+    
+    return {
+        "summary": {
+            "total": len(results),
+            "success": success_count,
+            "errors": error_count
+        },
+        "results": results,
+        "timestamp": datetime.now().isoformat()
+    }
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
 
 
+# 服务容器
+class ServiceContainer:
+    def __init__(self):
+        self.neo4j_service = None
+
+service_container = ServiceContainer()
+
 @app.on_event("startup")
 async def startup_event():
-    """
-    应用启动时执行的事件：
-    确保Neo4j数据库的约束和索引已正确设置。
-    """
-    logger.info("Application startup: Ensuring Neo4j constraints and indexes.")
-
-    neo4j_uri = os.getenv("EMC_NEO4J_URI", "bolt://localhost:7687")
-    neo4j_user = os.getenv("EMC_NEO4J_USER", "neo4j")
-    neo4j_password = os.getenv("EMC_NEO4J_PASSWORD")
-
-    if not neo4j_password:
-        logger.error("Neo4j password (EMC_NEO4J_PASSWORD) not set. Skipping constraint/index setup.")
-        return
-
-    emc_service = None
+    """应用启动时执行的事件"""
     try:
-        emc_service = await create_emc_knowledge_service(
+        # 初始化Neo4j服务
+        from services.knowledge_graph.neo4j_emc_service import Neo4jEMCService
+        neo4j_uri = os.getenv("EMC_NEO4J_URI", "bolt://localhost:7687")
+        neo4j_user = os.getenv("EMC_NEO4J_USER", "neo4j")
+        neo4j_password = os.getenv("EMC_NEO4J_PASSWORD", "password")
+        
+        service_container.neo4j_service = Neo4jEMCService(
             uri=neo4j_uri,
             username=neo4j_user,
             password=neo4j_password
         )
-        if emc_service:
-            logger.info("Successfully connected to Neo4j for constraint/index setup.")
-            await emc_service.ensure_constraints_and_indexes()
-            logger.info("Neo4j constraints and indexes setup/verification complete.")
-        else:
-            logger.error("Failed to create Neo4jEMCService instance.")
-
+        await service_container.neo4j_service.verify_connection()
+        logger.info("✅ Neo4j 连接成功")
     except Exception as e:
-        logger.error(f"Error during Neo4j constraint/index setup: {str(e)}", exc_info=True)
-    finally:
-        if emc_service and emc_service.driver:
-            await emc_service.close()
-            logger.info("Neo4j connection closed after constraint/index setup.")
+        logger.warning(f"⚠️  Neo4j 连接失败，图功能不可用: {e}")
+        service_container.neo4j_service = None
+    
+    logger.info("🚀 EMC知识图谱系统启动完成 - v2")
