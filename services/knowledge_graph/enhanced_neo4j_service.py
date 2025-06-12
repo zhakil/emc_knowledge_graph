@@ -10,15 +10,32 @@ from neo4j import AsyncGraphDatabase, Query
 class EnhancedNeo4jService:
     """增强的Neo4j服务，支持实时编辑"""
     
-    def __init__(self, uri: str, username: str, password: str):
-        self.driver = AsyncGraphDatabase.driver(uri, auth=(username, password))
+    def __init__(self, uri: str, username: str, password: str, mock_mode: bool = False):
+        self.mock_mode = mock_mode
+        if not mock_mode:
+            self.driver = AsyncGraphDatabase.driver(uri, auth=(username, password))
+        else:
+            self.driver = None
+            self.mock_data = {
+                'nodes': [],
+                'links': []
+            }
     
     async def close(self):
         """关闭连接"""
-        await self.driver.close()
+        if self.driver:
+            await self.driver.close()
     
     async def update_node_position(self, node_id: str, x: float, y: float) -> bool:
         """更新节点位置 - 类型安全版本"""
+        if self.mock_mode:
+            for node in self.mock_data['nodes']:
+                if node.get('id') == node_id:
+                    node['x'] = x
+                    node['y'] = y
+                    return True
+            return False
+            
         query_str = """
         MATCH (n {id: $node_id})
         SET n.x = $x, n.y = $y, n.updated_at = datetime()
@@ -35,6 +52,19 @@ class EnhancedNeo4jService:
         """交互式创建节点 - 实用版本"""
         node_id = f"node_{int(asyncio.get_event_loop().time() * 1000)}"
         node_type = node_data.get('type', 'Entity')
+        
+        if self.mock_mode:
+            new_node = {
+                'id': node_id,
+                'label': node_data.get('label', 'New Node'),
+                'type': node_type,
+                'x': node_data.get('x', 0),
+                'y': node_data.get('y', 0),
+                'properties': {k: v for k, v in node_data.items() 
+                              if k not in ['id', 'label', 'x', 'y', 'type']}
+            }
+            self.mock_data['nodes'].append(new_node)
+            return node_id
         
         query_str = f"""
         CREATE (n:{node_type} {{
@@ -74,6 +104,16 @@ class EnhancedNeo4jService:
         if properties is None:
             properties = {}
             
+        if self.mock_mode:
+            new_link = {
+                'source': source_id,
+                'target': target_id,
+                'type': rel_type,
+                'properties': properties
+            }
+            self.mock_data['links'].append(new_link)
+            return True
+            
         query_str = f"""
         MATCH (a {{id: $source_id}}), (b {{id: $target_id}})
         CREATE (a)-[r:{rel_type}]->(b)
@@ -99,6 +139,12 @@ class EnhancedNeo4jService:
         depth: int = 2
     ) -> Dict[str, Any]:
         """获取子图并包含布局信息 - 实用版本"""
+        if self.mock_mode:
+            return {
+                'nodes': self.mock_data['nodes'],
+                'links': self.mock_data['links']
+            }
+            
         query_str = f"""
         MATCH (center {{id: $center_id}})
         MATCH path = (center)-[*1..{depth}]-(n)

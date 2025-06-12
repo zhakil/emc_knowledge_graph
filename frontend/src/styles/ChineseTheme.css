@@ -1,0 +1,332 @@
+/* 中式古典主题样式 */
+@import url('https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&display=swap');
+
+.chinese-layout {
+  font-family: 'Ma Shan Zheng', 'SimSun', serif;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+}
+
+/* 侧边栏样式 */
+.chinese-sider {
+  background: linear-gradient(180deg, #2c3e50 0%, #34495e 100%) !important;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+  position: relative;
+}
+
+.chinese-sider::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    radial-gradient(circle at 20% 20%, rgba(212, 175, 55, 0.1) 0%, transparent 20%),
+    radial-gradient(circle at 80% 80%, rgba(212, 175, 55, 0.1) 0%, transparent 20%);
+  pointer-events: none;
+}
+
+.logo-section {
+  padding: 24px 16px;
+  text-align: center;
+  border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+  background: rgba(0, 0, 0, 0.1);
+  position: relative;
+  z-index: 1;
+}
+
+.logo-text {
+  font-size: 24px;
+  font-weight: bold;
+  color: #d4af37;
+  margin-bottom: 4px;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+  letter-spacing: 2px;
+}
+
+.logo-subtitle {
+  font-size: 12px;
+  color: #bdc3c7;
+  font-family: 'Arial', sans-serif;
+  opacity: 0.8;
+}
+
+/* 菜单样式 */
+.chinese-menu {
+  background: transparent !important;
+  border-right: none !important;
+  position: relative;
+  z-index: 1;
+}
+
+.chinese-menu .ant-menu-item {
+  margin: 8px 12px !important;
+  border-radius: 8px !important;
+  border: 1px solid transparent;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.chinese-menu .ant-menu-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.2), transparent);
+  transition: left 0.5s ease;
+}
+
+.chinese-menu .ant-menu-item:hover::before {
+  left: 100%;
+}
+
+.chinese-menu .ant-menu-item-selected {
+  background: rgba(212, 175, 55, 0.15) !important;
+  border-color: rgba(212, 175, 55, 0.5) !important;
+}
+
+.chinese-menu .ant-menu-item span {
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 1px;
+}
+
+/* 头部样式 */
+.chinese-header {
+  background: linear-gradient(90deg, #34495e 0%, #2c3e50 100%) !important;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  position: relative;
+}
+
+.chinese-header::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #d4af37, transparent);
+}
+
+.header-title {
+  display: flex;
+  flex-direction: column;
+}
+
+.title-main {
+  font-size: 20px;
+  font-weight: bold;
+  color: #d4af37;
+  letter-spacing: 2px;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.title-sub {
+  font-size: 12px;
+  color: #bdc3c7;
+  font-family: 'Arial', sans-serif;
+  margin-top: 2px;
+  opacity: 0.9;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.theme-switch {
+  font-size: 18px;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+  background: rgba(212, 175, 55, 0.1);
+}
+
+.theme-switch:hover {
+  background: rgba(212, 175, 55, 0.2);
+  transform: scale(1.1);
+}
+
+/* 内容区样式 */
+.chinese-content {
+  margin: 24px;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(212, 175, 55, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.chinese-content::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #d4af37, #f1c40f, #d4af37);
+}
+
+.content-container {
+  padding: 24px;
+  min-height: calc(100vh - 200px);
+}
+
+/* 悬浮按钮样式 */
+.settings-float-btn {
+  background: linear-gradient(135deg, #d4af37, #f1c40f) !important;
+  border: 2px solid rgba(255, 255, 255, 0.2) !important;
+  box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3) !important;
+}
+
+.settings-float-btn:hover {
+  transform: scale(1.05) !important;
+  box-shadow: 0 6px 16px rgba(212, 175, 55, 0.4) !important;
+}
+
+/* 卡片样式 */
+.chinese-card {
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 12px;
+  border: 1px solid rgba(212, 175, 55, 0.2);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.chinese-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #d4af37, transparent);
+}
+
+.chinese-card-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid rgba(212, 175, 55, 0.1);
+  background: linear-gradient(90deg, rgba(212, 175, 55, 0.05), rgba(212, 175, 55, 0.1), rgba(212, 175, 55, 0.05));
+}
+
+.chinese-card-title {
+  font-size: 18px;
+  font-weight: bold;
+  color: #2c3e50;
+  letter-spacing: 1px;
+  margin: 0;
+}
+
+.chinese-card-body {
+  padding: 20px;
+}
+
+/* 按钮样式 */
+.chinese-btn-primary {
+  background: linear-gradient(135deg, #d4af37, #f1c40f) !important;
+  border: none !important;
+  border-radius: 8px !important;
+  font-weight: bold !important;
+  letter-spacing: 1px !important;
+  transition: all 0.3s ease !important;
+}
+
+.chinese-btn-primary:hover {
+  background: linear-gradient(135deg, #b8941f, #d4af37) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 8px rgba(212, 175, 55, 0.3) !important;
+}
+
+/* 输入框样式 */
+.chinese-input {
+  border-radius: 8px !important;
+  border: 1px solid rgba(212, 175, 55, 0.3) !important;
+  transition: all 0.3s ease !important;
+}
+
+.chinese-input:focus {
+  border-color: #d4af37 !important;
+  box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.2) !important;
+}
+
+/* 滚动条样式 */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(212, 175, 55, 0.1);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #d4af37, #b8941f);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #b8941f, #9b7d1a);
+}
+
+/* 动画效果 */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+.fade-in-up {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.shimmer {
+  animation: shimmer 2s infinite linear;
+  background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.1), transparent);
+  background-size: 1000px 100%;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .chinese-content {
+    margin: 12px;
+  }
+  
+  .content-container {
+    padding: 16px;
+  }
+  
+  .title-main {
+    font-size: 16px;
+  }
+  
+  .logo-text {
+    font-size: 20px;
+  }
+}
