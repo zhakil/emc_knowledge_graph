@@ -1,0 +1,385 @@
+/**
+ * 前端Temperature智能控制组件
+ * 修改文件: frontend/components/Editor/DeepSeekPromptEditor.tsx
+ */
+
+import React, { useState, useEffect, useCallback } from 'react';
+import { Slider, Switch, Card, Tooltip, Alert, Progress } from 'antd';
+import { InfoCircleOutlined, BulbOutlined, SafetyOutlined } from '@ant-design/icons';
+
+// Temperature配置接口
+interface TemperatureConfig {
+  value: number;
+  queryType: string;
+  confidence: number;
+  explanation: string;
+  alternatives: {
+    conservative: number;
+    balanced: number;
+    creative: number;
+  };
+}
+
+// 查询类型映射
+const QueryTypeInfo = {
+  standard: {
+    icon: <SafetyOutlined />,
+    color: '#52c41a',
+    description: '标准规范查询 - 追求准确性和权威性'
+  },
+  analysis: {
+    icon: <InfoCircleOutlined />,
+    color: '#1890ff', 
+    description: '技术分析 - 平衡准确性和深度'
+  },
+  creative: {
+    icon: <BulbOutlined />,
+    color: '#722ed1',
+    description: '创意设计 - 鼓励创新思维'
+  },
+  debug: {
+    icon: <InfoCircleOutlined />,
+    color: '#fa8c16',
+    description: '故障排除 - 系统性问题解决'
+  },
+  explore: {
+    icon: <BulbOutlined />,
+    color: '#eb2f96',
+    description: '探索研究 - 前沿思考和假设'
+  }
+};
+
+interface TemperatureControllerProps {
+  prompt: string;
+  onTemperatureChange: (temperature: number, isAuto: boolean) => void;
+  disabled?: boolean;
+}
+
+export const TemperatureController: React.FC<TemperatureControllerProps> = ({
+  prompt,
+  onTemperatureChange,
+  disabled = false
+}) => {
+  // 状态管理
+  const [isAutoMode, setIsAutoMode] = useState(true);
+  const [manualTemperature, setManualTemperature] = useState(0.7);
+  const [autoConfig, setAutoConfig] = useState<TemperatureConfig | null>(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+
+  // 获取自动temperature推荐
+  const fetchTemperatureRecommendation = useCallback(async (inputPrompt: string) => {
+    if (!inputPrompt.trim() || inputPrompt.length < 10) {
+      setAutoConfig(null);
+      return;
+    }
+
+    setIsAnalyzing(true);
+    try {
+      const response = await fetch('/api/deepseek/temperature-recommendation', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt: inputPrompt })
+      });
+
+      if (response.ok) {
+        const config = await response.json();
+        setAutoConfig(config);
+        
+        // 如果是自动模式，通知父组件使用推荐值
+        if (isAutoMode) {
+          onTemperatureChange(config.recommended_temperature, true);
+        }
+      }
+    } catch (error) {
+      console.error('获取temperature推荐失败:', error);
+    } finally {
+      setIsAnalyzing(false);
+    }
+  }, [isAutoMode, onTemperatureChange]);
+
+  // 防抖处理prompt变化
+  useEffect(() => {
+    const debounceTimer = setTimeout(() => {
+      if (isAutoMode && prompt) {
+        fetchTemperatureRecommendation(prompt);
+      }
+    }, 500); // 500ms防抖
+
+    return () => clearTimeout(debounceTimer);
+  }, [prompt, isAutoMode, fetchTemperatureRecommendation]);
+
+  // 处理模式切换
+  const handleModeChange = (checked: boolean) => {
+    setIsAutoMode(checked);
+    if (checked && autoConfig) {
+      onTemperatureChange(autoConfig.recommended_temperature, true);
+    } else {
+      onTemperatureChange(manualTemperature, false);
+    }
+  };
+
+  // 处理手动temperature调整
+  const handleManualTemperatureChange = (value: number) => {
+    setManualTemperature(value);
+    if (!isAutoMode) {
+      onTemperatureChange(value, false);
+    }
+  };
+
+  // 使用预设temperature
+  const usePresetTemperature = (preset: 'conservative' | 'balanced' | 'creative') => {
+    if (!autoConfig) return;
+    
+    const temperature = autoConfig.alternatives[preset];
+    setManualTemperature(temperature);
+    setIsAutoMode(false);
+    onTemperatureChange(temperature, false);
+  };
+
+  // Temperature值的颜色和描述
+  const getTemperatureColor = (temp: number): string => {
+    if (temp <= 0.3) return '#52c41a';  // 绿色 - 保守
+    if (temp <= 0.7) return '#1890ff';  // 蓝色 - 平衡
+    return '#722ed1';                   // 紫色 - 创新
+  };
+
+  const getTemperatureDescription = (temp: number): string => {
+    if (temp <= 0.3) return '保守模式 - 追求准确性和一致性';
+    if (temp <= 0.7) return '平衡模式 - 兼顾准确性和创造性';
+    return '创新模式 - 鼓励创造性和探索性';
+  };
+
+  const currentTemperature = isAutoMode 
+    ? (autoConfig?.recommended_temperature ?? 0.7) 
+    : manualTemperature;
+
+  return (
+    <Card 
+      size="small" 
+      title="Temperature 智能控制"
+      extra={
+        <Switch
+          checked={isAutoMode}
+          onChange={handleModeChange}
+          disabled={disabled}
+          checkedChildren="智能"
+          unCheckedChildren="手动"
+        />
+      }
+      style={{ marginBottom: 16 }}
+    >
+      {/* 当前Temperature显示 */}
+      <div style={{ marginBottom: 16 }}>
+        <div style={{ 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'center',
+          marginBottom: 8 
+        }}>
+          <span style={{ fontWeight: 'bold' }}>
+            当前值: {currentTemperature.toFixed(3)}
+          </span>
+          <span style={{ 
+            color: getTemperatureColor(currentTemperature),
+            fontSize: '12px'
+          }}>
+            {getTemperatureDescription(currentTemperature)}
+          </span>
+        </div>
+        
+        <Progress
+          percent={currentTemperature * 100}
+          strokeColor={getTemperatureColor(currentTemperature)}
+          showInfo={false}
+          size="small"
+        />
+      </div>
+
+      {/* 自动模式分析结果 */}
+      {isAutoMode && autoConfig && (
+        <div style={{ marginBottom: 16 }}>
+          <Alert
+            message={
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                {QueryTypeInfo[autoConfig.queryType as keyof typeof QueryTypeInfo]?.icon}
+                <span>
+                  识别为: {QueryTypeInfo[autoConfig.queryType as keyof typeof QueryTypeInfo]?.description}
+                </span>
+                <span style={{ 
+                  fontSize: '12px', 
+                  color: '#666',
+                  marginLeft: 'auto'
+                }}>
+                  置信度: {(autoConfig.confidence * 100).toFixed(1)}%
+                </span>
+              </div>
+            }
+            description={autoConfig.explanation}
+            type="info"
+            showIcon={false}
+            style={{ marginBottom: 12 }}
+          />
+
+          {/* 快速预设选项 */}
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+            {Object.entries(autoConfig.alternatives).map(([key, value]) => (
+              <Tooltip 
+                key={key}
+                title={`${key === 'conservative' ? '保守' : key === 'balanced' ? '平衡' : '创新'}: ${value.toFixed(3)}`}
+              >
+                <button
+                  onClick={() => usePresetTemperature(key as any)}
+                  style={{
+                    padding: '4px 8px',
+                    border: '1px solid #d9d9d9',
+                    borderRadius: '4px',
+                    background: Math.abs(value - currentTemperature) < 0.01 ? '#e6f4ff' : 'white',
+                    cursor: 'pointer',
+                    fontSize: '12px'
+                  }}
+                  disabled={disabled}
+                >
+                  {key === 'conservative' ? '保守' : key === 'balanced' ? '平衡' : '创新'}
+                  <br />
+                  {value.toFixed(2)}
+                </button>
+              </Tooltip>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* 分析状态 */}
+      {isAnalyzing && (
+        <Alert
+          message="正在分析查询类型和推荐Temperature值..."
+          type="info"
+          showIcon
+          style={{ marginBottom: 12 }}
+        />
+      )}
+
+      {/* 手动模式滑块 */}
+      {!isAutoMode && (
+        <div style={{ marginBottom: 16 }}>
+          <div style={{ 
+            display: 'flex', 
+            justifyContent: 'space-between', 
+            fontSize: '12px',
+            color: '#666',
+            marginBottom: 8 
+          }}>
+            <span>保守 (0.1)</span>
+            <span>平衡 (0.7)</span>
+            <span>创新 (1.2)</span>
+          </div>
+          
+          <Slider
+            min={0.1}
+            max={1.2}
+            step={0.01}
+            value={manualTemperature}
+            onChange={handleManualTemperatureChange}
+            disabled={disabled}
+            marks={{
+              0.1: '0.1',
+              0.3: '0.3', 
+              0.7: '0.7',
+              1.0: '1.0',
+              1.2: '1.2'
+            }}
+            tooltip={{
+              formatter: (value) => `${value?.toFixed(3)} - ${getTemperatureDescription(value ?? 0.7)}`
+            }}
+          />
+        </div>
+      )}
+
+      {/* 使用提示 */}
+      <div style={{ 
+        fontSize: '12px', 
+        color: '#8c8c8c',
+        borderTop: '1px solid #f0f0f0',
+        paddingTop: 8 
+      }}>
+        <InfoCircleOutlined style={{ marginRight: 4 }} />
+        {isAutoMode 
+          ? '系统根据查询内容自动推荐最适合的Temperature值' 
+          : '手动模式允许您精确控制AI的创造性程度'}
+      </div>
+    </Card>
+  );
+};
+
+// 在DeepSeekPromptEditor中的集成示例
+export const EnhancedDeepSeekPromptEditor: React.FC = () => {
+  const [prompt, setPrompt] = useState('');
+  const [temperature, setTemperature] = useState(0.7);
+  const [isAutoTemperature, setIsAutoTemperature] = useState(true);
+
+  const handleTemperatureChange = (newTemp: number, isAuto: boolean) => {
+    setTemperature(newTemp);
+    setIsAutoTemperature(isAuto);
+  };
+
+  const handleSubmit = async () => {
+    try {
+      const response = await fetch('/api/deepseek/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          prompt,
+          override_temperature: isAutoTemperature ? null : temperature,
+          max_tokens: 1000
+        })
+      });
+
+      const result = await response.json();
+      console.log('AI响应:', result);
+      
+      // 这里可以显示结果，更新UI等
+    } catch (error) {
+      console.error('发送请求失败:', error);
+    }
+  };
+
+  return (
+    <div style={{ padding: 16 }}>
+      <TemperatureController
+        prompt={prompt}
+        onTemperatureChange={handleTemperatureChange}
+      />
+      
+      <textarea
+        value={prompt}
+        onChange={(e) => setPrompt(e.target.value)}
+        placeholder="请输入您的EMC相关问题..."
+        style={{
+          width: '100%',
+          minHeight: 120,
+          padding: 12,
+          border: '1px solid #d9d9d9',
+          borderRadius: 6,
+          fontSize: 14,
+          resize: 'vertical'
+        }}
+      />
+      
+      <button
+        onClick={handleSubmit}
+        disabled={!prompt.trim()}
+        style={{
+          marginTop: 16,
+          padding: '8px 24px',
+          background: '#1890ff',
+          color: 'white',
+          border: 'none',
+          borderRadius: 6,
+          cursor: prompt.trim() ? 'pointer' : 'not-allowed'
+        }}
+      >
+        发送 (Temperature: {temperature.toFixed(3)})
+      </button>
+    </div>
+  );
+};

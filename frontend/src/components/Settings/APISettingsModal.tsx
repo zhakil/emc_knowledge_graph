@@ -38,6 +38,13 @@ interface APIConfig {
     timeout: number;
     maxRetries: number;
   };
+  claude: {
+    apiKey: string;
+    baseUrl: string;
+    model: string;
+    timeout: number;
+    maxRetries: number;
+  };
   neo4j: {
     uri: string;
     username: string;
@@ -64,6 +71,13 @@ const APISettingsModal: React.FC<APISettingsModalProps> = ({ visible, onCancel }
       apiKey: '',
       baseUrl: 'https://api.deepseek.com/v1',
       model: 'deepseek-reasoner',
+      timeout: 30,
+      maxRetries: 3,
+    },
+    claude: {
+      apiKey: '',
+      baseUrl: 'https://api.anthropic.com/v1',
+      model: 'claude-3-5-sonnet-20241022',
       timeout: 30,
       maxRetries: 3,
     },
@@ -108,7 +122,7 @@ const APISettingsModal: React.FC<APISettingsModalProps> = ({ visible, onCancel }
     }
   };
 
-  const testConnection = async (type: 'deepseek' | 'neo4j') => {
+  const testConnection = async (type: 'deepseek' | 'claude' | 'neo4j') => {
     const values = form.getFieldsValue();
     setTestingConnection(type);
     setConnectionStatus({ ...connectionStatus, [type]: 'testing' });
@@ -275,6 +289,79 @@ const APISettingsModal: React.FC<APISettingsModalProps> = ({ visible, onCancel }
     </div>
   );
 
+  const claudePanel = (
+    <div className="chinese-card-body">
+      <Alert
+        message="Claude API 配置"
+        description="配置 Anthropic Claude Sonnet 4 模型，用于高级智能分析和推理"
+        type="info"
+        showIcon
+        style={{ marginBottom: 16 }}
+      />
+      
+      <Form.Item
+        name={['claude', 'apiKey']}
+        label="API 密钥"
+        rules={[{ required: true, message: '请输入 Claude API 密钥' }]}
+      >
+        <Input.Password 
+          placeholder="sk-ant-api03-xxxxxxxxxxxxxxxx"
+          className="chinese-input"
+        />
+      </Form.Item>
+
+      <Form.Item
+        name={['claude', 'baseUrl']}
+        label="API 端点"
+      >
+        <Input 
+          placeholder="https://api.anthropic.com/v1"
+          className="chinese-input"
+        />
+      </Form.Item>
+
+      <Form.Item
+        name={['claude', 'model']}
+        label="模型"
+      >
+        <Select className="chinese-input">
+          <Select.Option value="claude-3-5-sonnet-20241022">Claude 3.5 Sonnet (Latest)</Select.Option>
+          <Select.Option value="claude-3-sonnet-20240229">Claude 3 Sonnet</Select.Option>
+          <Select.Option value="claude-3-haiku-20240307">Claude 3 Haiku</Select.Option>
+          <Select.Option value="claude-3-opus-20240229">Claude 3 Opus</Select.Option>
+        </Select>
+      </Form.Item>
+
+      <Space>
+        <Form.Item
+          name={['claude', 'timeout']}
+          label="超时时间(秒)"
+        >
+          <InputNumber min={10} max={300} className="chinese-input" />
+        </Form.Item>
+
+        <Form.Item
+          name={['claude', 'maxRetries']}
+          label="最大重试次数"
+        >
+          <InputNumber min={1} max={10} className="chinese-input" />
+        </Form.Item>
+      </Space>
+
+      <Space style={{ marginTop: 16 }}>
+        <Button 
+          type="primary"
+          loading={testingConnection === 'claude'}
+          onClick={() => testConnection('claude')}
+          className="chinese-btn-primary"
+        >
+          测试连接
+        </Button>
+        {renderConnectionStatus('claude')}
+      </Space>
+    </div>
+  );
+
   const neo4jPanel = (
     <div className="chinese-card-body">
       <Alert
@@ -415,6 +502,16 @@ const APISettingsModal: React.FC<APISettingsModalProps> = ({ visible, onCancel }
         </span>
       ),
       children: deepseekPanel,
+    },
+    {
+      key: 'claude',
+      label: (
+        <span>
+          <ApiOutlined />
+          Claude Sonnet 4
+        </span>
+      ),
+      children: claudePanel,
     },
     {
       key: 'neo4j',

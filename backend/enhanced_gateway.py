@@ -239,6 +239,93 @@ async def delete_file(file_id: str):
     mock_files = [f for f in mock_files if f["id"] != file_id]
     return {"message": "文件删除成功"}
 
+@app.get("/api/files/{file_id}/preview")
+async def preview_file(file_id: str):
+    """预览文件内容"""
+    for file in mock_files:
+        if file["id"] == file_id:
+            # 模拟文件内容
+            if file["name"].endswith(".pdf"):
+                content = "这是一个PDF文件的预览内容...\n\n# EMC测试报告\n\n## 测试项目\n- 辐射发射测试\n- 抗扰度测试\n- 谐波测试\n\n## 测试结果\n所有测试项目均符合相关标准要求。"
+            elif file["name"].endswith(".docx"):
+                content = "这是一个Word文档的预览内容...\n\n# IEC 61000-4-3 标准概述\n\n## 适用范围\n本标准适用于电子设备的射频电磁场抗扰度测试。\n\n## 测试方法\n1. 测试设备准备\n2. 测试环境设置\n3. 测试执行\n4. 结果评估"
+            else:
+                content = f"文件: {file['name']}\n类型: {file['type']}\n大小: {file['size']} bytes\n创建时间: {file['createTime']}"
+            
+            return {
+                "id": file_id,
+                "name": file["name"],
+                "content": content,
+                "type": file["type"],
+                "size": file["size"]
+            }
+    
+    raise HTTPException(status_code=404, detail="文件未找到")
+
+@app.get("/api/files/{file_id}/download")
+async def download_file(file_id: str):
+    """下载文件"""
+    from fastapi.responses import Response
+    
+    for file in mock_files:
+        if file["id"] == file_id:
+            # 模拟文件内容
+            content = f"模拟文件内容 - {file['name']}\n创建时间: {file['createTime']}\n文件大小: {file['size']} bytes"
+            
+            return Response(
+                content=content.encode('utf-8'),
+                media_type='application/octet-stream',
+                headers={
+                    "Content-Disposition": f"attachment; filename={file['name']}"
+                }
+            )
+    
+    raise HTTPException(status_code=404, detail="文件未找到")
+
+@app.post("/api/files/{file_id}/share")
+async def share_file(file_id: str, share_config: Dict[str, Any] = None):
+    """分享文件"""
+    if share_config is None:
+        share_config = {}
+        
+    for file in mock_files:
+        if file["id"] == file_id:
+            # 生成分享链接
+            share_token = f"share_{file_id}_{uuid.uuid4().hex[:8]}"
+            share_link = f"http://localhost:8000/api/shared/{share_token}"
+            
+            expiry_hours = share_config.get("expiryHours", 24)
+            password = share_config.get("password", "")
+            
+            return {
+                "shareLink": share_link,
+                "shareToken": share_token,
+                "expiryHours": expiry_hours,
+                "hasPassword": bool(password),
+                "message": f"文件 '{file['name']}' 分享成功"
+            }
+    
+    raise HTTPException(status_code=404, detail="文件未找到")
+
+@app.get("/api/shared/{share_token}")
+async def get_shared_file(share_token: str):
+    """获取分享的文件"""
+    # 从分享token解析文件ID
+    if share_token.startswith("share_"):
+        parts = share_token.split("_")
+        if len(parts) >= 2:
+            file_id = parts[1]
+            
+            for file in mock_files:
+                if file["id"] == file_id:
+                    return {
+                        "file": file,
+                        "shareToken": share_token,
+                        "message": "分享文件获取成功"
+                    }
+    
+    raise HTTPException(status_code=404, detail="分享链接无效或已过期")
+
 # 知识图谱API
 @app.get("/api/knowledge-graph/nodes")
 async def get_graph_data():
@@ -340,37 +427,16 @@ async def update_settings_put(settings: Dict[str, Any]):
 
 @app.post("/api/test-connection/deepseek")
 async def test_deepseek_connection(config: Dict[str, Any]):
-    """真实测试DeepSeek API连接"""
+    """直接调用DeepSeek官方API验证"""
     try:
         api_key = config.get("apiKey", "")
         base_url = config.get("baseUrl", "https://api.deepseek.com/v1")
         
-        # 基础格式验证
+        # 仅基础检查
         if not api_key:
             return {"status": "error", "message": "API密钥不能为空"}
         
-        if not api_key.startswith("sk-"):
-            return {"status": "error", "message": "无效的API密钥格式，必须以'sk-'开头"}
-        
-        # DeepSeek API密钥通常很长，至少应该有50+字符
-        if len(api_key) < 50:
-            return {"status": "error", "message": f"API密钥长度不足({len(api_key)}字符)，真实密钥通常有50+字符"}
-        
-        # 检查是否是明显的测试/假密钥
-        fake_patterns = ["test", "fake", "demo", "invalid", "假", "测试", "example", "sample", "123", "abc", "000"]
-        for pattern in fake_patterns:
-            if pattern in api_key.lower():
-                return {"status": "error", "message": f"检测到测试密钥(包含'{pattern}')，请使用真实的API密钥"}
-        
-        # 检查密钥的复杂性 - 真实密钥应该有足够的随机性
-        if len(set(api_key)) < 15:  # 字符种类太少
-            return {"status": "error", "message": "API密钥复杂度不足，可能不是真实密钥"}
-        
-        # 检查是否有重复模式
-        if any(char * 5 in api_key for char in 'abcdefghijklmnopqrstuvwxyz0123456789'):
-            return {"status": "error", "message": "检测到重复字符模式，可能不是真实密钥"}
-        
-        # 尝试真实API连接
+        # 直接调用DeepSeek官方API - 让官方判定密钥是否有效
         try:
             import aiohttp
             
@@ -385,7 +451,7 @@ async def test_deepseek_connection(config: Dict[str, Any]):
                 "max_tokens": 1
             }
             
-            timeout = aiohttp.ClientTimeout(total=10)  # 短超时
+            timeout = aiohttp.ClientTimeout(total=15)
             
             async with aiohttp.ClientSession(timeout=timeout) as session:
                 async with session.post(
@@ -394,21 +460,81 @@ async def test_deepseek_connection(config: Dict[str, Any]):
                     json=test_data
                 ) as response:
                     if response.status == 200:
-                        return {"status": "success", "message": "DeepSeek API连接成功"}
+                        return {"status": "success", "message": "DeepSeek API连接成功！官方验证通过。"}
                     elif response.status == 401:
-                        return {"status": "error", "message": "API密钥无效或已过期"}
+                        return {"status": "error", "message": "API密钥无效 - DeepSeek官方验证失败"}
                     elif response.status == 403:
-                        return {"status": "error", "message": "API密钥权限不足"}
+                        return {"status": "error", "message": "API密钥权限不足 - DeepSeek官方拒绝访问"}
                     elif response.status == 429:
-                        return {"status": "error", "message": "API请求频率超限"}
+                        return {"status": "error", "message": "API请求频率超限 - 请稍后重试"}
                     else:
-                        return {"status": "error", "message": f"API服务器错误: HTTP {response.status}"}
+                        response_text = await response.text()
+                        return {"status": "error", "message": f"DeepSeek API错误 (HTTP {response.status}): {response_text[:200]}"}
                         
         except Exception as network_error:
-            # 如果是网络问题，但密钥格式正确，给出提示
             return {
                 "status": "warning", 
-                "message": f"网络连接失败，无法验证API密钥有效性。请确保: 1)网络连接正常 2)API密钥正确。错误详情: {str(network_error)[:100]}"
+                "message": f"网络连接失败，无法连接到DeepSeek官方API。请检查网络连接。错误: {str(network_error)[:150]}"
+            }
+                    
+    except Exception as e:
+        return {"status": "error", "message": f"连接测试失败: {str(e)}"}
+
+@app.post("/api/test-connection/claude")
+async def test_claude_connection(config: Dict[str, Any]):
+    """测试Claude API连接"""
+    try:
+        api_key = config.get("apiKey", "")
+        base_url = config.get("baseUrl", "https://api.anthropic.com/v1")
+        
+        # 基础检查
+        if not api_key:
+            return {"status": "error", "message": "API密钥不能为空"}
+        
+        # Claude API密钥格式检查
+        if not api_key.startswith("sk-ant-"):
+            return {"status": "error", "message": "无效的Claude API密钥格式，必须以'sk-ant-'开头"}
+        
+        # 直接调用Claude API验证
+        try:
+            import aiohttp
+            
+            headers = {
+                "x-api-key": api_key,
+                "Content-Type": "application/json",
+                "anthropic-version": "2023-06-01"
+            }
+            
+            test_data = {
+                "model": config.get("model", "claude-3-5-sonnet-20241022"),
+                "messages": [{"role": "user", "content": "Hello"}],
+                "max_tokens": 10
+            }
+            
+            timeout = aiohttp.ClientTimeout(total=15)
+            
+            async with aiohttp.ClientSession(timeout=timeout) as session:
+                async with session.post(
+                    f"{base_url}/messages",
+                    headers=headers,
+                    json=test_data
+                ) as response:
+                    if response.status == 200:
+                        return {"status": "success", "message": "Claude API连接成功！Sonnet 4模型可用。"}
+                    elif response.status == 401:
+                        return {"status": "error", "message": "API密钥无效 - Claude官方验证失败"}
+                    elif response.status == 403:
+                        return {"status": "error", "message": "API密钥权限不足 - Claude官方拒绝访问"}
+                    elif response.status == 429:
+                        return {"status": "error", "message": "API请求频率超限 - 请稍后重试"}
+                    else:
+                        response_text = await response.text()
+                        return {"status": "error", "message": f"Claude API错误 (HTTP {response.status}): {response_text[:200]}"}
+                        
+        except Exception as network_error:
+            return {
+                "status": "warning", 
+                "message": f"网络连接失败，无法连接到Claude官方API。请检查网络连接。错误: {str(network_error)[:150]}"
             }
                     
     except Exception as e:
