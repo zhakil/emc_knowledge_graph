@@ -121,14 +121,24 @@ const APISettingsModal: React.FC<APISettingsModalProps> = ({ visible, onCancel }
       });
 
       if (response.ok) {
-        setConnectionStatus({ ...connectionStatus, [type]: 'success' });
-        message.success(`${type.toUpperCase()} 连接测试成功`);
+        const result = await response.json();
+        
+        if (result.status === 'success') {
+          setConnectionStatus({ ...connectionStatus, [type]: 'success' });
+          message.success(`${type.toUpperCase()} 连接测试成功: ${result.message}`);
+        } else if (result.status === 'warning') {
+          setConnectionStatus({ ...connectionStatus, [type]: 'error' });
+          message.warning(`${type.toUpperCase()} 连接警告: ${result.message}`);
+        } else {
+          setConnectionStatus({ ...connectionStatus, [type]: 'error' });
+          message.error(`${type.toUpperCase()} 连接测试失败: ${result.message}`);
+        }
       } else {
-        throw new Error('连接失败');
+        throw new Error('网络请求失败');
       }
     } catch (error) {
       setConnectionStatus({ ...connectionStatus, [type]: 'error' });
-      message.error(`${type.toUpperCase()} 连接测试失败`);
+      message.error(`${type.toUpperCase()} 连接测试失败: ${error instanceof Error ? error.message : '未知错误'}`);
     } finally {
       setTestingConnection('');
     }
