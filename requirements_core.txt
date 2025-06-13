@@ -1,0 +1,8 @@
+fastapi
+uvicorn
+aiofiles
+aiohttp
+pydantic
+requests
+pandas
+numpy

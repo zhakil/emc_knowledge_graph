@@ -65,39 +65,70 @@ const FileUploadArea: React.FC = () => {
 
   const categories: FileCategory[] = [
     {
-      key: 'general',
-      label: '通用文档',
-      color: 'default',
+      key: 'document',
+      label: '文档类',
+      color: 'blue',
       icon: <FileTextOutlined />
     },
     {
-      key: 'emc-standard',
-      label: 'EMC标准',
-      color: 'blue',
+      key: 'image',
+      label: '图片类',
+      color: 'green',
+      icon: <EyeOutlined />
+    },
+    {
+      key: 'web',
+      label: '网页类',
+      color: 'orange',
+      icon: <CloudUploadOutlined />
+    },
+    {
+      key: 'code',
+      label: '代码类',
+      color: 'purple',
       icon: <FolderOpenOutlined />
     },
     {
-      key: 'test-report',
-      label: '测试报告',
-      color: 'green',
-      icon: <CheckCircleOutlined />
-    },
-    {
-      key: 'equipment-spec',
-      label: '设备规格',
-      color: 'orange',
+      key: 'spreadsheet',
+      label: '表格类',
+      color: 'cyan',
       icon: <TagsOutlined />
     },
     {
-      key: 'compliance-doc',
-      label: '合规文档',
-      color: 'purple',
+      key: 'emc-data',
+      label: 'EMC数据',
+      color: 'red',
       icon: <ExclamationCircleOutlined />
+    },
+    {
+      key: 'general',
+      label: '其他文件',
+      color: 'default',
+      icon: <FileTextOutlined />
     }
   ];
 
   const allowedTypes = [
-    '.pdf', '.docx', '.xlsx', '.csv', '.json', '.xml', '.txt', '.md'
+    // 文档类
+    '.pdf', '.doc', '.docx', '.txt', '.rtf', '.odt',
+    // 表格类  
+    '.xls', '.xlsx', '.csv', '.ods',
+    // 图片类
+    '.jpg', '.jpeg', '.png', '.gif', '.bmp', '.svg', '.webp', '.tiff', '.ico',
+    // 网页类
+    '.html', '.htm', '.xml', '.xhtml',
+    // 代码类
+    '.js', '.ts', '.py', '.java', '.cpp', '.c', '.h', '.css', '.scss', '.less', '.json', '.yaml', '.yml',
+    // Markdown类
+    '.md', '.markdown',
+    // 压缩包类
+    '.zip', '.rar', '.7z', '.tar', '.gz', '.bz2',
+    // 音频类
+    '.mp3', '.wav', '.flac', '.aac', '.ogg', '.m4a',
+    // 视频类
+    '.mp4', '.avi', '.mkv', '.mov', '.wmv', '.flv', '.webm',
+    // EMC特定
+    '.emc', '.emi', '.ems'
   ];
 
   const uploadProps: UploadProps = {

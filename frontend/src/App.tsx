@@ -2,11 +2,11 @@ import React, { useState } from 'react';
 import { ConfigProvider, Layout, Menu, theme, FloatButton } from 'antd';
 import {
   CloudUploadOutlined,
-  NodeIndexOutlined,
   FileTextOutlined,
   SettingOutlined,
   HomeOutlined,
-  BranchesOutlined
+  BranchesOutlined,
+  BookOutlined
 } from '@ant-design/icons';
 import './styles/ChineseTheme.css';
 
@@ -14,7 +14,7 @@ import './styles/ChineseTheme.css';
 import APISettingsModal from './components/Settings/APISettingsModal';
 import FileManager from './components/FileManager/FileManager';
 import KnowledgeGraphViewer from './components/Graph/KnowledgeGraphViewer';
-import MarkdownEditor from './components/editor/MarkdownEditor';
+import ObsidianMarkdownEditor from './components/editor/ObsidianMarkdownEditor';
 import FileUploadArea from './components/Upload/FileUploadArea';
 import Dashboard from './components/Dashboard/Dashboard';
 
@@ -50,9 +50,9 @@ const App: React.FC<AppProps> = () => {
       label: '知识图谱',
     },
     {
-      key: 'markdown',
-      icon: <NodeIndexOutlined />,
-      label: 'Markdown编辑',
+      key: 'obsidian-editor',
+      icon: <BookOutlined />,
+      label: '知识库编辑器',
     },
   ];
 
@@ -66,8 +66,8 @@ const App: React.FC<AppProps> = () => {
         return <FileManager />;
       case 'knowledge-graph':
         return <KnowledgeGraphViewer />;
-      case 'markdown':
-        return <MarkdownEditor />;
+      case 'obsidian-editor':
+        return <ObsidianMarkdownEditor />;
       default:
         return <Dashboard />;
     }
