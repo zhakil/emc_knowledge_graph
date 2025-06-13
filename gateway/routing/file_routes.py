@@ -393,6 +393,64 @@ async def search_files(
         raise HTTPException(status_code=500, detail=f"文件搜索失败: {str(e)}")
 
 
+@router.get("/{file_id}/download")
+async def download_file(
+    file_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    下载原始文件
+    """
+    try:
+        # 在实际实现中，这里应该从数据库查询文件信息
+        # 暂时返回模拟文件下载
+        
+        # 创建一个模拟的文件内容
+        mock_content = f"""# EMC知识文档 - {file_id}
+
+这是一个模拟的EMC文档内容，用于演示文件下载功能。
+
+## 文档信息
+- 文件ID: {file_id}
+- 下载时间: {datetime.now().isoformat()}
+- 下载用户: {current_user.get('username', 'Unknown')}
+
+## EMC测试标准
+1. IEC 61000-4-2: 静电放电抗扰度测试
+2. IEC 61000-4-3: 射频电磁场辐射抗扰度测试
+3. IEC 61000-4-4: 电快速瞬变脉冲群抗扰度测试
+
+## 测试结果
+- 传导发射: 合格
+- 辐射发射: 合格
+- 抗扰度: 合格
+
+---
+文档生成时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+"""
+        
+        # 创建临时文件
+        temp_file = tempfile.NamedTemporaryFile(
+            mode='w',
+            suffix='.md',
+            delete=False,
+            encoding='utf-8'
+        )
+        
+        temp_file.write(mock_content)
+        temp_file.close()
+        
+        return FileResponse(
+            path=temp_file.name,
+            filename=f"emc_document_{file_id}.md",
+            media_type="text/markdown"
+        )
+        
+    except Exception as e:
+        logger.error(f"下载文件失败: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"下载失败: {str(e)}")
+
+
 @router.get("/download/{task_id}")
 async def download_processed_file(
     task_id: str,

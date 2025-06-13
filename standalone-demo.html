@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EMC知识图谱系统 - 演示版</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        .header { 
+            background: rgba(255,255,255,0.95); 
+            border-radius: 15px; 
+            padding: 40px; 
+            margin-bottom: 30px; 
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        }
+        .title { 
+            font-size: 3em; 
+            color: #2c3e50; 
+            margin-bottom: 15px; 
+            text-align: center;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .subtitle { 
+            color: #7f8c8d; 
+            font-size: 1.4em; 
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .status { 
+            background: linear-gradient(45deg, #56ab2f, #a8e6cf); 
+            color: white; 
+            padding: 15px 25px; 
+            border-radius: 25px; 
+            text-align: center;
+            font-weight: bold;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        .grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); 
+            gap: 25px; 
+            margin-top: 30px; 
+        }
+        .card { 
+            background: rgba(255,255,255,0.95); 
+            border-radius: 15px; 
+            padding: 30px; 
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 45px rgba(0,0,0,0.15);
+        }
+        .card h3 { 
+            color: #34495e; 
+            margin-bottom: 20px; 
+            font-size: 1.5em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .demo-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 15px 0;
+            border-left: 4px solid #007bff;
+        }
+        .feature-list {
+            list-style: none;
+            padding: 0;
+        }
+        .feature-list li {
+            padding: 12px 0;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .feature-list li:last-child {
+            border-bottom: none;
+        }
+        .btn {
+            display: inline-block;
+            padding: 12px 25px;
+            background: linear-gradient(45deg, #007bff, #0056b3);
+            color: white;
+            text-decoration: none;
+            border-radius: 25px;
+            margin: 8px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,123,255,0.3);
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,123,255,0.4);
+        }
+        .graph-demo {
+            width: 100%;
+            height: 300px;
+            background: #2c3e50;
+            border-radius: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+        .node {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            animation: float 3s ease-in-out infinite;
+        }
+        .node1 { background: #e74c3c; top: 50px; left: 50px; }
+        .node2 { background: #3498db; top: 100px; right: 80px; animation-delay: -1s; }
+        .node3 { background: #2ecc71; bottom: 80px; left: 100px; animation-delay: -2s; }
+        .node4 { background: #f39c12; bottom: 50px; right: 50px; animation-delay: -0.5s; }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        .connection {
+            position: absolute;
+            height: 2px;
+            background: rgba(255,255,255,0.3);
+            transform-origin: left center;
+        }
+        .conn1 { width: 150px; top: 75px; left: 110px; transform: rotate(20deg); }
+        .conn2 { width: 120px; top: 140px; right: 140px; transform: rotate(-30deg); }
+        .conn3 { width: 100px; bottom: 105px; left: 160px; transform: rotate(45deg); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="title">🏛️ EMC知识图谱系统</h1>
+            <p class="subtitle">电磁兼容性知识管理与分析平台 - 演示版本</p>
+            <div class="status">✨ 系统演示模式运行中 - <span id="current-time"></span></div>
+        </div>
+        
+        <div class="grid">
+            <div class="card">
+                <h3>🎯 系统概述</h3>
+                <div class="demo-section">
+                    <p><strong>EMC知识图谱系统</strong>是一个专为电磁兼容性领域设计的知识管理平台，集成了：</p>
+                    <ul class="feature-list">
+                        <li>📊 智能知识图谱构建</li>
+                        <li>🔍 语义搜索与推理</li>
+                        <li>📈 数据可视化分析</li>
+                        <li>🤖 AI辅助决策支持</li>
+                        <li>📋 标准规范管理</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h3>🌐 知识图谱演示</h3>
+                <div class="graph-demo">
+                    <div class="node node1">设备</div>
+                    <div class="node node2">标准</div>
+                    <div class="node node3">测试</div>
+                    <div class="node node4">结果</div>
+                    <div class="connection conn1"></div>
+                    <div class="connection conn2"></div>
+                    <div class="connection conn3"></div>
+                </div>
+                <p style="margin-top: 15px; color: #666; text-align: center;">
+                    实时知识图谱可视化 - 展示实体间的复杂关联关系
+                </p>
+            </div>
+            
+            <div class="card">
+                <h3>🚀 快速体验</h3>
+                <div class="demo-section">
+                    <h4>🔧 部署选项：</h4>
+                    <a href="javascript:void(0)" class="btn" onclick="showDockerInfo()">Docker一键部署</a>
+                    <a href="javascript:void(0)" class="btn" onclick="showWindowsInfo()">Windows本地部署</a>
+                    <a href="javascript:void(0)" class="btn" onclick="showCloudInfo()">云端部署</a>
+                </div>
+                <div id="deploy-info" style="margin-top: 15px;"></div>
+            </div>
+            
+            <div class="card">
+                <h3>📋 核心功能</h3>
+                <div class="demo-section">
+                    <h4>🎯 主要特性：</h4>
+                    <ul class="feature-list">
+                        <li>🏗️ 多源数据集成与清洗</li>
+                        <li>🧠 智能实体识别与关系抽取</li>
+                        <li>📊 交互式图谱可视化</li>
+                        <li>🔍 语义查询与推理引擎</li>
+                        <li>📈 知识发现与分析</li>
+                        <li>🔄 实时数据同步</li>
+                        <li>🛡️ 权限管理与安全控制</li>
+                        <li>📱 响应式Web界面</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h3>🎓 使用场景</h3>
+                <div class="demo-section">
+                    <h4>💼 适用领域：</h4>
+                    <ul class="feature-list">
+                        <li>🏭 EMC测试实验室</li>
+                        <li>🔬 科研院所</li>
+                        <li>🏢 产品设计企业</li>
+                        <li>📚 教育培训机构</li>
+                        <li>⚖️ 合规性评估</li>
+                        <li>📊 标准制定组织</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h3>📞 技术支持</h3>
+                <div class="demo-section">
+                    <p><strong>需要帮助？</strong></p>
+                    <ul class="feature-list">
+                        <li>📖 查看完整文档</li>
+                        <li>🐛 报告问题</li>
+                        <li>💡 功能建议</li>
+                        <li>🤝 社区支持</li>
+                    </ul>
+                    <div style="margin-top: 15px;">
+                        <a href="javascript:void(0)" class="btn" onclick="showContact()">联系我们</a>
+                        <a href="DOCKER_DEPLOYMENT.md" class="btn">部署文档</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function updateTime() {
+            document.getElementById('current-time').textContent = 
+                new Date().toLocaleString('zh-CN');
+        }
+        
+        function showDockerInfo() {
+            document.getElementById('deploy-info').innerHTML = `
+                <div style="background: #e3f2fd; padding: 15px; border-radius: 8px;">
+                    <h4>🐳 Docker部署</h4>
+                    <p><strong>快速启动：</strong></p>
+                    <code style="background: #333; color: #0f0; padding: 10px; display: block; border-radius: 4px; margin: 10px 0;">
+                        docker compose -f docker-compose.community.yml up -d
+                    </code>
+                    <p>或运行: <code>./start-docker.sh</code></p>
+                </div>
+            `;
+        }
+        
+        function showWindowsInfo() {
+            document.getElementById('deploy-info').innerHTML = `
+                <div style="background: #fff3e0; padding: 15px; border-radius: 8px;">
+                    <h4>🪟 Windows部署</h4>
+                    <p><strong>步骤：</strong></p>
+                    <ol style="margin-left: 20px;">
+                        <li>双击运行 <code>windows-deploy.bat</code></li>
+                        <li>或手动运行 <code>python quick-start.py</code></li>
+                    </ol>
+                    <p><strong>访问：</strong> http://localhost:3002</p>
+                </div>
+            `;
+        }
+        
+        function showCloudInfo() {
+            document.getElementById('deploy-info').innerHTML = `
+                <div style="background: #f3e5f5; padding: 15px; border-radius: 8px;">
+                    <h4>☁️ 云端部署</h4>
+                    <p><strong>支持平台：</strong></p>
+                    <ul style="margin-left: 20px;">
+                        <li>AWS EC2</li>
+                        <li>阿里云ECS</li>
+                        <li>腾讯云CVM</li>
+                        <li>Docker Swarm</li>
+                        <li>Kubernetes</li>
+                    </ul>
+                </div>
+            `;
+        }
+        
+        function showContact() {
+            alert('📧 技术支持\\n\\n如需技术支持，请：\\n1. 查看项目文档\\n2. 提交GitHub Issue\\n3. 联系开发团队\\n\\n感谢使用EMC知识图谱系统！');
+        }
+        
+        updateTime();
+        setInterval(updateTime, 1000);
+        
+        // 添加一些动态效果
+        document.addEventListener('DOMContentLoaded', function() {
+            const cards = document.querySelectorAll('.card');
+            cards.forEach((card, index) => {
+                card.style.animationDelay = (index * 0.1) + 's';
+                card.style.animation = 'fadeInUp 0.6s ease forwards';
+            });
+        });
+        
+        // 添加CSS动画
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes fadeInUp {
+                from {
+                    opacity: 0;
+                    transform: translateY(30px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>

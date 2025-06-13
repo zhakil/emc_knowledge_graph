@@ -1,0 +1,77 @@
+project:
+  name: "EMC_Knowledge_Graph"
+  language: "zh"
+  
+llm:
+  openai_client:
+    api_key: ${EMC_DEEPSEEK_API_KEY}
+    base_url: "https://api.deepseek.com/v1"
+    model: "deepseek-chat"
+    max_tokens: 4000
+    temperature: 0.1  # EMC领域需要较高的准确性
+
+builder:
+  extractor:
+    type: "schema_constraint"
+    domain: "EMC"
+    chunk_size: 1000
+    chunk_overlap: 200
+    
+  reader:
+    pdf:
+      enabled: true
+      chunk_size: 1000
+      
+  schema:
+    nodes:
+      - EMCStandard
+      - Equipment
+      - Test
+      - Product
+      - Frequency
+      - FrequencyRange
+      - TestResult
+      - Document
+      - Organization
+      
+    relationships:
+      - COMPLIES_WITH
+      - TESTED_BY
+      - REQUIRES
+      - PRODUCES
+      - APPLIES_TO
+      - RELATED_TO
+
+solver:
+  reasoning_mode: "hybrid"
+  max_reasoning_steps: 5
+  domain_context: "EMC"
+
+neo4j:
+  uri: ${NEO4J_URI}
+  user: ${NEO4J_USERNAME}
+  password: ${NEO4J_PASSWORD}
+  database: "emc_knowledge"
+
+# EMC特定配置
+emc:
+  standard_patterns:
+    - "CISPR"
+    - "IEC 61000"
+    - "EN 55"
+    - "FCC"
+    - "GB/T"
+    - "MIL-STD"
+  
+  frequency_units:
+    - "Hz"
+    - "kHz" 
+    - "MHz"
+    - "GHz"
+    
+  test_categories:
+    - "传导发射"
+    - "辐射发射"
+    - "静电放电"
+    - "抗扰度"
+    - "浪涌"

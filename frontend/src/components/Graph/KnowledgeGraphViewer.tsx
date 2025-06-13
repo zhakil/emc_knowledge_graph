@@ -30,7 +30,6 @@ import {
   EditOutlined,
   DeleteOutlined,
   NodeIndexOutlined,
-  ShareAltOutlined,
   ZoomInOutlined,
   ZoomOutOutlined,
   ReloadOutlined,
@@ -568,7 +567,7 @@ const KnowledgeGraphViewer: React.FC = () => {
             <Divider>操作</Divider>
             <Space>
               <Button icon={<EditOutlined />}>编辑</Button>
-              <Button icon={<ShareAltOutlined />}>关联</Button>
+              <Button icon={<NodeIndexOutlined />}>关联</Button>
               <Button icon={<DeleteOutlined />} danger>删除</Button>
             </Space>
           </div>

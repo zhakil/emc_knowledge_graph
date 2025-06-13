@@ -37,7 +37,6 @@ import {
   FullscreenOutlined,
   SettingOutlined,
   DownloadOutlined,
-  ShareAltOutlined,
   HistoryOutlined
 } from '@ant-design/icons';
 
@@ -155,8 +154,18 @@ def analyze_emc_data(frequencies, amplitudes):
 ## 高级功能
 
 ### 🔗 链接和引用
+
+**外部链接**:
 - [EMC标准数据库](https://example.com/emc-standards)
 - [测试设备手册](https://example.com/equipment-manual)
+
+**内部文件链接**:
+- [相关文档](file:md_1) - 链接到系统内的其他文档
+- [测试报告](file:md_2) - 点击可直接打开对应文件
+
+**锚点链接**:
+- [跳转到概述](#概述) - 页面内快速导航
+- [回到顶部](#📝-EMC知识文档) - 跳转到标题
 
 ### 📝 注释和备注
 > 💡 **提示**: 在进行EMC测试时，确保测试环境符合标准要求，避免外界干扰影响测试结果。
@@ -370,8 +379,48 @@ def analyze_emc_data(frequencies, amplitudes):
     {
       key: 'link',
       icon: <LinkOutlined />,
-      tooltip: '链接',
-      action: () => insertMarkdown('[{text}](url)', '{text}')
+      tooltip: '外部链接',
+      action: () => insertMarkdown('[{text}](http://example.com)', '{text}')
+    },
+    {
+      key: 'file-link',
+      icon: <FileTextOutlined />,
+      tooltip: '文件链接',
+      action: () => {
+        if (files.length > 0) {
+          Modal.confirm({
+            title: '选择要链接的文件',
+            content: (
+              <Select
+                placeholder="选择文件"
+                style={{ width: '100%' }}
+                onChange={(value) => {
+                  const file = files.find(f => f.id === value);
+                  if (file) {
+                    insertMarkdown(`[${file.name}](file:${file.id})`, '');
+                  }
+                }}
+              >
+                {files.map(file => (
+                  <Select.Option key={file.id} value={file.id}>
+                    {file.name}
+                  </Select.Option>
+                ))}
+              </Select>
+            ),
+            okText: '确定',
+            cancelText: '取消'
+          });
+        } else {
+          message.info('暂无可链接的文件');
+        }
+      }
+    },
+    {
+      key: 'anchor',
+      icon: <LinkOutlined />,
+      tooltip: '锚点链接',
+      action: () => insertMarkdown('[跳转到章节](#section-name)', '')
     },
     {
       key: 'image',
@@ -399,15 +448,48 @@ def analyze_emc_data(frequencies, amplitudes):
     }
   ];
 
+  const handleInternalLink = (url: string) => {
+    // 处理内部链接
+    if (url.startsWith('#')) {
+      // 锚点链接
+      const element = document.getElementById(url.slice(1));
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+      }
+    } else if (url.startsWith('/')) {
+      // 内部路由链接
+      message.info(`导航到: ${url}`);
+      // 这里可以集成路由跳转逻辑
+    } else if (url.startsWith('file:')) {
+      // 文件链接
+      const fileId = url.replace('file:', '');
+      const file = files.find(f => f.id === fileId || f.name === fileId);
+      if (file) {
+        handleOpenFile(file);
+        message.success(`打开文件: ${file.name}`);
+      } else {
+        message.error(`文件未找到: ${fileId}`);
+      }
+    }
+  };
+
   const renderPreview = () => {
-    // 简单的Markdown预览实现
+    // 增强的Markdown预览实现，支持内部链接
     let html = markdownContent
-      .replace(/^# (.*$)/gim, '<h1>$1</h1>')
-      .replace(/^## (.*$)/gim, '<h2>$1</h2>')
-      .replace(/^### (.*$)/gim, '<h3>$1</h3>')
+      .replace(/^# (.*$)/gim, '<h1 id="$1">$1</h1>')
+      .replace(/^## (.*$)/gim, '<h2 id="$1">$1</h2>')
+      .replace(/^### (.*$)/gim, '<h3 id="$1">$1</h3>')
       .replace(/\*\*(.*?)\*\*/gim, '<strong>$1</strong>')
       .replace(/\*(.*?)\*/gim, '<em>$1</em>')
-      .replace(/`(.*?)`/gim, '<code>$1</code>')
+      .replace(/`(.*?)`/gim, '<code style="background: #f0f0f0; padding: 2px 4px; border-radius: 3px;">$1</code>')
+      // 处理链接，支持内部链接
+      .replace(/\[([^\]]+)\]\(([^)]+)\)/gim, (match, text, url) => {
+        if (url.startsWith('#') || url.startsWith('/') || url.startsWith('file:')) {
+          return `<a href="#" onclick="handleInternalLink('${url}')" style="color: #1890ff; text-decoration: none; cursor: pointer;">${text}</a>`;
+        } else {
+          return `<a href="${url}" target="_blank" style="color: #1890ff; text-decoration: none;">${text} ↗</a>`;
+        }
+      })
       .replace(/^\- (.*$)/gim, '<li>$1</li>')
       .replace(/^\d+\. (.*$)/gim, '<li>$1</li>')
       .replace(/\n/gim, '<br>');
@@ -421,9 +503,24 @@ def analyze_emc_data(frequencies, amplitudes):
           backgroundColor: '#fff',
           border: '1px solid #d9d9d9',
           borderRadius: '6px',
-          fontFamily: '"Chinese Quote", -apple-system, BlinkMacSystemFont, "Segoe UI"'
+          fontFamily: '"Chinese Quote", -apple-system, BlinkMacSystemFont, "Segoe UI"',
+          lineHeight: '1.6'
         }}
         dangerouslySetInnerHTML={{ __html: html }}
+        onClick={(e) => {
+          // 处理点击事件中的内部链接
+          const target = e.target as HTMLElement;
+          if (target.tagName === 'A' && target.getAttribute('onclick')) {
+            e.preventDefault();
+            const onclick = target.getAttribute('onclick');
+            if (onclick) {
+              const match = onclick.match(/handleInternalLink\('([^']+)'\)/);
+              if (match) {
+                handleInternalLink(match[1]);
+              }
+            }
+          }
+        }}
       />
     );
   };

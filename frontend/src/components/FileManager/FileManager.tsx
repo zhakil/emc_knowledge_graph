@@ -27,7 +27,6 @@ import {
   DownloadOutlined,
   EyeOutlined,
   EditOutlined,
-  ShareAltOutlined,
   FolderAddOutlined,
   FileAddOutlined,
   SortAscendingOutlined,
@@ -122,6 +121,7 @@ const FileManager: React.FC = () => {
             updateTime: '2025-06-10 09:30:00',
             path: '/standards/',
             extension: 'pdf',
+            url: '/api/files/file_1/download',
             status: 'active',
             analysis: {
               entities: ['IEC 61000-4-3', '射频电磁场', '抗扰度测试'],
@@ -140,6 +140,7 @@ const FileManager: React.FC = () => {
             updateTime: '2025-06-11 14:20:00',
             path: '/reports/',
             extension: 'docx',
+            url: '/api/files/file_2/download',
             status: 'active',
             analysis: {
               entities: ['设备A', 'EMC测试', '合规性'],
@@ -158,6 +159,7 @@ const FileManager: React.FC = () => {
             updateTime: '2025-06-09 16:45:00',
             path: '/specs/',
             extension: 'xlsx',
+            url: '/api/files/file_3/download',
             status: 'active'
           },
           {
@@ -276,15 +278,48 @@ const FileManager: React.FC = () => {
     }
   };
 
-  const handleFileDownload = (file: FileItem) => {
-    if (file.url) {
+  const handleFileDownload = async (file: FileItem) => {
+    try {
+      // 如果文件有直接下载链接，使用该链接
+      if (file.url) {
+        const link = document.createElement('a');
+        link.href = file.url;
+        link.download = file.name;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        message.success('开始下载文件');
+        return;
+      }
+
+      // 否则通过API下载
+      const response = await fetch(`/api/files/${file.id}/download`, {
+        method: 'GET',
+      });
+
+      if (!response.ok) {
+        throw new Error('下载请求失败');
+      }
+
+      // 创建blob对象
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      
+      // 创建下载链接
       const link = document.createElement('a');
-      link.href = file.url;
+      link.href = url;
       link.download = file.name;
+      document.body.appendChild(link);
       link.click();
-      message.success('开始下载文件');
-    } else {
-      message.error('文件下载链接不可用');
+      
+      // 清理
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      
+      message.success('文件下载成功');
+    } catch (error) {
+      console.error('下载失败:', error);
+      message.error('文件下载失败，请重试');
     }
   };
 
@@ -610,12 +645,6 @@ const FileManager: React.FC = () => {
                 block
               >
                 编辑属性
-              </Button>
-              <Button
-                icon={<ShareAltOutlined />}
-                block
-              >
-                生成分享链接
               </Button>
               <Popconfirm
                 title="确定要删除这个文件吗？"

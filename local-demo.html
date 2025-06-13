@@ -1,0 +1,427 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EMC知识图谱系统 - 本地演示</title>
+    <style>
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+            margin: 0; 
+            padding: 20px; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container { max-width: 1400px; margin: 0 auto; }
+        .header { 
+            background: rgba(255,255,255,0.95); 
+            padding: 30px; 
+            border-radius: 15px; 
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+            text-align: center;
+        }
+        .title { 
+            font-size: 2.5em; 
+            color: #2c3e50; 
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .main-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
+        .graph-container { 
+            background: rgba(255,255,255,0.95); 
+            padding: 20px; 
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+        .info-panel { 
+            background: rgba(255,255,255,0.95); 
+            padding: 20px; 
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+        .graph { 
+            width: 100%; 
+            height: 500px; 
+            border: 2px solid #ddd; 
+            border-radius: 10px; 
+            position: relative;
+            background: #f8f9fa;
+            overflow: hidden;
+        }
+        .node { 
+            position: absolute; 
+            width: 120px; 
+            height: 60px; 
+            border-radius: 30px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            color: white; 
+            font-weight: bold; 
+            font-size: 12px;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        .node:hover { transform: scale(1.1); }
+        .equipment { background: linear-gradient(45deg, #ff6b6b, #ee5a24); }
+        .standard { background: linear-gradient(45deg, #3742fa, #2f3542); }
+        .test { background: linear-gradient(45deg, #2ed573, #1e90ff); }
+        .result { background: linear-gradient(45deg, #ffa502, #ff6348); }
+        .product { background: linear-gradient(45deg, #a55eea, #8854d0); }
+        .connection { 
+            position: absolute; 
+            height: 3px; 
+            background: linear-gradient(45deg, #ddd, #bbb); 
+            border-radius: 2px;
+            z-index: 1;
+        }
+        .stats { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 15px; 
+            margin-bottom: 20px; 
+        }
+        .stat-card { 
+            background: #f8f9fa; 
+            padding: 15px; 
+            border-radius: 10px; 
+            text-align: center;
+            border-left: 4px solid #007bff;
+        }
+        .stat-number { font-size: 2em; font-weight: bold; color: #007bff; }
+        .stat-label { color: #666; margin-top: 5px; }
+        .feature-list { 
+            background: #f8f9fa; 
+            padding: 20px; 
+            border-radius: 10px; 
+            margin: 15px 0; 
+        }
+        .feature-list h3 { margin-top: 0; color: #333; }
+        .feature-list ul { margin: 0; padding-left: 20px; }
+        .feature-list li { margin: 8px 0; color: #555; }
+        .controls { margin: 20px 0; text-align: center; }
+        .btn { 
+            padding: 12px 24px; 
+            margin: 5px; 
+            background: linear-gradient(45deg, #007bff, #0056b3); 
+            color: white; 
+            border: none; 
+            border-radius: 25px; 
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,123,255,0.4); }
+        .status { 
+            background: linear-gradient(45deg, #28a745, #20c997); 
+            color: white; 
+            padding: 10px 20px; 
+            border-radius: 20px; 
+            display: inline-block;
+            margin: 10px 0;
+        }
+        .demo-info {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 4px solid #2196f3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="title">🏛️ EMC知识图谱系统</h1>
+            <p style="font-size: 1.2em; color: #666;">电磁兼容性知识管理与分析平台</p>
+            <div class="status">✨ 本地演示模式 - 2025-06-13 10:36:01</div>
+        </div>
+        
+        <div class="main-grid">
+            <div class="graph-container">
+                <h2>🌐 知识图谱可视化</h2>
+                <div class="graph" id="graph">
+                    <!-- 节点将通过JavaScript动态生成 -->
+                </div>
+                <div class="controls">
+                    <button class="btn" onclick="animateGraph()">🎯 重新布局</button>
+                    <button class="btn" onclick="highlightConnections()">🔗 高亮连接</button>
+                    <button class="btn" onclick="showNodeDetails()">📋 显示详情</button>
+                </div>
+            </div>
+            
+            <div class="info-panel">
+                <h2>📊 系统状态</h2>
+                <div class="stats">
+                    <div class="stat-card">
+                        <div class="stat-number">6</div>
+                        <div class="stat-label">知识节点</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">5</div>
+                        <div class="stat-label">关系连接</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">5</div>
+                        <div class="stat-label">实体类型</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">100%</div>
+                        <div class="stat-label">系统健康</div>
+                    </div>
+                </div>
+                
+                <div class="feature-list">
+                    <h3>🎯 核心功能</h3>
+                    <ul>
+                        <li>智能知识抽取</li>
+                        <li>语义关系建模</li>
+                        <li>可视化分析</li>
+                        <li>智能推理引擎</li>
+                        <li>多源数据集成</li>
+                    </ul>
+                </div>
+                
+                <div class="demo-info">
+                    <h4>💡 演示说明</h4>
+                    <p>这是EMC知识图谱系统的本地演示版本，展示了：</p>
+                    <ul>
+                        <li>知识节点的关联关系</li>
+                        <li>交互式图谱可视化</li>
+                        <li>系统核心功能特性</li>
+                    </ul>
+                    <p><strong>完整版本支持：</strong><br>
+                    • 大规模数据处理<br>
+                    • 实时数据同步<br>
+                    • 高级分析工具<br>
+                    • 多用户协作</p>
+                </div>
+                
+                <div style="text-align: center; margin-top: 20px;">
+                    <button class="btn" onclick="showDeployInfo()">🚀 部署指南</button>
+                    <button class="btn" onclick="showTechStack()">🔧 技术栈</button>
+                </div>
+                
+                <div id="extra-info" style="margin-top: 15px;"></div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const demoData = {
+        "nodes": [
+                {
+                        "id": "1",
+                        "label": "EMC\u6d4b\u8bd5\u8bbe\u5907",
+                        "type": "\u8bbe\u5907",
+                        "x": 100,
+                        "y": 100
+                },
+                {
+                        "id": "2",
+                        "label": "GB/T 17626",
+                        "type": "\u6807\u51c6",
+                        "x": 300,
+                        "y": 100
+                },
+                {
+                        "id": "3",
+                        "label": "\u6297\u6270\u5ea6\u6d4b\u8bd5",
+                        "type": "\u6d4b\u8bd5",
+                        "x": 200,
+                        "y": 200
+                },
+                {
+                        "id": "4",
+                        "label": "\u5408\u683c\u62a5\u544a",
+                        "type": "\u7ed3\u679c",
+                        "x": 200,
+                        "y": 300
+                },
+                {
+                        "id": "5",
+                        "label": "\u624b\u673a",
+                        "type": "\u4ea7\u54c1",
+                        "x": 50,
+                        "y": 250
+                },
+                {
+                        "id": "6",
+                        "label": "IEC 61000",
+                        "type": "\u6807\u51c6",
+                        "x": 350,
+                        "y": 200
+                }
+        ],
+        "links": [
+                {
+                        "source": "1",
+                        "target": "3",
+                        "label": "\u6267\u884c"
+                },
+                {
+                        "source": "2",
+                        "target": "3",
+                        "label": "\u4f9d\u636e"
+                },
+                {
+                        "source": "3",
+                        "target": "4",
+                        "label": "\u4ea7\u751f"
+                },
+                {
+                        "source": "5",
+                        "target": "3",
+                        "label": "\u88ab\u6d4b\u8bd5"
+                },
+                {
+                        "source": "6",
+                        "target": "2",
+                        "label": "\u53c2\u8003"
+                }
+        ]
+};
+        
+        let isAnimated = false;
+        
+        function initGraph() {
+            const graph = document.getElementById('graph');
+            
+            // 创建连接线
+            demoData.links.forEach((link, index) => {
+                const sourceNode = demoData.nodes.find(n => n.id === link.source);
+                const targetNode = demoData.nodes.find(n => n.id === link.target);
+                
+                if (sourceNode && targetNode) {
+                    const connection = document.createElement('div');
+                    connection.className = 'connection';
+                    
+                    const dx = targetNode.x - sourceNode.x;
+                    const dy = targetNode.y - sourceNode.y;
+                    const length = Math.sqrt(dx * dx + dy * dy);
+                    const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+                    
+                    connection.style.width = length + 'px';
+                    connection.style.left = (sourceNode.x + 60) + 'px';
+                    connection.style.top = (sourceNode.y + 30) + 'px';
+                    connection.style.transform = `rotate(${angle}deg)`;
+                    connection.style.transformOrigin = '0 50%';
+                    
+                    graph.appendChild(connection);
+                }
+            });
+            
+            // 创建节点
+            demoData.nodes.forEach((node, index) => {
+                const nodeEl = document.createElement('div');
+                nodeEl.className = 'node';
+                nodeEl.textContent = node.label;
+                nodeEl.style.left = node.x + 'px';
+                nodeEl.style.top = node.y + 'px';
+                
+                // 根据类型设置样式
+                switch(node.type) {
+                    case '设备': nodeEl.classList.add('equipment'); break;
+                    case '标准': nodeEl.classList.add('standard'); break;
+                    case '测试': nodeEl.classList.add('test'); break;
+                    case '结果': nodeEl.classList.add('result'); break;
+                    case '产品': nodeEl.classList.add('product'); break;
+                }
+                
+                nodeEl.onclick = () => showNodeInfo(node);
+                graph.appendChild(nodeEl);
+            });
+        }
+        
+        function animateGraph() {
+            const nodes = document.querySelectorAll('.node');
+            nodes.forEach((node, index) => {
+                if (!isAnimated) {
+                    node.style.animation = `float 2s ease-in-out infinite`;
+                    node.style.animationDelay = (index * 0.2) + 's';
+                } else {
+                    node.style.animation = '';
+                }
+            });
+            isAnimated = !isAnimated;
+        }
+        
+        function highlightConnections() {
+            const connections = document.querySelectorAll('.connection');
+            connections.forEach((conn, index) => {
+                conn.style.background = `hsl(${index * 60}, 70%, 50%)`;
+                conn.style.height = '5px';
+                setTimeout(() => {
+                    conn.style.background = 'linear-gradient(45deg, #ddd, #bbb)';
+                    conn.style.height = '3px';
+                }, 2000);
+            });
+        }
+        
+        function showNodeDetails() {
+            let details = "📋 节点详情:\n\n";
+            demoData.nodes.forEach(node => {
+                details += `• ${node.label} (${node.type})\n`;
+            });
+            alert(details);
+        }
+        
+        function showNodeInfo(node) {
+            alert(`📋 节点信息\n\n` +
+                  `名称: ${node.label}\n` +
+                  `类型: ${node.type}\n` +
+                  `ID: ${node.id}\n` +
+                  `位置: (${node.x}, ${node.y})`);
+        }
+        
+        function showDeployInfo() {
+            document.getElementById('extra-info').innerHTML = `
+                <div class="demo-info">
+                    <h4>🚀 部署选项</h4>
+                    <ul>
+                        <li><strong>Docker:</strong> docker compose up -d</li>
+                        <li><strong>Windows:</strong> 运行 windows-deploy.bat</li>
+                        <li><strong>Python:</strong> python quick-start.py</li>
+                        <li><strong>云端:</strong> 支持AWS/阿里云/腾讯云</li>
+                    </ul>
+                    <p>详见: DOCKER_DEPLOYMENT.md</p>
+                </div>
+            `;
+        }
+        
+        function showTechStack() {
+            document.getElementById('extra-info').innerHTML = `
+                <div class="demo-info">
+                    <h4>🔧 技术栈</h4>
+                    <ul>
+                        <li><strong>后端:</strong> Python + FastAPI</li>
+                        <li><strong>前端:</strong> React + TypeScript</li>
+                        <li><strong>数据库:</strong> Neo4j + Redis</li>
+                        <li><strong>可视化:</strong> D3.js + Vis.js</li>
+                        <li><strong>容器:</strong> Docker + Nginx</li>
+                    </ul>
+                </div>
+            `;
+        }
+        
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            initGraph();
+            
+            // 添加CSS动画
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes float {
+                    0%, 100% { transform: translateY(0px) scale(1); }
+                    50% { transform: translateY(-10px) scale(1.05); }
+                }
+            `;
+            document.head.appendChild(style);
+        });
+    </script>
+</body>
+</html>

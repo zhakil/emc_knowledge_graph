@@ -24,3 +24,10 @@ setuptools==80.3.1
 spacy==3.8.7
 starlette==0.47.0
 uvicorn==0.34.3
+
+# KAG知识增强框架
+openspg-kag>=0.7.0
+# KAG的额外依赖
+transformers>=4.21.0
+sentence-transformers>=2.2.0
+torch>=1.12.0

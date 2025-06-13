@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EMC知识图谱系统 - 完整客户端</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏛️</text></svg>">
+    
+    <!-- 外部依赖 -->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    
+    <!-- 样式 -->
+    <style>
+        :root {
+            --primary-color: #1890ff;
+            --success-color: #52c41a;
+            --warning-color: #faad14;
+            --error-color: #ff4d4f;
+            --text-color: #262626;
+            --text-secondary: #8c8c8c;
+            --border-color: #d9d9d9;
+            --bg-color: #ffffff;
+            --bg-secondary: #fafafa;
+            --shadow: 0 2px 8px rgba(0,0,0,0.15);
+            --radius: 6px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: var(--text-color);
+        }
+
+        .app-container {
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* 侧边栏 */
+        .sidebar {
+            width: 260px;
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar.collapsed {
+            width: 60px;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border-color);
+            text-align: center;
+        }
+
+        .logo {
+            font-size: 1.5em;
+            font-weight: bold;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+        }
+
+        .sidebar.collapsed .logo {
+            font-size: 1.8em;
+        }
+
+        .sidebar-nav {
+            flex: 1;
+            padding: 20px 10px;
+            overflow-y: auto;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            margin: 4px 0;
+            border-radius: var(--radius);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: var(--text-color);
+        }
+
+        .nav-item:hover {
+            background: rgba(24,144,255,0.1);
+            color: var(--primary-color);
+        }
+
+        .nav-item.active {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .nav-item .icon {
+            font-size: 18px;
+            margin-right: 12px;
+            min-width: 18px;
+        }
+
+        .sidebar.collapsed .nav-item .text {
+            display: none;
+        }
+
+        .sidebar-toggle {
+            position: absolute;
+            top: 20px;
+            right: -15px;
+            width: 30px;
+            height: 30px;
+            background: var(--primary-color);
+            border: none;
+            border-radius: 50%;
+            color: white;
+            cursor: pointer;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* 主内容区 */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .header {
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-color);
+            padding: 16px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-title {
+            font-size: 1.5em;
+            font-weight: 600;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .content-area {
+            flex: 1;
+            padding: 24px;
+            overflow-y: auto;
+            background: rgba(255,255,255,0.1);
+        }
+
+        /* 卡片组件 */
+        .card {
+            background: var(--bg-color);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            margin-bottom: 24px;
+            overflow: hidden;
+        }
+
+        .card-header {
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--bg-secondary);
+        }
+
+        .card-title {
+            font-size: 1.2em;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card-body {
+            padding: 24px;
+        }
+
+        /* 按钮组件 */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            background: var(--bg-color);
+            color: var(--text-color);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .btn:hover {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            border-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #096dd9;
+            border-color: #096dd9;
+            color: white;
+        }
+
+        .btn-success {
+            background: var(--success-color);
+            border-color: var(--success-color);
+            color: white;
+        }
+
+        .btn-warning {
+            background: var(--warning-color);
+            border-color: var(--warning-color);
+            color: white;
+        }
+
+        .btn-danger {
+            background: var(--error-color);
+            border-color: var(--error-color);
+            color: white;
+        }
+
+        .btn-sm {
+            padding: 4px 8px;
+            font-size: 12px;
+        }
+
+        /* 输入框组件 */
+        .input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(24,144,255,0.2);
+        }
+
+        /* 网格布局 */
+        .grid {
+            display: grid;
+            gap: 24px;
+        }
+
+        .grid-2 { grid-template-columns: repeat(2, 1fr); }
+        .grid-3 { grid-template-columns: repeat(3, 1fr); }
+        .grid-4 { grid-template-columns: repeat(4, 1fr); }
+
+        @media (max-width: 768px) {
+            .grid-2, .grid-3, .grid-4 {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* 统计卡片 */
+        .stat-card {
+            background: linear-gradient(135deg, var(--primary-color), #096dd9);
+            color: white;
+            padding: 24px;
+            border-radius: var(--radius);
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+
+        /* 图谱容器 */
+        .graph-container {
+            height: 600px;
+            border: 2px solid var(--border-color);
+            border-radius: var(--radius);
+            background: var(--bg-color);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .graph-controls {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            z-index: 10;
+            display: flex;
+            gap: 8px;
+        }
+
+        /* 表格 */
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--bg-color);
+            border-radius: var(--radius);
+            overflow: hidden;
+        }
+
+        .table th,
+        .table td {
+            padding: 12px 16px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .table th {
+            background: var(--bg-secondary);
+            font-weight: 600;
+        }
+
+        .table tr:hover {
+            background: rgba(24,144,255,0.05);
+        }
+
+        /* 标签 */
+        .tag {
+            display: inline-block;
+            padding: 2px 8px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            font-size: 12px;
+            margin: 2px;
+        }
+
+        .tag-blue { background: #e6f7ff; border-color: #91d5ff; color: #096dd9; }
+        .tag-green { background: #f6ffed; border-color: #b7eb8f; color: #389e0d; }
+        .tag-orange { background: #fff7e6; border-color: #ffd591; color: #d46b08; }
+        .tag-red { background: #fff2f0; border-color: #ffb3a8; color: #cf1322; }
+
+        /* 模态框 */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.45);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--bg-color);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            max-width: 90vw;
+            max-height: 90vh;
+            overflow: auto;
+        }
+
+        .modal-header {
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-body {
+            padding: 24px;
+        }
+
+        .modal-footer {
+            padding: 16px 24px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+
+        /* 加载动画 */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--border-color);
+            border-top: 2px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* 通知 */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--bg-color);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 16px;
+            max-width: 400px;
+            z-index: 1000;
+            border-left: 4px solid var(--success-color);
+            opacity: 0;
+            transform: translateX(100%);
+            transition: all 0.3s ease;
+        }
+
+        .notification.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .notification.error {
+            border-left-color: var(--error-color);
+        }
+
+        .notification.warning {
+            border-left-color: var(--warning-color);
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: fixed;
+                top: 0;
+                left: -100%;
+                z-index: 1000;
+                transition: left 0.3s ease;
+            }
+
+            .sidebar.show {
+                left: 0;
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .app-container {
+                flex-direction: column;
+            }
+
+            .content-area {
+                padding: 16px;
+            }
+        }
+
+        /* 隐藏类 */
+        .hidden {
+            display: none !important;
+        }
+
+        /* 文件上传 */
+        .upload-area {
+            border: 2px dashed var(--border-color);
+            border-radius: var(--radius);
+            padding: 40px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .upload-area:hover,
+        .upload-area.dragover {
+            border-color: var(--primary-color);
+            background: rgba(24,144,255,0.05);
+        }
+
+        /* 进度条 */
+        .progress {
+            height: 8px;
+            background: var(--bg-secondary);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: var(--primary-color);
+            transition: width 0.3s ease;
+        }
+
+        /* Markdown编辑器 */
+        .markdown-editor {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            height: 500px;
+        }
+
+        .editor-textarea {
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            resize: none;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            padding: 16px;
+        }
+
+        .editor-preview {
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            padding: 16px;
+            overflow-y: auto;
+            background: var(--bg-color);
+        }
+
+        /* 搜索结果 */
+        .search-result {
+            padding: 16px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .search-result:hover {
+            border-color: var(--primary-color);
+            box-shadow: 0 2px 8px rgba(24,144,255,0.15);
+        }
+
+        .search-result-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .search-result-meta {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+    </style>
+</head>
+<body>
+    <div id="app" class="app-container">
+        <!-- 侧边栏 -->
+        <div class="sidebar" id="sidebar">
+            <button class="sidebar-toggle" onclick="toggleSidebar()">
+                <span id="toggleIcon">‹</span>
+            </button>
+            
+            <div class="sidebar-header">
+                <div class="logo">🏛️ EMC知识图谱</div>
+                <div class="sidebar-subtitle">专业版客户端</div>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <a href="#dashboard" class="nav-item active" onclick="showPage('dashboard')">
+                    <span class="icon">📊</span>
+                    <span class="text">仪表盘</span>
+                </a>
+                <a href="#graph" class="nav-item" onclick="showPage('graph')">
+                    <span class="icon">🌐</span>
+                    <span class="text">知识图谱</span>
+                </a>
+                <a href="#search" class="nav-item" onclick="showPage('search')">
+                    <span class="icon">🔍</span>
+                    <span class="text">智能搜索</span>
+                </a>
+                <a href="#files" class="nav-item" onclick="showPage('files')">
+                    <span class="icon">📁</span>
+                    <span class="text">文件管理</span>
+                </a>
+                <a href="#editor" class="nav-item" onclick="showPage('editor')">
+                    <span class="icon">📝</span>
+                    <span class="text">文档编辑</span>
+                </a>
+                <a href="#analysis" class="nav-item" onclick="showPage('analysis')">
+                    <span class="icon">📈</span>
+                    <span class="text">数据分析</span>
+                </a>
+                <a href="#standards" class="nav-item" onclick="showPage('standards')">
+                    <span class="icon">📋</span>
+                    <span class="text">标准库</span>
+                </a>
+                <a href="#settings" class="nav-item" onclick="showPage('settings')">
+                    <span class="icon">⚙️</span>
+                    <span class="text">系统设置</span>
+                </a>
+            </nav>
+        </div>
+
+        <!-- 主内容 -->
+        <div class="main-content">
+            <div class="header">
+                <h1 class="header-title" id="pageTitle">EMC知识图谱系统仪表盘</h1>
+                <div class="header-actions">
+                    <button class="btn" onclick="refreshData()">
+                        <span>🔄</span>
+                        刷新
+                    </button>
+                    <button class="btn" onclick="showHelp()">
+                        <span>❓</span>
+                        帮助
+                    </button>
+                    <button class="btn" onclick="exportData()">
+                        <span>📤</span>
+                        导出
+                    </button>
+                </div>
+            </div>
+
+            <div class="content-area" id="contentArea">
+                <!-- 页面内容将在这里动态加载 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 模态框容器 -->
+    <div class="modal" id="modal">
+        <div class="modal-content" id="modalContent">
+            <!-- 模态框内容 -->
+        </div>
+    </div>
+
+    <!-- 通知容器 -->
+    <div class="notification" id="notification">
+        <div class="notification-content"></div>
+    </div>
+
+    <script>
+        // 全局应用状态
+        const AppState = {
+            currentPage: 'dashboard',
+            sidebarCollapsed: false,
+            data: {
+                nodes: [],
+                relationships: [],
+                files: [],
+                stats: {}
+            },
+            settings: {
+                theme: 'light',
+                language: 'zh-CN',
+                autoSave: true
+            }
+        };
+
+        // 初始化应用
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeApp();
+            loadInitialData();
+            showPage('dashboard');
+        });
+
+        // 应用初始化
+        function initializeApp() {
+            console.log('🚀 EMC知识图谱客户端启动中...');
+            
+            // 加载本地设置
+            loadSettings();
+            
+            // 设置事件监听
+            setupEventListeners();
+            
+            // 显示启动通知
+            showNotification('EMC知识图谱客户端已成功启动', 'success');
+        }
+
+        // 加载初始数据
+        async function loadInitialData() {
+            try {
+                // 模拟从API加载数据
+                AppState.data = {
+                    nodes: await loadNodes(),
+                    relationships: await loadRelationships(),
+                    files: await loadFiles(),
+                    stats: await loadStats()
+                };
+                
+                updateStats();
+            } catch (error) {
+                console.error('加载初始数据失败:', error);
+                showNotification('数据加载失败，使用离线模式', 'warning');
+                loadMockData();
+            }
+        }
+
+        // 加载模拟数据
+        function loadMockData() {
+            AppState.data = {
+                nodes: [
+                    { id: '1', label: 'EMC测试设备', type: 'Equipment', properties: { model: 'EMI-9KB', manufacturer: 'R&S' }},
+                    { id: '2', label: 'GB/T 17626', type: 'Standard', properties: { version: '2018', scope: '电磁兼容试验' }},
+                    { id: '3', label: '抗扰度测试', type: 'Test', properties: { category: 'EMC测试', environment: '电波暗室' }},
+                    { id: '4', label: '智能手机', type: 'Product', properties: { brand: '华为', model: 'Mate60 Pro' }},
+                    { id: '5', label: 'IEC 61000', type: 'Standard', properties: { organization: 'IEC', status: '国际标准' }},
+                    { id: '6', label: '测试报告', type: 'Document', properties: { date: '2024-01-15', status: '合格' }}
+                ],
+                relationships: [
+                    { source: '1', target: '3', type: 'USES', label: '用于执行' },
+                    { source: '2', target: '3', type: 'DEFINES', label: '定义标准' },
+                    { source: '3', target: '6', type: 'GENERATES', label: '生成报告' },
+                    { source: '4', target: '3', type: 'TESTED_BY', label: '接受测试' },
+                    { source: '5', target: '2', type: 'BASIS_FOR', label: '基础标准' }
+                ],
+                files: [
+                    { id: 'f1', name: 'IEC61000-4-3标准文档.pdf', type: 'pdf', size: 2048576, category: 'emc-standard', status: 'active', date: '2025-06-10' },
+                    { id: 'f2', name: 'EMC测试报告_设备A.docx', type: 'docx', size: 1536000, category: 'test-report', status: 'active', date: '2025-06-11' },
+                    { id: 'f3', name: '设备规格说明.xlsx', type: 'xlsx', size: 512000, category: 'equipment-spec', status: 'active', date: '2025-06-09' }
+                ],
+                stats: {
+                    totalNodes: 6,
+                    totalRelationships: 5,
+                    totalFiles: 3,
+                    systemHealth: 100
+                }
+            };
+        }
+
+        // API调用函数
+        async function loadNodes() {
+            // 模拟API调用
+            return new Promise(resolve => {
+                setTimeout(() => resolve([]), 500);
+            });
+        }
+
+        async function loadRelationships() {
+            return new Promise(resolve => {
+                setTimeout(() => resolve([]), 500);
+            });
+        }
+
+        async function loadFiles() {
+            return new Promise(resolve => {
+                setTimeout(() => resolve([]), 500);
+            });
+        }
+
+        async function loadStats() {
+            return new Promise(resolve => {
+                setTimeout(() => resolve({}), 500);
+            });
+        }
+
+        // 页面导航
+        function showPage(pageName) {
+            // 更新导航状态
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            const activeItem = document.querySelector(`[onclick="showPage('${pageName}')"]`);
+            if (activeItem) {
+                activeItem.classList.add('active');
+            }
+
+            // 更新页面标题
+            const titles = {
+                dashboard: 'EMC知识图谱系统仪表盘',
+                graph: '知识图谱可视化',
+                search: '智能搜索引擎',
+                files: '文件管理中心',
+                editor: '文档编辑器',
+                analysis: '数据分析中心',
+                standards: 'EMC标准库',
+                settings: '系统设置'
+            };
+            
+            document.getElementById('pageTitle').textContent = titles[pageName] || '未知页面';
+            AppState.currentPage = pageName;
+
+            // 渲染页面内容
+            renderPage(pageName);
+        }
+
+        // 渲染页面内容
+        function renderPage(pageName) {
+            const contentArea = document.getElementById('contentArea');
+            
+            switch(pageName) {
+                case 'dashboard':
+                    contentArea.innerHTML = getDashboardHTML();
+                    initializeDashboard();
+                    break;
+                case 'graph':
+                    contentArea.innerHTML = getGraphHTML();
+                    initializeGraph();
+                    break;
+                case 'search':
+                    contentArea.innerHTML = getSearchHTML();
+                    initializeSearch();
+                    break;
+                case 'files':
+                    contentArea.innerHTML = getFilesHTML();
+                    initializeFiles();
+                    break;
+                case 'editor':
+                    contentArea.innerHTML = getEditorHTML();
+                    initializeEditor();
+                    break;
+                case 'analysis':
+                    contentArea.innerHTML = getAnalysisHTML();
+                    initializeAnalysis();
+                    break;
+                case 'standards':
+                    contentArea.innerHTML = getStandardsHTML();
+                    initializeStandards();
+                    break;
+                case 'settings':
+                    contentArea.innerHTML = getSettingsHTML();
+                    initializeSettings();
+                    break;
+                default:
+                    contentArea.innerHTML = '<div class="card"><div class="card-body">页面未找到</div></div>';
+            }
+        }
+
+        // 仪表盘HTML
+        function getDashboardHTML() {
+            return `
+                <div class="grid grid-4">
+                    <div class="stat-card">
+                        <div class="stat-number" id="statNodes">${AppState.data.stats.totalNodes || 0}</div>
+                        <div class="stat-label">知识节点</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="statRelationships">${AppState.data.stats.totalRelationships || 0}</div>
+                        <div class="stat-label">关系连接</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="statFiles">${AppState.data.stats.totalFiles || 0}</div>
+                        <div class="stat-label">处理文件</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="statHealth">${AppState.data.stats.systemHealth || 100}%</div>
+                        <div class="stat-label">系统健康</div>
+                    </div>
+                </div>
+
+                <div class="grid grid-2">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">📊 系统概览</div>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="overviewChart" width="400" height="200"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">📈 活动趋势</div>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="activityChart" width="400" height="200"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">⚡ 快速操作</div>
+                    </div>
+                    <div class="card-body">
+                        <div class="grid grid-4">
+                            <button class="btn btn-primary" onclick="showPage('graph')">
+                                <span>🌐</span>
+                                查看知识图谱
+                            </button>
+                            <button class="btn btn-primary" onclick="showPage('search')">
+                                <span>🔍</span>
+                                智能搜索
+                            </button>
+                            <button class="btn btn-primary" onclick="showPage('files')">
+                                <span>📁</span>
+                                上传文件
+                            </button>
+                            <button class="btn btn-primary" onclick="showPage('editor')">
+                                <span>📝</span>
+                                创建文档
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">📋 最近活动</div>
+                    </div>
+                    <div class="card-body">
+                        <div id="recentActivities">
+                            <div class="search-result">
+                                <div class="search-result-title">新增EMC测试标准文档</div>
+                                <div class="search-result-meta">2分钟前 • 文件管理</div>
+                            </div>
+                            <div class="search-result">
+                                <div class="search-result-title">完成知识图谱构建</div>
+                                <div class="search-result-meta">15分钟前 • 知识图谱</div>
+                            </div>
+                            <div class="search-result">
+                                <div class="search-result-title">导入IEC 61000标准数据</div>
+                                <div class="search-result-meta">1小时前 • 数据导入</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 继续在下一个响应中提供其他页面的HTML和功能...
+    </script>
+    
+    <!-- 加载功能模块 -->
+    <script src="emc_client_modules.js"></script>
+</body>
+</html>
