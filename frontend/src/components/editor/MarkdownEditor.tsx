@@ -28,6 +28,7 @@ import {
   BoldOutlined,
   ItalicOutlined,
   UnderlineOutlined,
+  FileTextOutlined,
   LinkOutlined,
   PictureOutlined,
   TableOutlined,

@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  # 完整生产版本
+  emc-knowledge-graph:
+    build:
+      context: .
+      dockerfile: Dockerfile.production
+    container_name: emc-knowledge-graph-production
+    ports:
+      - "3000:80"
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+    
+  # 后端API服务 (如果需要)
+  emc-backend:
+    image: python:3.9-slim
+    container_name: emc-backend
+    working_dir: /app
+    volumes:
+      - ../backend:/app
+    ports:
+      - "8001:8001"
+    command: python -m uvicorn main:app --host 0.0.0.0 --port 8001
+    restart: unless-stopped
+    environment:
+      - PYTHONPATH=/app
+    depends_on:
+      - emc-knowledge-graph
+
+networks:
+  default:
+    name: emc-network

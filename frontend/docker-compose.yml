@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  emc-desktop-builder:
+    build:
+      context: .
+      dockerfile: Dockerfile.desktop
+    container_name: emc-knowledge-graph-builder
+    volumes:
+      - ./dist:/app/dist  # 挂载dist目录，构建文件会保存到宿主机
+      - ./src:/app/src    # 挂载源代码，支持实时开发
+    environment:
+      - NODE_ENV=production
+      - ELECTRON_CACHE=/tmp/electron
+      - ELECTRON_BUILDER_CACHE=/tmp/electron-builder
+    command: /build-desktop.sh
+    
+  # 开发环境服务 (可选)
+  emc-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.desktop
+    container_name: emc-knowledge-graph-dev
+    ports:
+      - "3003:3003"
+    volumes:
+      - ./src:/app/src
+      - ./public:/app/public
+    environment:
+      - NODE_ENV=development
+    command: npm start
+    
+  # 测试Electron应用 (可选)
+  emc-electron-test:
+    build:
+      context: .
+      dockerfile: Dockerfile.desktop
+    container_name: emc-electron-test
+    volumes:
+      - ./dist:/app/dist
+      - /tmp/.X11-unix:/tmp/.X11-unix
+    environment:
+      - DISPLAY=${DISPLAY}
+      - NODE_ENV=production
+    command: npm run electron

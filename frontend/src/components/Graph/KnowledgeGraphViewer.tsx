@@ -258,8 +258,8 @@ const KnowledgeGraphViewer: React.FC = () => {
         })
         .on('end', (event, d) => {
           if (!event.active) simulation.alphaTarget(0);
-          d.fx = null;
-          d.fy = null;
+          d.fx = undefined;
+          d.fy = undefined;
         }));
 
     // 节点点击事件

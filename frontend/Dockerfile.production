@@ -1,0 +1,54 @@
+# EMC知识图谱生产版本Docker构建
+FROM node:18-bullseye as builder
+
+# 设置工作目录
+WORKDIR /app
+
+# 安装系统依赖
+RUN apt-get update && apt-get install -y \
+    python3 \
+    python3-pip \
+    build-essential \
+    git \
+    curl \
+    libnss3-dev \
+    libatk-bridge2.0-dev \
+    libdrm2 \
+    libxkbcommon-dev \
+    libxss1 \
+    libasound2 \
+    libxtst6 \
+    libxrandr2 \
+    libgbm1 \
+    libgtk-3-0 \
+    && rm -rf /var/lib/apt/lists/*
+
+# 设置npm源
+RUN npm config set registry https://registry.npmmirror.com/
+
+# 复制package.json
+COPY package*.json ./
+
+# 安装依赖
+RUN npm install --legacy-peer-deps --production=false
+
+# 复制源代码
+COPY . .
+
+# 构建React应用
+RUN npm run build
+
+# 生产运行阶段
+FROM nginx:alpine as production
+
+# 复制构建结果
+COPY --from=builder /app/build /usr/share/nginx/html
+
+# 复制nginx配置
+COPY nginx.production.conf /etc/nginx/nginx.conf
+
+# 暴露端口
+EXPOSE 80
+
+# 启动nginx
+CMD ["nginx", "-g", "daemon off;"]

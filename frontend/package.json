@@ -22,11 +22,17 @@
     "vis-network": "^9.1.0",
     "web-vitals": "^2.1.4"
   },
+  "main": "public/electron.js",
+  "homepage": "./",
   "scripts": {
-    "start": "SKIP_PREFLIGHT_CHECK=true HOST=0.0.0.0 PORT=3002 react-scripts start",
+    "start": "SKIP_PREFLIGHT_CHECK=true HOST=0.0.0.0 PORT=3003 react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "electron": "electron .",
+    "electron-dev": "concurrently \"npm start\" \"wait-on http://localhost:3003 && electron .\"",
+    "electron-build": "npm run build && electron-builder",
+    "dist": "npm run build && electron-builder --publish=never"
   },
   "eslintConfig": {
     "extends": [
@@ -49,6 +55,92 @@
   "proxy": "http://localhost:8001",
   "devDependencies": {
     "ajv": "^8.12.0",
-    "ajv-keywords": "^5.1.0"
+    "ajv-keywords": "^5.1.0",
+    "electron": "^32.0.0",
+    "electron-builder": "^25.0.0",
+    "electron-is-dev": "^2.0.0",
+    "concurrently": "^8.2.0",
+    "wait-on": "^7.2.0"
+  },
+  "build": {
+    "appId": "com.emc.knowledge-graph",
+    "productName": "EMC知识图谱系统",
+    "copyright": "Copyright © 2025 EMC Knowledge Graph",
+    "directories": {
+      "output": "dist",
+      "buildResources": "assets"
+    },
+    "files": [
+      "build/**/*",
+      "node_modules/**/*", 
+      "public/electron.js",
+      "api_server.py",
+      "requirements.txt"
+    ],
+    "extraMetadata": {
+      "main": "public/electron.js"
+    },
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        },
+        {
+          "target": "portable", 
+          "arch": ["x64"]
+        }
+      ],
+      "icon": "public/favicon.ico",
+      "artifactName": "${productName}-${version}-${arch}.${ext}",
+      "requestedExecutionLevel": "asInvoker",
+      "verifyUpdateCodeSignature": false,
+      "publisherName": "EMC Knowledge Graph Team",
+      "fileAssociations": [
+        {
+          "ext": "emckg",
+          "name": "EMC Knowledge Graph File",
+          "description": "EMC知识图谱项目文件",
+          "icon": "public/favicon.ico"
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "allowElevation": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "EMC知识图谱",
+      "menuCategory": "开发工具",
+      "installerIcon": "public/favicon.ico",
+      "uninstallerIcon": "public/favicon.ico",
+      "installerHeader": "public/favicon.ico",
+      "installerHeaderIcon": "public/favicon.ico",
+      "include": "build/installer.nsh",
+      "runAfterFinish": true,
+      "deleteAppDataOnUninstall": false
+    },
+    "portable": {
+      "artifactName": "${productName}-${version}-portable.${ext}"
+    },
+    "mac": {
+      "target": [
+        {
+          "target": "dmg",
+          "arch": ["x64", "arm64"]
+        }
+      ],
+      "icon": "public/favicon.ico"
+    },
+    "linux": {
+      "target": [
+        {
+          "target": "AppImage",
+          "arch": ["x64"]
+        }
+      ],
+      "icon": "public/favicon.ico"
+    }
   }
 }

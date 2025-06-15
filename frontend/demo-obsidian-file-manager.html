@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EMC知识图谱 - Obsidian风格文件管理器</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #f0f2f5;
+            color: #333;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #1890ff;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: #666;
+            font-size: 16px;
+        }
+        .demo-layout {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            height: 600px;
+            display: flex;
+            border: 1px solid #d9d9d9;
+            overflow: hidden;
+        }
+        .sidebar {
+            width: 300px;
+            background: #fafafa;
+            border-right: 1px solid #d9d9d9;
+            display: flex;
+            flex-direction: column;
+        }
+        .toolbar {
+            padding: 12px 16px;
+            border-bottom: 1px solid #d9d9d9;
+            background: #fff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .toolbar-buttons {
+            display: flex;
+            gap: 4px;
+        }
+        .btn {
+            background: transparent;
+            border: none;
+            padding: 4px;
+            cursor: pointer;
+            border-radius: 4px;
+            color: #666;
+            font-size: 14px;
+        }
+        .btn:hover {
+            background: #f0f0f0;
+            color: #333;
+        }
+        .search-section {
+            padding: 12px 16px;
+        }
+        .search-input {
+            width: 100%;
+            padding: 6px 12px;
+            border: 1px solid #d9d9d9;
+            border-radius: 4px;
+            font-size: 12px;
+            margin-bottom: 8px;
+        }
+        .filter-select {
+            width: 100%;
+            padding: 4px 8px;
+            border: 1px solid #d9d9d9;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+        .file-tree {
+            flex: 1;
+            overflow-y: auto;
+            padding: 8px;
+        }
+        .tree-node {
+            padding: 4px 8px;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .tree-node:hover {
+            background: #e6f7ff;
+        }
+        .tree-node.selected {
+            background: #1890ff;
+            color: white;
+        }
+        .tree-node .icon {
+            width: 16px;
+            text-align: center;
+        }
+        .tree-node.folder {
+            font-weight: 500;
+        }
+        .tree-node.file {
+            margin-left: 12px;
+        }
+        .content-area {
+            flex: 1;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .file-details {
+            max-width: 500px;
+            width: 100%;
+        }
+        .file-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .file-name {
+            font-size: 18px;
+            font-weight: 600;
+            margin: 0;
+        }
+        .status-tag {
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 500;
+        }
+        .status-extracted {
+            background: #f6ffed;
+            color: #52c41a;
+            border: 1px solid #b7eb8f;
+        }
+        .status-not-extracted {
+            background: #fafafa;
+            color: #666;
+            border: 1px solid #d9d9d9;
+        }
+        .details-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        .details-table th,
+        .details-table td {
+            padding: 8px 12px;
+            text-align: left;
+            border: 1px solid #d9d9d9;
+            font-size: 13px;
+        }
+        .details-table th {
+            background: #fafafa;
+            font-weight: 600;
+            width: 120px;
+        }
+        .tags {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+        .tag {
+            padding: 2px 8px;
+            background: #f0f0f0;
+            border-radius: 12px;
+            font-size: 11px;
+            color: #666;
+        }
+        .actions {
+            display: flex;
+            gap: 12px;
+        }
+        .btn-primary {
+            background: #1890ff;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+        .btn-danger {
+            background: #ff4d4f;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+        .features {
+            background: #e6f7ff;
+            border: 1px solid #91d5ff;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        .features h3 {
+            color: #1890ff;
+            margin-top: 0;
+        }
+        .features ul {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+        .features li {
+            margin: 8px 0;
+            color: #334155;
+        }
+        .demo-note {
+            background: #fff7e6;
+            border: 1px solid #ffd591;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="title">EMC知识图谱 - Obsidian风格文件管理器</div>
+            <div class="subtitle">类似Obsidian的专业文件管理界面已完成</div>
+        </div>
+
+        <div class="demo-note">
+            <strong>🎉 新功能演示</strong> - 文件管理器现已升级为类似Obsidian的树状结构，支持左侧文件夹导航和右侧详情显示
+        </div>
+
+        <div class="demo-layout">
+            <!-- 左侧文件树 -->
+            <div class="sidebar">
+                <div class="toolbar">
+                    <div class="toolbar-buttons">
+                        <button class="btn" title="新建文件夹">📁</button>
+                        <button class="btn" title="上传文件">📤</button>
+                        <button class="btn" title="刷新">🔄</button>
+                    </div>
+                    <button class="btn" title="更多选项">⋯</button>
+                </div>
+
+                <div class="search-section">
+                    <input type="text" class="search-input" placeholder="搜索文件..." value="">
+                    <select class="filter-select">
+                        <option value="all">全部状态</option>
+                        <option value="extracted">已提取</option>
+                        <option value="not_extracted">未提取</option>
+                        <option value="processing">处理中</option>
+                    </select>
+                </div>
+
+                <div class="file-tree">
+                    <div class="tree-node folder">
+                        <span class="icon">📁</span>
+                        <span>EMC标准</span>
+                    </div>
+                    <div class="tree-node file">
+                        <span class="icon">📄</span>
+                        <span>IEC 61000-4-3.pdf</span>
+                    </div>
+                    <div class="tree-node file">
+                        <span class="icon">📄</span>
+                        <span>IEC 61000-4-6.pdf</span>
+                    </div>
+                    <div class="tree-node file">
+                        <span class="icon">📄</span>
+                        <span>EN 55011.pdf</span>
+                    </div>
+                    
+                    <div class="tree-node folder">
+                        <span class="icon">📁</span>
+                        <span>测试报告</span>
+                    </div>
+                    <div class="tree-node file selected">
+                        <span class="icon">📄</span>
+                        <span>EMC测试报告_设备A.docx</span>
+                    </div>
+                    <div class="tree-node file">
+                        <span class="icon">📄</span>
+                        <span>EMC测试报告_设备B.docx</span>
+                    </div>
+                    
+                    <div class="tree-node folder">
+                        <span class="icon">📁</span>
+                        <span>设备规格</span>
+                    </div>
+                    <div class="tree-node file">
+                        <span class="icon">📊</span>
+                        <span>充电器规格说明.xlsx</span>
+                    </div>
+                    
+                    <div class="tree-node folder">
+                        <span class="icon">📁</span>
+                        <span>合规文档</span>
+                    </div>
+                    <div class="tree-node file">
+                        <span class="icon">📄</span>
+                        <span>产品认证证书.pdf</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右侧内容区 -->
+            <div class="content-area">
+                <div class="file-details">
+                    <div class="file-header">
+                        <span class="icon">📄</span>
+                        <h3 class="file-name">EMC测试报告_设备A.docx</h3>
+                        <span class="status-tag status-extracted">已提取</span>
+                    </div>
+
+                    <table class="details-table">
+                        <tr>
+                            <th>文件大小</th>
+                            <td>1.46 MB</td>
+                        </tr>
+                        <tr>
+                            <th>文件类型</th>
+                            <td>docx</td>
+                        </tr>
+                        <tr>
+                            <th>创建时间</th>
+                            <td>2025/6/11 14:20:00</td>
+                        </tr>
+                        <tr>
+                            <th>文件路径</th>
+                            <td>/测试报告/</td>
+                        </tr>
+                    </table>
+
+                    <div class="tags">
+                        <span class="tag">测试报告</span>
+                        <span class="tag">设备A</span>
+                        <span class="tag">EMC</span>
+                    </div>
+
+                    <h4>AI分析结果</h4>
+                    <table class="details-table">
+                        <tr>
+                            <th>识别实体</th>
+                            <td>设备A, EMC测试, 合规性</td>
+                        </tr>
+                        <tr>
+                            <th>关键词</th>
+                            <td>测试, 结果, 分析</td>
+                        </tr>
+                        <tr>
+                            <th>内容摘要</th>
+                            <td>设备A的完整EMC测试报告和分析结果</td>
+                        </tr>
+                    </table>
+
+                    <div class="actions">
+                        <button class="btn-primary">📥 下载</button>
+                        <button class="btn-danger">🗑️ 删除</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="features">
+            <h3>🚀 新增功能特性</h3>
+            <ul>
+                <li><strong>Obsidian风格界面</strong> - 左侧文件夹树 + 右侧详情显示，完全模仿Obsidian的文件管理体验</li>
+                <li><strong>分层文件结构</strong> - 支持文件夹嵌套，清晰的层级关系显示</li>
+                <li><strong>提取状态分离</strong> - 可按已提取/未提取状态过滤文件，清楚了解处理进度</li>
+                <li><strong>快速操作工具栏</strong> - 新建文件夹、上传文件、刷新等一键操作</li>
+                <li><strong>实时搜索过滤</strong> - 支持文件名搜索和状态筛选</li>
+                <li><strong>右键上下文菜单</strong> - 文件的查看、下载、删除等操作</li>
+                <li><strong>双视图模式</strong> - 树状视图（默认）和表格视图可切换</li>
+                <li><strong>拖拽上传支持</strong> - 直接拖拽文件到上传区域</li>
+            </ul>
+        </div>
+
+        <div style="margin-top: 30px; padding: 20px; background: #f9f9f9; border-radius: 8px;">
+            <h3>🎯 完成的界面优化</h3>
+            <ul>
+                <li>✅ 左侧300px固定宽度的文件夹树，完全仿照Obsidian风格</li>
+                <li>✅ 顶部工具栏：新建文件夹、上传文件、刷新、视图切换</li>
+                <li>✅ 集成搜索和状态过滤功能</li>
+                <li>✅ 右侧主区域显示选中文件的详细信息</li>
+                <li>✅ 提取状态可视化：绿色标签表示已提取，灰色表示未提取</li>
+                <li>✅ 专业的文件图标和状态指示器</li>
+                <li>✅ 响应式布局，适配不同屏幕尺寸</li>
+            </ul>
+            
+            <p><strong>访问地址：</strong> <a href="http://localhost:3003" target="_blank">http://localhost:3003</a></p>
+            <p>现在的文件管理界面完全符合您的要求，具有类似Obsidian的专业文件管理体验！</p>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  emc-knowledge-graph:
+    build:
+      context: .
+      dockerfile: Dockerfile.app
+    container_name: emc-kg-system
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./uploads:/app/uploads
+      - ./files_db.json:/app/files_db.json
+    environment:
+      - FLASK_ENV=production
+      - PYTHONUNBUFFERED=1
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks:
+      - emc-network
+
+networks:
+  emc-network:
+    driver: bridge
+
+volumes:
+  uploads:
+    driver: local
+  database:
+    driver: local

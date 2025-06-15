@@ -14,7 +14,6 @@ import {
   Tag,
   Alert,
   Tree,
-  Upload,
   Dropdown,
   Menu,
   Collapse,
@@ -24,8 +23,11 @@ import {
   List,
   Badge,
   AutoComplete,
-  Segmented
+  Segmented,
+  Progress,
+  Upload
 } from 'antd';
+import type { RcFile } from 'antd/es/upload/interface';
 import {
   EditOutlined,
   EyeOutlined,
@@ -44,7 +46,6 @@ import {
   FullscreenOutlined,
   SettingOutlined,
   DownloadOutlined,
-  UploadOutlined,
   SearchOutlined,
   FolderOpenOutlined,
   FileMarkdownOutlined,
@@ -59,7 +60,6 @@ import {
   MoreOutlined
 } from '@ant-design/icons';
 import type { DataNode } from 'antd/es/tree';
-import type { RcFile } from 'antd/es/upload';
 
 const { TextArea } = Input;
 const { Title, Text, Paragraph } = Typography;
@@ -120,13 +120,15 @@ const ObsidianMarkdownEditor: React.FC = () => {
   const initializeDefaultContent = () => {
     const defaultContent = `# 📚 Obsidian风格Markdown编辑器
 
-## 🌟 主要功能
+欢迎使用Markdown编辑器！目前没有任何文件。
+
+## 🚀 快速开始
 
 ### 📂 文件管理
-- **树形结构**: 类似Obsidian的文件夹展开/折叠
-- **快速搜索**: 实时搜索文件名和内容
-- **批量导入**: 支持从外部导入多个.md文件
-- **文件组织**: 拖拽文件到不同文件夹
+- 点击左侧工具栏的 **📄** 图标创建新文件
+- 点击左侧工具栏的 **📁** 图标创建新文件夹
+- 点击左侧工具栏的 **📥** 图标导入单个文件
+- 点击左侧工具栏的 **📂** 图标导入整个文件夹
 
 ### ✏️ 编辑功能
 - **实时预览**: 分屏或独立预览模式
@@ -137,45 +139,30 @@ const ObsidianMarkdownEditor: React.FC = () => {
 ### 🔗 链接系统
 - **内部链接**: [[文件名]] 格式链接到其他文档
 - **标签系统**: #标签 快速分类和检索
-- **反向链接**: 查看哪些文档引用了当前文档
 
-## 📝 语法示例
+## 📝 创建您的第一个文档
 
-### 基础格式
+1. 点击左侧的 **新建文件** 按钮
+2. 开始编写您的Markdown内容
+3. 使用 **Ctrl+S** 或点击保存按钮保存文档
+
+### 示例语法
 **粗体文本** 和 *斜体文本*
 
-### 列表
-1. 有序列表项 1
-2. 有序列表项 2
-   - 嵌套无序列表
-   - 另一个项目
-
-### 代码块
 \`\`\`javascript
-// EMC数据分析示例
-function analyzeEMCData(data) {
-  return data.filter(item => item.compliance);
-}
+// 代码示例
+console.log("Hello World!");
 \`\`\`
 
-### 表格
-| 测试项目 | 标准 | 结果 | 状态 |
-|---------|------|------|------|
-| 传导发射 | CISPR 32 | 通过 | ✅ |
-| 辐射发射 | CISPR 32 | 通过 | ✅ |
-| 静电放电 | IEC 61000-4-2 | 通过 | ✅ |
+| 列1 | 列2 | 列3 |
+|-----|-----|-----|
+| 数据1 | 数据2 | 数据3 |
 
-### 内部链接示例
-- [[EMC测试指南]]
-- [[设备规格文档]]
-- [[标准解读文档]]
-
-### 标签
-#EMC #测试 #文档 #知识管理
+#标签示例 #markdown #编辑器
 
 ---
 
-**开始使用**: 左侧文件树可以创建新文档或导入现有文件
+开始您的知识管理之旅吧！
 `;
     setMarkdownContent(defaultContent);
   };
@@ -187,65 +174,8 @@ function analyzeEMCData(data) {
         const data = await response.json();
         setFiles(data);
       } else {
-        // 使用模拟数据
-        const mockFiles: MarkdownFile[] = [
-          {
-            id: 'folder_1',
-            name: 'EMC知识库',
-            content: '',
-            lastModified: '2025-06-12',
-            path: '/',
-            tags: [],
-            type: 'folder',
-            children: [
-              {
-                id: 'file_1',
-                name: 'EMC测试指南.md',
-                content: '# EMC测试指南\\n\\n这是一个完整的EMC测试指南文档...',
-                lastModified: '2025-06-12',
-                path: '/EMC知识库/',
-                tags: ['EMC', '测试', '指南'],
-                parentId: 'folder_1',
-                type: 'file',
-                size: 1024
-              },
-              {
-                id: 'file_2',
-                name: '标准解读_IEC61000.md',
-                content: '# IEC 61000标准解读\\n\\n## 概述\\n\\nIEC 61000系列标准...',
-                lastModified: '2025-06-11',
-                path: '/EMC知识库/',
-                tags: ['标准', 'IEC', '解读'],
-                parentId: 'folder_1',
-                type: 'file',
-                size: 2048
-              }
-            ]
-          },
-          {
-            id: 'folder_2',
-            name: '设备文档',
-            content: '',
-            lastModified: '2025-06-10',
-            path: '/',
-            tags: [],
-            type: 'folder',
-            children: [
-              {
-                id: 'file_3',
-                name: '设备A规格说明.md',
-                content: '# 设备A规格说明\\n\\n## 技术参数\\n\\n...',
-                lastModified: '2025-06-10',
-                path: '/设备文档/',
-                tags: ['设备', '规格', '技术'],
-                parentId: 'folder_2',
-                type: 'file',
-                size: 1536
-              }
-            ]
-          }
-        ];
-        setFiles(mockFiles);
+        // 初始状态为空，没有任何文件或文件夹
+        setFiles([]);
       }
     } catch (error) {
       console.error('加载文件失败:', error);
@@ -254,21 +184,76 @@ function analyzeEMCData(data) {
   };
 
   const buildFileTree = () => {
+    const getContextMenu = (item: MarkdownFile) => {
+      const menuItems = [
+        {
+          key: 'new-file',
+          label: '新建文件',
+          icon: <FileAddOutlined />,
+          onClick: () => handleNewFile(item.type === 'folder' ? item : undefined)
+        },
+        {
+          key: 'new-folder',
+          label: '新建文件夹',
+          icon: <FolderOutlined />,
+          onClick: () => handleNewFolder(item.type === 'folder' ? item : undefined)
+        },
+        { type: 'divider' as const },
+        {
+          key: 'rename',
+          label: '重命名',
+          icon: <EditOutlined />,
+          onClick: () => handleRenameItem(item)
+        },
+        {
+          key: 'delete',
+          label: '删除',
+          icon: <DeleteOutlined />,
+          danger: true,
+          onClick: () => handleDeleteItem(item)
+        }
+      ];
+
+      return {
+        items: menuItems
+      };
+    };
+
     const buildNodes = (items: MarkdownFile[]): FileNode[] => {
       return items.map(item => ({
         key: item.id,
         title: (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            {item.type === 'folder' ? (
-              <FolderOutlined style={{ color: '#faad14' }} />
-            ) : (
-              <FileMarkdownOutlined style={{ color: '#1890ff' }} />
-            )}
-            <span>{item.name}</span>
-            {item.tags.length > 0 && (
-              <Badge count={item.tags.length} size="small" />
-            )}
-          </div>
+          <Dropdown
+            menu={getContextMenu(item)}
+            trigger={['contextMenu']}
+          >
+            <div 
+              style={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: 8,
+                padding: '2px 4px',
+                borderRadius: 4,
+                cursor: 'pointer'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#f5f5f5';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'transparent';
+              }}
+            >
+              {item.type === 'folder' ? (
+                <FolderOutlined style={{ color: '#faad14' }} />
+              ) : (
+                <FileMarkdownOutlined style={{ color: '#1890ff' }} />
+              )}
+              <span style={{ userSelect: 'none' }}>{item.name}</span>
+              {item.tags.length > 0 && (
+                <Badge count={item.tags.length} size="small" />
+              )}
+            </div>
+          </Dropdown>
         ),
         fileData: item,
         children: item.children ? buildNodes(item.children) : undefined,
@@ -377,16 +362,17 @@ function analyzeEMCData(data) {
     }
   };
 
-  const handleNewFile = () => {
+  const handleNewFile = (parentFolder?: MarkdownFile) => {
     const newFile: MarkdownFile = {
       id: `file_${Date.now()}`,
       name: '新建文档.md',
       content: '# 新建文档\n\n开始编写您的内容...\n',
       lastModified: new Date().toISOString().split('T')[0],
-      path: '/',
+      path: parentFolder ? `${parentFolder.path}${parentFolder.name}/` : '/',
       tags: [],
       type: 'file',
-      size: 0
+      size: 0,
+      parentId: parentFolder?.id
     };
 
     if (unsavedChanges) {
@@ -397,84 +383,415 @@ function analyzeEMCData(data) {
         cancelText: '不保存',
         onOk: () => {
           handleSave();
-          createNewFile(newFile);
+          createNewFile(newFile, parentFolder);
         },
-        onCancel: () => createNewFile(newFile)
+        onCancel: () => createNewFile(newFile, parentFolder)
       });
     } else {
-      createNewFile(newFile);
+      createNewFile(newFile, parentFolder);
     }
   };
 
-  const createNewFile = (newFile: MarkdownFile) => {
-    setFiles(prev => [...prev, newFile]);
+  const handleNewFolder = (parentFolder?: MarkdownFile) => {
+    Modal.confirm({
+      title: '创建新文件夹',
+      content: (
+        <Input 
+          placeholder="请输入文件夹名称"
+          id="folder-name-input"
+          onPressEnter={(e) => {
+            const folderName = (e.target as HTMLInputElement).value;
+            if (folderName) {
+              createNewFolder(folderName, parentFolder);
+              Modal.destroyAll();
+            }
+          }}
+        />
+      ),
+      onOk: () => {
+        const folderName = (document.getElementById('folder-name-input') as HTMLInputElement)?.value;
+        if (folderName) {
+          createNewFolder(folderName, parentFolder);
+        } else {
+          message.warning('请输入文件夹名称');
+        }
+      }
+    });
+  };
+
+  const createNewFolder = (folderName: string, parentFolder?: MarkdownFile) => {
+    const newFolder: MarkdownFile = {
+      id: `folder_${Date.now()}`,
+      name: folderName,
+      content: '',
+      lastModified: new Date().toISOString().split('T')[0],
+      path: parentFolder ? `${parentFolder.path}${parentFolder.name}/` : '/',
+      tags: [],
+      type: 'folder',
+      parentId: parentFolder?.id,
+      children: []
+    };
+
+    if (parentFolder) {
+      // 添加到父文件夹
+      const updateFiles = (items: MarkdownFile[]): MarkdownFile[] => {
+        return items.map(item => {
+          if (item.id === parentFolder.id) {
+            return {
+              ...item,
+              children: [...(item.children || []), newFolder]
+            };
+          }
+          if (item.children) {
+            return { ...item, children: updateFiles(item.children) };
+          }
+          return item;
+        });
+      };
+      setFiles(updateFiles(files));
+    } else {
+      // 添加到根目录
+      setFiles(prev => [...prev, newFolder]);
+    }
+
+    message.success('文件夹创建成功');
+  };
+
+  const createNewFile = (newFile: MarkdownFile, parentFolder?: MarkdownFile) => {
+    if (parentFolder) {
+      // 添加到父文件夹
+      const updateFiles = (items: MarkdownFile[]): MarkdownFile[] => {
+        return items.map(item => {
+          if (item.id === parentFolder.id) {
+            return {
+              ...item,
+              children: [...(item.children || []), newFile]
+            };
+          }
+          if (item.children) {
+            return { ...item, children: updateFiles(item.children) };
+          }
+          return item;
+        });
+      };
+      setFiles(updateFiles(files));
+    } else {
+      // 添加到根目录
+      setFiles(prev => [...prev, newFile]);
+    }
+    
     setCurrentFile(newFile);
     setMarkdownContent(newFile.content);
     setUnsavedChanges(false);
   };
 
+  const handleRenameItem = (item: MarkdownFile) => {
+    Modal.confirm({
+      title: `重命名${item.type === 'folder' ? '文件夹' : '文件'}`,
+      content: (
+        <Input 
+          placeholder={`请输入新的${item.type === 'folder' ? '文件夹' : '文件'}名称`}
+          defaultValue={item.name}
+          id="rename-input"
+          onPressEnter={(e) => {
+            const newName = (e.target as HTMLInputElement).value;
+            if (newName && newName !== item.name) {
+              performRename(item, newName);
+              Modal.destroyAll();
+            }
+          }}
+        />
+      ),
+      onOk: () => {
+        const newName = (document.getElementById('rename-input') as HTMLInputElement)?.value;
+        if (newName && newName !== item.name) {
+          performRename(item, newName);
+        } else {
+          message.warning('请输入有效的名称');
+        }
+      }
+    });
+  };
+
+  const performRename = (item: MarkdownFile, newName: string) => {
+    const updateFiles = (items: MarkdownFile[]): MarkdownFile[] => {
+      return items.map(fileItem => {
+        if (fileItem.id === item.id) {
+          return {
+            ...fileItem,
+            name: newName,
+            lastModified: new Date().toISOString().split('T')[0]
+          };
+        }
+        if (fileItem.children) {
+          return { ...fileItem, children: updateFiles(fileItem.children) };
+        }
+        return fileItem;
+      });
+    };
+
+    setFiles(updateFiles(files));
+    if (currentFile?.id === item.id) {
+      setCurrentFile({ ...currentFile, name: newName });
+    }
+    message.success(`${item.type === 'folder' ? '文件夹' : '文件'}重命名成功`);
+  };
+
+  const handleDeleteItem = (item: MarkdownFile) => {
+    Modal.confirm({
+      title: `删除${item.type === 'folder' ? '文件夹' : '文件'}`,
+      content: `确定要删除${item.type === 'folder' ? '文件夹' : '文件'} "${item.name}" 吗？${item.type === 'folder' ? '此操作将删除文件夹内的所有内容。' : ''}`,
+      okText: '删除',
+      okType: 'danger',
+      cancelText: '取消',
+      onOk: () => {
+        performDelete(item);
+      }
+    });
+  };
+
+  const performDelete = (item: MarkdownFile) => {
+    const updateFiles = (items: MarkdownFile[]): MarkdownFile[] => {
+      return items.filter(fileItem => {
+        if (fileItem.id === item.id) {
+          return false;
+        }
+        if (fileItem.children) {
+          fileItem.children = updateFiles(fileItem.children);
+        }
+        return true;
+      });
+    };
+
+    setFiles(updateFiles(files));
+    
+    // 如果删除的是当前打开的文件，清空编辑器
+    if (currentFile?.id === item.id) {
+      setCurrentFile(null);
+      setMarkdownContent('');
+      setUnsavedChanges(false);
+    }
+    
+    message.success(`${item.type === 'folder' ? '文件夹' : '文件'}删除成功`);
+  };
+
   const handleImportFiles = async (fileList: RcFile[]) => {
+    console.log('开始导入文件，数量:', fileList.length);
     setImportProgress(0);
     setShowImportModal(true);
 
     try {
-      // 创建FormData来上传文件
-      const formData = new FormData();
-      fileList.forEach((file) => {
-        formData.append('files', file);
-      });
+      setImportProgress(10);
 
-      setImportProgress(20);
+      // 按文件夹路径组织文件
+      const filesByPath: { [path: string]: RcFile[] } = {};
+      const folderStructure: { [path: string]: string[] } = {};
 
-      // 调用后端API导入文件夹
-      const response = await fetch('/api/markdown-files/import-folder', {
-        method: 'POST',
-        body: formData,
-      });
+      console.log('分析文件结构...');
 
-      setImportProgress(70);
-
-      if (response.ok) {
-        const result = await response.json();
-        setImportProgress(90);
-
-        // 重新加载文件列表
-        await loadFiles();
-        setImportProgress(100);
-
-        message.success(result.message);
+      fileList.forEach(file => {
+        const fullPath = file.webkitRelativePath || file.name;
+        const pathParts = fullPath.split('/');
         
-        setTimeout(() => {
-          setShowImportModal(false);
-          setImportProgress(0);
-        }, 1000);
-      } else {
-        throw new Error('导入失败');
+        // 构建文件夹结构
+        let currentPath = '';
+        pathParts.slice(0, -1).forEach((part: string) => {
+          const parentPath = currentPath;
+          currentPath = currentPath ? `${currentPath}/${part}` : part;
+          
+          if (!folderStructure[parentPath]) {
+            folderStructure[parentPath] = [];
+          }
+          if (!folderStructure[parentPath].includes(currentPath)) {
+            folderStructure[parentPath].push(currentPath);
+          }
+        });
+
+        // 按路径分组文件
+        const dirPath = pathParts.slice(0, -1).join('/');
+        if (!filesByPath[dirPath]) {
+          filesByPath[dirPath] = [];
+        }
+        filesByPath[dirPath].push(file);
+      });
+
+      setImportProgress(30);
+
+      // 创建文件夹结构
+      const newFolders: { [path: string]: MarkdownFile } = {};
+      const rootFolders: MarkdownFile[] = [];
+
+      // 按路径深度排序，确保父文件夹先创建
+      const sortedPaths = Object.keys(folderStructure).sort((a, b) => {
+        const depthA = a.split('/').filter(p => p).length;
+        const depthB = b.split('/').filter(p => p).length;
+        return depthA - depthB;
+      });
+
+      sortedPaths.forEach(parentPath => {
+        folderStructure[parentPath].forEach(folderPath => {
+          if (!newFolders[folderPath]) {
+            const pathParts = folderPath.split('/');
+            const folderName = pathParts[pathParts.length - 1];
+            const parentFolderPath = pathParts.slice(0, -1).join('/');
+
+            const newFolder: MarkdownFile = {
+              id: `folder_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+              name: folderName,
+              content: '',
+              lastModified: new Date().toISOString().split('T')[0],
+              path: parentFolderPath ? `/${parentFolderPath}/` : '/',
+              tags: [],
+              type: 'folder',
+              children: [],
+              parentId: parentFolderPath ? newFolders[parentFolderPath]?.id : undefined
+            };
+
+            newFolders[folderPath] = newFolder;
+
+            if (parentFolderPath && newFolders[parentFolderPath]) {
+              newFolders[parentFolderPath].children!.push(newFolder);
+            } else {
+              rootFolders.push(newFolder);
+            }
+          }
+        });
+      });
+
+      setImportProgress(50);
+
+      // 处理文件
+      let processedFiles = 0;
+      const totalFiles = fileList.length;
+
+      for (const [dirPath, files] of Object.entries(filesByPath)) {
+        for (const file of files) {
+          try {
+            const content = await readFileContent(file);
+            const fileName = file.name;
+
+            const newFile: MarkdownFile = {
+              id: `file_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+              name: fileName,
+              content: content,
+              lastModified: new Date().toISOString().split('T')[0],
+              path: dirPath ? `/${dirPath}/` : '/',
+              tags: extractTagsFromContent(content),
+              type: 'file',
+              size: file.size,
+              parentId: dirPath ? newFolders[dirPath]?.id : undefined
+            };
+
+            if (dirPath && newFolders[dirPath]) {
+              newFolders[dirPath].children!.push(newFile);
+            } else {
+              rootFolders.push(newFile);
+            }
+
+            processedFiles++;
+            setImportProgress(50 + (processedFiles / totalFiles) * 40);
+          } catch (error) {
+            console.error(`读取文件失败 ${file.name}:`, error);
+          }
+        }
       }
+
+      // 添加到文件列表
+      setFiles(prev => [...prev, ...rootFolders]);
+      setImportProgress(100);
+
+      message.success(`成功导入 ${processedFiles} 个文件`);
+      
+      setTimeout(() => {
+        setShowImportModal(false);
+        setImportProgress(0);
+      }, 1000);
+
     } catch (error) {
-      message.error('文件导入失败');
+      console.error('文件导入失败:', error);
+      message.error('文件导入失败，请重试');
       setShowImportModal(false);
       setImportProgress(0);
     }
   };
 
-  const handleImportFolder = () => {
-    // 创建一个文件选择器，支持选择多个文件
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.multiple = true;
-    input.accept = '.md,.markdown,.txt,.html,.htm';
-    input.setAttribute('webkitdirectory', 'true'); // 支持文件夹选择
+  // 从内容中提取标签
+  const extractTagsFromContent = (content: string): string[] => {
+    const tagRegex = /#(\w+)/g;
+    const tags: string[] = [];
+    let match;
     
-    input.onchange = (e) => {
-      const target = e.target as HTMLInputElement;
-      if (target.files && target.files.length > 0) {
-        const fileList = Array.from(target.files) as RcFile[];
-        handleImportFiles(fileList);
+    while ((match = tagRegex.exec(content)) !== null) {
+      if (!tags.includes(match[1])) {
+        tags.push(match[1]);
       }
-    };
+    }
     
-    input.click();
+    return tags;
+  };
+
+  const handleImportFolder = () => {
+    try {
+      // 检查浏览器是否支持文件夹选择
+      if (!('webkitdirectory' in document.createElement('input'))) {
+        message.error('您的浏览器不支持文件夹选择功能，请使用Chrome、Edge或Firefox浏览器');
+        return;
+      }
+
+      // 创建一个文件选择器，支持选择多个文件
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.multiple = true;
+      input.accept = '.md,.markdown,.txt,.html,.htm';
+      input.setAttribute('webkitdirectory', 'true'); // 支持文件夹选择
+      
+      input.onchange = (e) => {
+        try {
+          const target = e.target as HTMLInputElement;
+          console.log('文件选择器触发，文件数量:', target.files?.length);
+          
+          if (target.files && target.files.length > 0) {
+            const fileList = Array.from(target.files);
+            console.log('选择的文件:', fileList.map(f => f.name));
+            
+            // 过滤只保留markdown和文本文件
+            const validFiles = fileList.filter(file => {
+              const isValid = /\.(md|markdown|txt|html|htm)$/i.test(file.name);
+              if (!isValid) {
+                console.log('跳过非markdown文件:', file.name);
+              }
+              return isValid;
+            });
+            
+            if (validFiles.length === 0) {
+              message.warning('选择的文件夹中没有找到markdown文件(.md, .markdown, .txt)');
+              return;
+            }
+            
+            console.log('有效文件数量:', validFiles.length);
+            handleImportFiles(validFiles as RcFile[]);
+          } else {
+            console.log('未选择任何文件');
+            message.info('未选择任何文件');
+          }
+        } catch (error) {
+          console.error('文件选择处理错误:', error);
+          message.error('文件选择处理失败，请重试');
+        }
+      };
+      
+      input.onerror = (error) => {
+        console.error('文件输入错误:', error);
+        message.error('文件选择失败，请重试');
+      };
+      
+      // 触发文件选择器
+      input.click();
+      
+    } catch (error) {
+      console.error('创建文件选择器失败:', error);
+      message.error('无法创建文件选择器，请检查浏览器设置');
+    }
   };
 
   const readFileContent = (file: RcFile): Promise<string> => {
@@ -532,6 +849,57 @@ function analyzeEMCData(data) {
   };
 
   const renderPreview = () => {
+    // 处理YAML Front Matter
+    const processYAMLFrontMatter = (content: string) => {
+      const yamlRegex = /^---\n([\s\S]*?)\n---/;
+      const match = content.match(yamlRegex);
+      
+      if (match) {
+        const yamlContent = match[1];
+        const remainingContent = content.replace(yamlRegex, '').trim();
+        
+        // 解析YAML内容
+        const yamlLines = yamlContent.split('\n').filter(line => line.trim());
+        const yamlHtml = yamlLines.map(line => {
+          if (line.includes(':')) {
+            const [key, value] = line.split(':').map(s => s.trim());
+            return `<div style="margin: 4px 0;">
+              <span style="color: #1890ff; font-weight: 500;">${key}:</span> 
+              <span style="color: #52c41a; margin-left: 8px;">${value}</span>
+            </div>`;
+          }
+          return `<div style="color: #666; margin: 2px 0;">${line}</div>`;
+        }).join('');
+        
+        const frontMatterHtml = `
+          <div style="
+            background: linear-gradient(135deg, #f6f9fc 0%, #e9f3ff 100%);
+            border: 2px dashed #1890ff;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 20px;
+            font-family: 'Courier New', monospace;
+          ">
+            <div style="
+              color: #1890ff; 
+              font-weight: bold; 
+              margin-bottom: 8px;
+              display: flex;
+              align-items: center;
+              gap: 8px;
+            ">
+              📋 YAML Front Matter
+            </div>
+            ${yamlHtml}
+          </div>
+        `;
+        
+        return { frontMatter: frontMatterHtml, content: remainingContent };
+      }
+      
+      return { frontMatter: '', content };
+    };
+
     // 处理内部链接
     const processInternalLinks = (content: string) => {
       return content.replace(/\[\[(.*?)\]\]/gim, (match, linkText) => {
@@ -574,15 +942,18 @@ function analyzeEMCData(data) {
       });
     };
 
+    // 处理YAML Front Matter
+    const { frontMatter, content } = processYAMLFrontMatter(markdownContent);
+
     // 基础Markdown处理
-    let html = markdownContent
+    let html = content
       .replace(/^# (.*$)/gim, '<h1 style="color: #2c3e50; border-bottom: 2px solid #d4af37; padding-bottom: 8px;">$1</h1>')
       .replace(/^## (.*$)/gim, '<h2 style="color: #34495e; border-bottom: 1px solid #d4af37; padding-bottom: 4px;">$1</h2>')
       .replace(/^### (.*$)/gim, '<h3 style="color: #34495e;">$1</h3>')
       .replace(/\*\*(.*?)\*\*/gim, '<strong style="color: #2c3e50;">$1</strong>')
       .replace(/\*(.*?)\*/gim, '<em style="color: #34495e;">$1</em>')
       .replace(/`(.*?)`/gim, '<code style="background: #f4f4f4; padding: 2px 4px; border-radius: 3px; color: #e74c3c;">$1</code>')
-      .replace(/^\- (.*$)/gim, '<li style="margin: 4px 0;">$1</li>')
+      .replace(/^- (.*$)/gim, '<li style="margin: 4px 0;">$1</li>')
       .replace(/^\d+\. (.*$)/gim, '<li style="margin: 4px 0;">$1</li>')
       .replace(/\n/gim, '<br>');
 
@@ -608,7 +979,7 @@ function analyzeEMCData(data) {
           fontFamily: 'SimSun, 宋体, serif',
           lineHeight: '1.6'
         }}
-        dangerouslySetInnerHTML={{ __html: html }}
+        dangerouslySetInnerHTML={{ __html: frontMatter + html }}
         onClick={(e) => {
           const target = e.target as HTMLElement;
           if (target.classList.contains('internal-link')) {
@@ -725,7 +1096,15 @@ function analyzeEMCData(data) {
                       type="text" 
                       size="small" 
                       icon={<FileAddOutlined />} 
-                      onClick={handleNewFile}
+                      onClick={() => handleNewFile()}
+                    />
+                  </Tooltip>
+                  <Tooltip title="新建文件夹">
+                    <Button 
+                      type="text" 
+                      size="small" 
+                      icon={<FolderOutlined />} 
+                      onClick={() => handleNewFolder()}
                     />
                   </Tooltip>
                   <Tooltip title="导入文件">
@@ -733,7 +1112,8 @@ function analyzeEMCData(data) {
                       multiple
                       accept=".md,.markdown,.txt,.html,.htm"
                       showUploadList={false}
-                      beforeUpload={(file, fileList) => {
+                      beforeUpload={(file: RcFile, fileList: RcFile[]) => {
+                        console.log('通过Upload组件导入文件:', fileList.length);
                         handleImportFiles(fileList as RcFile[]);
                         return false;
                       }}
@@ -745,7 +1125,7 @@ function analyzeEMCData(data) {
                     <Button 
                       type="text" 
                       size="small" 
-                      icon={<FolderOutlined />} 
+                      icon={<FolderOpenOutlined />} 
                       onClick={handleImportFolder}
                     />
                   </Tooltip>
@@ -781,7 +1161,7 @@ function analyzeEMCData(data) {
                     </List.Item>
                   )}
                 />
-              ) : (
+              ) : fileTree.length > 0 ? (
                 <Tree
                   showLine
                   switcherIcon={<CaretDownOutlined />}
@@ -792,6 +1172,21 @@ function analyzeEMCData(data) {
                   onSelect={handleFileSelect}
                   style={{ background: 'transparent' }}
                 />
+              ) : (
+                <div style={{ 
+                  textAlign: 'center', 
+                  padding: '40px 20px', 
+                  color: '#999',
+                  fontSize: '14px'
+                }}>
+                  <div style={{ marginBottom: 16 }}>
+                    <FolderOutlined style={{ fontSize: 48, color: '#d9d9d9' }} />
+                  </div>
+                  <div style={{ marginBottom: 8 }}>暂无文件</div>
+                  <div style={{ fontSize: '12px' }}>
+                    点击上方按钮创建文件或导入文件夹
+                  </div>
+                </div>
               )}
             </Card>
           </Col>
@@ -947,22 +1342,11 @@ function analyzeEMCData(data) {
           <div style={{ marginBottom: 16 }}>
             正在导入文件... {Math.round(importProgress)}%
           </div>
-          <div style={{ 
-            width: '100%', 
-            height: 6, 
-            backgroundColor: '#f0f0f0', 
-            borderRadius: 3,
-            overflow: 'hidden'
-          }}>
-            <div 
-              style={{ 
-                width: `${importProgress}%`, 
-                height: '100%', 
-                backgroundColor: '#1890ff',
-                transition: 'width 0.3s ease'
-              }} 
-            />
-          </div>
+          <Progress 
+            percent={Math.round(importProgress)} 
+            status={importProgress === 100 ? 'success' : 'active'}
+            strokeColor={{ from: '#108ee9', to: '#87d068' }}
+          />
         </div>
       </Modal>
     </div>

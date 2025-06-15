@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EMC知识图谱系统 - 专业版界面演示</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #f0f2f5;
+            color: #333;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #1890ff;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: #666;
+            font-size: 16px;
+        }
+        .navigation {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .nav-item {
+            display: inline-block;
+            padding: 10px 20px;
+            margin-right: 10px;
+            background: #f5f5f5;
+            border-radius: 6px;
+            text-decoration: none;
+            color: #333;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        .nav-item:hover {
+            background: #e6f7ff;
+            color: #1890ff;
+        }
+        .nav-item.active {
+            background: #1890ff;
+            color: white;
+        }
+        .content {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .feature-card {
+            border: 1px solid #d9d9d9;
+            border-radius: 8px;
+            padding: 20px;
+            background: #fafafa;
+        }
+        .feature-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1890ff;
+            margin-bottom: 10px;
+        }
+        .feature-desc {
+            color: #666;
+            line-height: 1.6;
+        }
+        .status-tag {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        .status-extracted {
+            background: #f6ffed;
+            color: #52c41a;
+            border: 1px solid #b7eb8f;
+        }
+        .status-not-extracted {
+            background: #fafafa;
+            color: #666;
+            border: 1px solid #d9d9d9;
+        }
+        .improvements {
+            background: #e6f7ff;
+            border: 1px solid #91d5ff;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        .improvements h3 {
+            color: #1890ff;
+            margin-top: 0;
+        }
+        .improvements ul {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+        .improvements li {
+            margin: 8px 0;
+            color: #334155;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="title">EMC知识图谱系统</div>
+            <div class="subtitle">专业版界面重新设计完成</div>
+        </div>
+
+        <div class="navigation">
+            <a href="#" class="nav-item active">📁 文件上传</a>
+            <a href="#" class="nav-item">📂 文件管理</a>
+            <a href="#" class="nav-item">🤖 实体关系提取</a>
+            <a href="#" class="nav-item">📝 Markdown编辑器</a>
+            <a href="#" class="nav-item">🌐 知识图谱</a>
+        </div>
+
+        <div class="content">
+            <h2>界面重新设计完成</h2>
+            <p>根据用户要求，已将界面从"幼稚"的装饰性设计改为专业、简洁的现代化界面：</p>
+
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <div class="feature-title">简化菜单结构</div>
+                    <div class="feature-desc">
+                        从原来的8个菜单项简化为5个核心功能：
+                        <ul>
+                            <li>文件上传</li>
+                            <li>文件管理</li>
+                            <li>实体关系提取</li>
+                            <li>Markdown编辑器</li>
+                            <li>知识图谱</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-title">专业化品牌</div>
+                    <div class="feature-desc">
+                        移除了"墨韵"品牌元素，改为简洁的"EMC知识图谱"，采用现代化的字体和配色方案，去除了所有装饰性元素。
+                    </div>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-title">文件管理增强</div>
+                    <div class="feature-desc">
+                        文件管理现在支持提取状态分离显示：
+                        <br><br>
+                        <span class="status-tag status-extracted">已提取</span>
+                        <span class="status-tag status-not-extracted">未提取</span>
+                        <br><br>
+                        用户可以根据提取状态过滤文件，清楚了解哪些文件已经处理完成。
+                    </div>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-title">KAG-DeepSeek集成</div>
+                    <div class="feature-desc">
+                        已完成KAG框架与DeepSeek API的深度融合，支持：
+                        <ul>
+                            <li>融合权重配置</li>
+                            <li>多层推理</li>
+                            <li>DIKW层次分析</li>
+                            <li>时间上下文解析</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="improvements">
+                <h3>完成的改进项目</h3>
+                <ul>
+                    <li>✅ 移除所有装饰性的"幼稚"元素（emoji、过度装饰等）</li>
+                    <li>✅ 将"墨韵知识图谱"更名为"EMC知识图谱"</li>
+                    <li>✅ 简化侧边栏菜单为5个核心功能</li>
+                    <li>✅ 文件管理添加提取状态分离显示</li>
+                    <li>✅ 应用专业的现代化主题配色</li>
+                    <li>✅ 修复所有React编译错误和TypeScript问题</li>
+                    <li>✅ 统一文件上传入口，避免多处上传的混乱</li>
+                    <li>✅ KAG-DeepSeek融合提取器集成完成</li>
+                </ul>
+            </div>
+
+            <div style="margin-top: 30px; padding: 20px; background: #f9f9f9; border-radius: 8px;">
+                <h3>访问方式</h3>
+                <p><strong>开发服务器：</strong> <a href="http://localhost:3003" target="_blank">http://localhost:3003</a></p>
+                <p>系统现在已经采用专业、简洁的设计，完全符合企业级应用的视觉标准。</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

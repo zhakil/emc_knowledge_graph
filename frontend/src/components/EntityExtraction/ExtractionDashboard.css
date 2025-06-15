@@ -1,0 +1,438 @@
+.extraction-dashboard {
+  padding: 24px;
+  background: #f5f5f5;
+  min-height: 100vh;
+}
+
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding: 20px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.dashboard-header h1 {
+  margin: 0;
+  color: #1a1a1a;
+  font-size: 28px;
+  font-weight: 600;
+}
+
+.header-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.upload-dragger {
+  display: inline-block !important;
+}
+
+.upload-dragger .ant-upload {
+  background: none !important;
+  border: none !important;
+  padding: 0 !important;
+}
+
+.upload-dragger .ant-upload-drag {
+  background: none !important;
+  border: none !important;
+  padding: 0 !important;
+}
+
+/* 指标概览卡片 */
+.metrics-overview {
+  margin-bottom: 24px;
+}
+
+.metric-card {
+  border-radius: 12px;
+  border: none;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  transition: all 0.3s ease;
+}
+
+.metric-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+}
+
+.metric-card .ant-statistic-title {
+  color: #666;
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+
+.metric-card .ant-statistic-content {
+  color: #1a1a1a;
+}
+
+.metric-card .ant-statistic-content-value {
+  font-size: 32px;
+  font-weight: 700;
+}
+
+.metric-subtitle {
+  color: #999;
+  font-size: 12px;
+  margin-top: 8px;
+}
+
+/* 主要标签页 */
+.main-tabs {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.main-tabs .ant-tabs-nav {
+  margin: 0;
+  padding: 0 24px;
+  background: white;
+  border-radius: 12px 12px 0 0;
+}
+
+.main-tabs .ant-tabs-content-holder {
+  padding: 24px;
+}
+
+.main-tabs .ant-tabs-tab {
+  padding: 16px 20px;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.main-tabs .ant-tabs-tab-btn {
+  color: #666;
+}
+
+.main-tabs .ant-tabs-tab-active .ant-tabs-tab-btn {
+  color: #1890ff;
+  font-weight: 600;
+}
+
+/* 图表卡片 */
+.chart-card {
+  border-radius: 12px;
+  border: none;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  height: 100%;
+}
+
+.chart-card .ant-card-head {
+  border-bottom: 1px solid #f0f0f0;
+  padding: 16px 24px;
+}
+
+.chart-card .ant-card-head-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+/* 实体类型图表 */
+.entity-type-chart,
+.relationship-type-chart {
+  padding: 16px 0;
+}
+
+.type-item {
+  margin-bottom: 20px;
+}
+
+.type-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.type-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+}
+
+.type-count {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1890ff;
+}
+
+/* 性能指标 */
+.performance-metric {
+  text-align: center;
+  padding: 20px;
+  background: #fafafa;
+  border-radius: 8px;
+  border: 1px solid #e8e8e8;
+}
+
+.metric-value {
+  font-size: 28px;
+  font-weight: bold;
+  color: #1890ff;
+  margin-bottom: 8px;
+}
+
+.metric-label {
+  font-size: 14px;
+  color: #666;
+  font-weight: 500;
+}
+
+/* 活动时间线 */
+.activity-card {
+  border-radius: 12px;
+  border: none;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.activity-timeline {
+  padding: 16px 0;
+}
+
+.activity-item {
+  padding-bottom: 8px;
+}
+
+.activity-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.activity-action {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.activity-document {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 8px;
+  font-family: 'Courier New', monospace;
+  background: #f8f8f8;
+  padding: 4px 8px;
+  border-radius: 4px;
+  display: inline-block;
+}
+
+.activity-details {
+  display: flex;
+  gap: 16px;
+  font-size: 12px;
+  color: #999;
+}
+
+.activity-time {
+  margin-left: auto;
+  font-family: 'Courier New', monospace;
+}
+
+/* 响应式设计 */
+@media (max-width: 1200px) {
+  .dashboard-header {
+    flex-direction: column;
+    gap: 16px;
+    align-items: flex-start;
+  }
+  
+  .dashboard-header h1 {
+    font-size: 24px;
+  }
+  
+  .metric-card .ant-statistic-content-value {
+    font-size: 28px;
+  }
+}
+
+@media (max-width: 768px) {
+  .extraction-dashboard {
+    padding: 16px;
+  }
+  
+  .dashboard-header {
+    padding: 16px;
+  }
+  
+  .dashboard-header h1 {
+    font-size: 20px;
+  }
+  
+  .main-tabs .ant-tabs-content-holder {
+    padding: 16px;
+  }
+  
+  .activity-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .activity-details {
+    flex-direction: column;
+    gap: 4px;
+  }
+  
+  .metric-card .ant-statistic-content-value {
+    font-size: 24px;
+  }
+  
+  .performance-metric {
+    padding: 16px;
+  }
+  
+  .metric-value {
+    font-size: 24px;
+  }
+}
+
+@media (max-width: 480px) {
+  .metrics-overview .ant-col {
+    margin-bottom: 16px;
+  }
+  
+  .type-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+  
+  .main-tabs .ant-tabs-tab {
+    padding: 12px 16px;
+    font-size: 14px;
+  }
+}
+
+/* 动画效果 */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.metric-card,
+.chart-card,
+.activity-card {
+  animation: slideIn 0.5s ease-out;
+}
+
+.activity-item {
+  animation: slideIn 0.3s ease-out;
+}
+
+/* 进度条动画 */
+.ant-progress-line-bg {
+  transition: all 0.5s ease;
+}
+
+/* 警告样式 */
+.ant-alert {
+  border-radius: 8px;
+  border: none;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+/* 加载状态 */
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  backdrop-filter: blur(2px);
+}
+
+/* 成功状态动画 */
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.metric-card.success {
+  animation: pulse 0.5s ease-in-out;
+}
+
+/* 错误状态 */
+.metric-card.error {
+  border-left: 4px solid #ff4d4f;
+}
+
+.metric-card.error .ant-statistic-content-value {
+  color: #ff4d4f;
+}
+
+/* 深色主题支持 */
+@media (prefers-color-scheme: dark) {
+  .extraction-dashboard {
+    background: #141414;
+  }
+  
+  .dashboard-header {
+    background: #1f1f1f;
+    color: #e8e8e8;
+  }
+  
+  .dashboard-header h1 {
+    color: #e8e8e8;
+  }
+  
+  .metric-card,
+  .chart-card,
+  .activity-card,
+  .main-tabs {
+    background: #1f1f1f;
+    border-color: #434343;
+  }
+  
+  .metric-card .ant-statistic-title {
+    color: #999;
+  }
+  
+  .metric-card .ant-statistic-content {
+    color: #e8e8e8;
+  }
+  
+  .performance-metric {
+    background: #262626;
+    border-color: #434343;
+  }
+  
+  .activity-document {
+    background: #262626;
+    color: #e8e8e8;
+  }
+  
+  .type-name {
+    color: #e8e8e8;
+  }
+  
+  .activity-action {
+    color: #e8e8e8;
+  }
+}

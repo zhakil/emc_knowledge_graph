@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EMC知识图谱 - Windows桌面客户端演示</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #f0f2f5;
+            color: #333;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #1890ff;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: #666;
+            font-size: 16px;
+        }
+        .desktop-preview {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+        .window-titlebar {
+            background: #e0e0e0;
+            padding: 8px 16px;
+            border-bottom: 1px solid #ccc;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .window-controls {
+            display: flex;
+            gap: 8px;
+        }
+        .control-btn {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+        }
+        .close { background: #ff5f57; }
+        .minimize { background: #ffbd2e; }
+        .maximize { background: #28ca42; }
+        .window-title {
+            font-size: 14px;
+            font-weight: 500;
+        }
+        .desktop-content {
+            height: 600px;
+            background: #fafafa;
+            padding: 0;
+            border: 1px solid #d9d9d9;
+            display: flex;
+        }
+        .desktop-sidebar {
+            width: 280px;
+            background: #f8f9fa;
+            border-right: 1px solid #d9d9d9;
+            padding: 16px;
+        }
+        .menu-item {
+            padding: 8px 12px;
+            margin: 4px 0;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .menu-item:hover {
+            background: #e6f7ff;
+        }
+        .menu-item.active {
+            background: #1890ff;
+            color: white;
+        }
+        .desktop-main {
+            flex: 1;
+            padding: 20px;
+        }
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .feature-card {
+            border: 1px solid #d9d9d9;
+            border-radius: 8px;
+            padding: 20px;
+            background: #fafafa;
+        }
+        .feature-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1890ff;
+            margin-bottom: 10px;
+        }
+        .feature-desc {
+            color: #666;
+            line-height: 1.6;
+        }
+        .tech-specs {
+            background: #e6f7ff;
+            border: 1px solid #91d5ff;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        .tech-specs h3 {
+            color: #1890ff;
+            margin-top: 0;
+        }
+        .spec-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 16px;
+            margin: 16px 0;
+        }
+        .spec-item {
+            background: white;
+            padding: 12px;
+            border-radius: 6px;
+            border: 1px solid #d9d9d9;
+        }
+        .spec-label {
+            font-weight: 600;
+            color: #333;
+        }
+        .spec-value {
+            color: #666;
+            font-size: 14px;
+        }
+        .download-section {
+            background: #f6ffed;
+            border: 1px solid #b7eb8f;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+            text-align: center;
+        }
+        .download-btn {
+            background: #52c41a;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 8px;
+        }
+        .download-btn:hover {
+            background: #389e0d;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="title">EMC知识图谱 - Windows桌面客户端</div>
+            <div class="subtitle">Electron桌面应用程序配置完成，准备构建Windows安装包</div>
+        </div>
+
+        <div class="desktop-preview">
+            <div class="window-titlebar">
+                <div class="window-title">EMC知识图谱系统 v1.0.0</div>
+                <div class="window-controls">
+                    <button class="control-btn minimize"></button>
+                    <button class="control-btn maximize"></button>
+                    <button class="control-btn close"></button>
+                </div>
+            </div>
+            <div class="desktop-content">
+                <div class="desktop-sidebar">
+                    <div class="menu-item active">
+                        <span>📁</span> 文件上传
+                    </div>
+                    <div class="menu-item">
+                        <span>📂</span> 文件管理
+                    </div>
+                    <div class="menu-item">
+                        <span>🤖</span> 实体关系提取
+                    </div>
+                    <div class="menu-item">
+                        <span>📝</span> Markdown编辑器
+                    </div>
+                    <div class="menu-item">
+                        <span>🌐</span> 知识图谱
+                    </div>
+                </div>
+                <div class="desktop-main">
+                    <h3>欢迎使用EMC知识图谱桌面客户端</h3>
+                    <p>基于Electron的原生Windows桌面应用程序，提供完整的知识图谱构建和管理功能。</p>
+                    
+                    <div class="feature-grid">
+                        <div class="feature-card">
+                            <div class="feature-title">原生桌面体验</div>
+                            <div class="feature-desc">
+                                完全的Windows原生应用程序，支持系统托盘、文件关联、快捷键等桌面功能。
+                            </div>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-title">离线工作模式</div>
+                            <div class="feature-desc">
+                                支持本地文件处理和知识图谱构建，无需互联网连接即可使用核心功能。
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tech-specs">
+            <h3>🛠️ 技术规格</h3>
+            <div class="spec-list">
+                <div class="spec-item">
+                    <div class="spec-label">框架</div>
+                    <div class="spec-value">Electron 32.x + React 18</div>
+                </div>
+                <div class="spec-item">
+                    <div class="spec-label">支持系统</div>
+                    <div class="spec-value">Windows 10/11 (x64)</div>
+                </div>
+                <div class="spec-item">
+                    <div class="spec-label">安装包格式</div>
+                    <div class="spec-value">NSIS (.exe)</div>
+                </div>
+                <div class="spec-item">
+                    <div class="spec-label">最小内存</div>
+                    <div class="spec-value">4GB RAM</div>
+                </div>
+                <div class="spec-item">
+                    <div class="spec-label">磁盘空间</div>
+                    <div class="spec-value">500MB</div>
+                </div>
+                <div class="spec-item">
+                    <div class="spec-label">AI集成</div>
+                    <div class="spec-value">KAG + DeepSeek</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="feature-grid">
+            <div class="feature-card">
+                <div class="feature-title">桌面应用功能</div>
+                <div class="feature-desc">
+                    <ul>
+                        <li>系统菜单和快捷键支持</li>
+                        <li>原生文件对话框</li>
+                        <li>桌面通知</li>
+                        <li>开机自启动选项</li>
+                        <li>系统托盘集成</li>
+                        <li>文件拖放支持</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="feature-card">
+                <div class="feature-title">Windows集成</div>
+                <div class="feature-desc">
+                    <ul>
+                        <li>开始菜单快捷方式</li>
+                        <li>文件类型关联</li>
+                        <li>右键上下文菜单</li>
+                        <li>Windows防火墙兼容</li>
+                        <li>UAC权限管理</li>
+                        <li>自动更新机制</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="download-section">
+            <h3>🚀 准备构建Windows安装包</h3>
+            <p>Electron配置已完成，可以使用以下命令构建Windows桌面应用程序：</p>
+            
+            <div style="background: #f5f5f5; padding: 12px; border-radius: 4px; margin: 16px 0; font-family: 'Courier New', monospace;">
+                npm run build && npm run dist
+            </div>
+            
+            <p>构建完成后将生成：</p>
+            <ul style="text-align: left; display: inline-block;">
+                <li><strong>EMC知识图谱系统-1.0.0-x64.exe</strong> - Windows安装程序</li>
+                <li><strong>便携版目录</strong> - 免安装版本</li>
+                <li><strong>自动更新包</strong> - 增量更新文件</li>
+            </ul>
+            
+            <div>
+                <button class="download-btn">📦 构建Windows安装包</button>
+                <button class="download-btn">🔧 高级配置</button>
+            </div>
+        </div>
+
+        <div style="margin-top: 30px; padding: 20px; background: #f9f9f9; border-radius: 8px;">
+            <h3>✅ 完成的配置</h3>
+            <ul>
+                <li>✅ Electron主进程配置 (public/electron.js)</li>
+                <li>✅ package.json桌面应用脚本配置</li>
+                <li>✅ electron-builder Windows构建配置</li>
+                <li>✅ NSIS安装程序配置</li>
+                <li>✅ 应用程序菜单和快捷键</li>
+                <li>✅ 文件对话框和系统集成</li>
+                <li>✅ 安全配置和权限管理</li>
+            </ul>
+            
+            <p><strong>下一步：</strong></p>
+            <ol>
+                <li>安装Electron依赖包</li>
+                <li>运行 <code>npm run electron-dev</code> 测试桌面版本</li>
+                <li>运行 <code>npm run dist</code> 构建Windows安装包</li>
+                <li>分发给最终用户</li>
+            </ol>
+        </div>
+    </div>
+</body>
+</html>

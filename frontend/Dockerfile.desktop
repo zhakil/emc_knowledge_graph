@@ -1,0 +1,68 @@
+# EMC知识图谱 Windows桌面客户端构建环境
+FROM node:18-bullseye
+
+# 设置工作目录
+WORKDIR /app
+
+# 安装必要的系统依赖
+RUN apt-get update && apt-get install -y \
+    python3 \
+    python3-pip \
+    build-essential \
+    git \
+    curl \
+    wget \
+    libnss3-dev \
+    libatk-bridge2.0-dev \
+    libdrm2 \
+    libxkbcommon-dev \
+    libxss1 \
+    libasound2 \
+    libxtst6 \
+    libxrandr2 \
+    libasound2-dev \
+    libpangocairo-1.0-0 \
+    libatk1.0-dev \
+    libcairo-gobject2 \
+    libgtk-3-dev \
+    libgdk-pixbuf2.0-dev \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# 设置npm配置
+RUN npm config set registry https://registry.npmmirror.com
+RUN npm install -g electron-builder
+
+# 复制package.json和安装依赖
+COPY package.json ./
+RUN npm install --legacy-peer-deps
+
+# 复制源代码
+COPY . .
+
+# 设置环境变量
+ENV NODE_ENV=production
+ENV ELECTRON_CACHE=/tmp/electron
+ENV ELECTRON_BUILDER_CACHE=/tmp/electron-builder
+
+# 构建React应用
+RUN npm run build
+
+# 暴露端口用于开发
+EXPOSE 3003
+
+# 创建构建脚本
+RUN echo '#!/bin/bash\n\
+echo "🚀 开始构建EMC知识图谱Windows桌面客户端..."\n\
+echo "📦 构建React应用..."\n\
+npm run build\n\
+echo "✅ React应用构建完成"\n\
+echo "🖥️ 构建Electron桌面应用..."\n\
+npm run dist\n\
+echo "✅ Windows桌面客户端构建完成！"\n\
+echo "📁 构建文件位置: /app/dist/"\n\
+ls -la /app/dist/\n\
+' > /build-desktop.sh && chmod +x /build-desktop.sh
+
+# 默认命令
+CMD ["/build-desktop.sh"]
